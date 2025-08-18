@@ -18,6 +18,7 @@ const mockData = {
     currentUser: {
         id: 1,
         name: 'Ana Silva',
+        username: 'ana_silva',
         email: 'ana@example.com',
         photo: 'https://via.placeholder.com/150x150/a855c7/ffffff?text=Ana',
         status: 'Revivendo os anos 2000! 💜',

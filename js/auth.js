@@ -310,11 +310,13 @@ function emailExists(email) {
 
 // Criar sessão de usuário
 function createUserSession(email, name = null) {
+    const userName = name || getUserNameFromEmail(email);
     const user = {
         id: generateUserId(),
-        name: name || getUserNameFromEmail(email),
+        name: userName,
+        username: generateUsername(userName),
         email: email,
-        photo: `https://via.placeholder.com/150x150/a855c7/ffffff?text=${name ? name.charAt(0) : 'U'}`,
+        photo: `https://via.placeholder.com/150x150/a855c7/ffffff?text=${userName ? userName.charAt(0) : 'U'}`,
         status: 'Novo no Orkut Retrô! 🎉',
         age: null,
         location: '',
@@ -352,6 +354,75 @@ function generateUserId() {
 function getUserNameFromEmail(email) {
     const username = email.split('@')[0];
     return username.charAt(0).toUpperCase() + username.slice(1);
+}
+
+// Gerar username único
+function generateUsername(name) {
+    if (!name) return 'user' + Math.random().toString(36).substr(2, 6);
+    
+    // Remover acentos e caracteres especiais
+    const baseUsername = name.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
+        .replace(/[^a-z0-9]/g, '_') // Substitui caracteres especiais por _
+        .replace(/_+/g, '_') // Remove underscores duplicados
+        .replace(/^_|_$/g, '') // Remove underscores do início e fim
+        .substring(0, 15); // Limita a 15 caracteres
+    
+    // Se o username já existe, adicionar números
+    let username = baseUsername;
+    let counter = 1;
+    
+    while (usernameExists(username)) {
+        username = baseUsername + counter;
+        counter++;
+        if (counter > 999) break; // Evitar loop infinito
+    }
+    
+    return username || 'user' + Math.random().toString(36).substr(2, 6);
+}
+
+// Verificar se username existe (simulação)
+function usernameExists(username) {
+    // Lista de usernames reservados/existentes para simulação
+    const existingUsernames = ['admin', 'root', 'orkut', 'ana_silva', 'carlos_santos', 'maria_oliveira'];
+    return existingUsernames.includes(username.toLowerCase());
+}
+
+// Validar username
+function validateUsername(username) {
+    if (!username) return { valid: false, message: 'Nome de usuário é obrigatório.' };
+    
+    // Verificar padrão
+    const usernamePattern = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernamePattern.test(username)) {
+        return { 
+            valid: false, 
+            message: 'Nome de usuário deve ter 3-20 caracteres, apenas letras, números e underline (_).' 
+        };
+    }
+    
+    // Verificar se não começa ou termina com underscore
+    if (username.startsWith('_') || username.endsWith('_')) {
+        return { valid: false, message: 'Nome de usuário não pode começar ou terminar com _.' };
+    }
+    
+    // Verificar se não é apenas números
+    if (/^[0-9]+$/.test(username)) {
+        return { valid: false, message: 'Nome de usuário deve conter pelo menos uma letra.' };
+    }
+    
+    // Verificar palavras reservadas
+    const reservedWords = ['admin', 'root', 'api', 'www', 'mail', 'ftp', 'orkut', 'moderador'];
+    if (reservedWords.includes(username.toLowerCase())) {
+        return { valid: false, message: 'Este nome de usuário está reservado.' };
+    }
+    
+    // Verificar se já existe
+    if (usernameExists(username)) {
+        return { valid: false, message: 'Este nome de usuário já está em uso.' };
+    }
+    
+    return { valid: true, message: 'Nome de usuário disponível!' };
 }
 
 // Limpar sessão
