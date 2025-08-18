@@ -1,10 +1,15 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getDatabase } = require('./database');
+const { createClient } = require('@supabase/supabase-js');
 
 // Configurações
 const JWT_SECRET = process.env.JWT_SECRET || 'orkut-retro-secret-2025';
 const SALT_ROUNDS = 12;
+
+// Cliente Supabase
+const supabaseUrl = 'https://ksskokjrdzqghhuahjpl.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtzc2tva2pyZHpxZ2hodWFoanBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDUzMTEsImV4cCI6MjA3MTEyMTMxMX0.tyQ15i2ypP7BW5UCKOkptJFCHo5IDdRD4ojzcmHSpK4';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Função principal do endpoint
 export default async function handler(req, res) {
@@ -58,14 +63,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Conectar ao banco de dados
-    const db = await getDatabase();
-
     // Verificar se o email já existe
-    const existingUser = await db.get(
-      'SELECT id FROM users WHERE email = ?',
-      [email.toLowerCase()]
-    );
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single();
 
     if (existingUser) {
       return res.status(409).json({
@@ -75,51 +78,73 @@ export default async function handler(req, res) {
     }
 
     // Gerar username único
-    const username = await generateUniqueUsername(db, name);
+    const username = await generateUniqueUsername(name);
 
     // Hash da senha
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     // Criar usuário
-    const userId = db.generateId();
-    await db.run(
-      'INSERT INTO users (id, name, email, password_hash, username) VALUES (?, ?, ?, ?, ?)',
-      [userId, name.trim(), email.toLowerCase(), passwordHash, username]
-    );
+    const { data: newUser, error: userError } = await supabase
+      .from('users')
+      .insert({
+        name: name.trim(),
+        email: email.toLowerCase(),
+        password_hash: passwordHash,
+        username: username
+      })
+      .select()
+      .single();
+
+    if (userError) {
+      console.error('Erro ao criar usuário:', userError);
+      
+      if (userError.message.includes('duplicate key value')) {
+        return res.status(409).json({
+          error: 'Email ou username já existe',
+          details: 'Tente com outros dados'
+        });
+      }
+      
+      throw userError;
+    }
 
     // Criar perfil
-    const profileId = db.generateId();
     const defaultPhotoUrl = generateDefaultAvatar(name);
     
-    await db.run(
-      `INSERT INTO profiles (
-        id, user_id, photo_url, status, profile_views, join_date, last_active
-      ) VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      [
-        profileId, 
-        userId, 
-        photo || defaultPhotoUrl,
-        'Novo no Orkut Retrô! 🎉',
-        0
-      ]
-    );
+    const { data: newProfile, error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        user_id: newUser.id,
+        photo_url: photo || defaultPhotoUrl,
+        status: 'Novo no Orkut Retrô! 🎉',
+        profile_views: 0
+      })
+      .select()
+      .single();
+
+    if (profileError) {
+      console.error('Erro ao criar perfil:', profileError);
+      // Se falhou ao criar perfil, remove o usuário criado
+      await supabase.from('users').delete().eq('id', newUser.id);
+      throw profileError;
+    }
 
     // Gerar token JWT
     const token = jwt.sign(
       { 
-        userId, 
-        email: email.toLowerCase(),
-        username 
+        userId: newUser.id, 
+        email: newUser.email,
+        username: newUser.username 
       },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     // Buscar dados completos do usuário criado
-    const userData = await getUserCompleteData(db, userId);
+    const userData = await getUserCompleteData(newUser.id);
 
-    // Log da criação (para desenvolvimento)
-    console.log(`Novo usuário criado: ${email} (${username})`);
+    // Log da criação
+    console.log(`Novo usuário criado: ${email} (${username}) - ID: ${newUser.id}`);
 
     // Retornar sucesso
     res.status(201).json({
@@ -133,9 +158,21 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
-    res.status(500).json({
+    
+    let errorMessage = 'Não foi possível criar o usuário. Tente novamente.';
+    let statusCode = 500;
+    
+    if (error?.message?.includes('duplicate key value')) {
+      errorMessage = 'Email ou username já existem';
+      statusCode = 409;
+    } else if (error?.message?.includes('invalid input syntax')) {
+      errorMessage = 'Dados fornecidos são inválidos';
+      statusCode = 400;
+    }
+
+    res.status(statusCode).json({
       error: 'Erro interno do servidor',
-      details: 'Não foi possível criar o usuário. Tente novamente.'
+      details: errorMessage
     });
   }
 }
@@ -147,7 +184,7 @@ function isValidEmail(email) {
 }
 
 // Função para gerar username único
-async function generateUniqueUsername(db, name) {
+async function generateUniqueUsername(name) {
   // Limpar nome e criar base do username
   let baseUsername = name.toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
@@ -165,10 +202,11 @@ async function generateUniqueUsername(db, name) {
   let counter = 1;
 
   while (true) {
-    const existingUsername = await db.get(
-      'SELECT id FROM users WHERE username = ?',
-      [username]
-    );
+    const { data: existingUsername } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .single();
 
     if (!existingUsername) {
       break; // Username disponível
@@ -198,54 +236,51 @@ function generateDefaultAvatar(name) {
 }
 
 // Função para buscar dados completos do usuário
-async function getUserCompleteData(db, userId) {
-  const query = `
-    SELECT 
-      u.id,
-      u.name,
-      u.email,
-      u.username,
-      u.created_at,
-      p.photo_url,
-      p.status,
-      p.age,
-      p.location,
-      p.relationship_status,
-      p.birthday,
-      p.bio,
-      p.profile_views,
-      p.join_date,
-      p.last_active,
-      (SELECT COUNT(*) FROM friendships WHERE (requester_id = u.id OR addressee_id = u.id) AND status = 'accepted') as friends_count,
-      (SELECT COUNT(*) FROM scraps WHERE to_user_id = u.id) as scraps_count
-    FROM users u
-    LEFT JOIN profiles p ON u.id = p.user_id
-    WHERE u.id = ?
-  `;
+async function getUserCompleteData(userId) {
+  const { data: user, error } = await supabase
+    .from('users')
+    .select(`
+      *,
+      profiles(*)
+    `)
+    .eq('id', userId)
+    .single();
 
-  const user = await db.get(query, [userId]);
-  
-  if (!user) {
+  if (error || !user) {
     throw new Error('Usuário não encontrado após criação');
   }
+
+  // Buscar estatísticas
+  const { count: friendsCount } = await supabase
+    .from('friendships')
+    .select('*', { count: 'exact', head: true })
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+    .eq('status', 'accepted');
+
+  const { count: scrapsCount } = await supabase
+    .from('scraps')
+    .select('*', { count: 'exact', head: true })
+    .eq('to_user_id', userId);
+
+  const profile = user.profiles || {};
 
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     username: user.username,
-    photo: user.photo_url,
-    status: user.status,
-    age: user.age,
-    location: user.location || '',
-    relationship: user.relationship_status || '',
-    birthday: user.birthday || '',
-    bio: user.bio || '',
-    profileViews: user.profile_views || 0,
-    friendsCount: user.friends_count || 0,
-    scrapsCount: user.scraps_count || 0,
-    joinDate: user.join_date,
-    lastActive: user.last_active,
+    photo: profile.photo_url,
+    status: profile.status,
+    age: profile.age,
+    location: profile.location || '',
+    relationship: profile.relationship_status || '',
+    birthday: profile.birthday || '',
+    bio: profile.bio || '',
+    profileViews: profile.profile_views || 0,
+    friendsCount: friendsCount || 0,
+    scrapsCount: scrapsCount || 0,
+    joinDate: profile.join_date || user.created_at,
+    lastActive: profile.last_active || user.created_at,
     createdAt: user.created_at
   };
 }

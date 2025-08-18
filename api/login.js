@@ -67,7 +67,7 @@ export default async function handler(req, res) {
         p.last_active
       FROM users u
       LEFT JOIN profiles p ON u.id = p.user_id
-      WHERE u.email = ?`,
+      WHERE u.email = $1`,
       [email.toLowerCase()]
     );
 
@@ -91,23 +91,23 @@ export default async function handler(req, res) {
 
     // Atualizar última atividade
     await db.run(
-      'UPDATE profiles SET last_active = datetime("now") WHERE user_id = ?',
+      'UPDATE profiles SET last_active = CURRENT_TIMESTAMP WHERE user_id = $1',
       [user.id]
     );
 
     // Buscar estatísticas do usuário
     const [friendsCount, scrapsCount, fansCount] = await Promise.all([
       db.get(
-        'SELECT COUNT(*) as count FROM friendships WHERE (requester_id = ? OR addressee_id = ?) AND status = "accepted"',
-        [user.id, user.id]
+        'SELECT COUNT(*) as count FROM friendships WHERE (requester_id = $1 OR addressee_id = $2) AND status = $3',
+        [user.id, user.id, 'accepted']
       ),
       db.get(
-        'SELECT COUNT(*) as count FROM scraps WHERE to_user_id = ?',
+        'SELECT COUNT(*) as count FROM scraps WHERE to_user_id = $1',
         [user.id]
       ),
       db.get(
-        'SELECT COUNT(*) as count FROM friendships WHERE addressee_id = ? AND status = "pending"',
-        [user.id]
+        'SELECT COUNT(*) as count FROM friendships WHERE addressee_id = $1 AND status = $2',
+        [user.id, 'pending']
       )
     ]);
 

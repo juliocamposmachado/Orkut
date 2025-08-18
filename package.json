@@ -10,14 +10,17 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "sqlite3": "^5.1.6",
-    "uuid": "^9.0.1",
+    "@supabase/supabase-js": "^2.55.0",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "googleapis": "^118.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "orkut-retro": "file:",
+    "pg": "^8.11.3",
     "sharp": "^0.32.6",
-    "googleapis": "^118.0.0",
-    "cors": "^2.8.5"
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@vercel/node": "^3.0.7"

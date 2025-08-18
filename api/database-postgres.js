@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
 const { v4: uuidv4 } = require('uuid');
 
-// Configurações de conexão do banco
+// Configurações de conexão
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/orkut';
 
 // Classe para gerenciar o banco de dados PostgreSQL
-class Database {
+class PostgreSQLDatabase {
   constructor() {
     this.pool = null;
   }
@@ -196,10 +196,10 @@ class Database {
 
     // Executar todas as queries
     for (const query of queries) {
-      await this.run(query);
+      await this.query(query);
     }
 
-    console.log('Tabelas criadas com sucesso');
+    console.log('Tabelas PostgreSQL criadas com sucesso');
   }
 
   // Executar query
@@ -245,7 +245,7 @@ class Database {
     }
   }
 
-  // Gerar ID único
+  // Gerar ID único (UUID)
   generateId() {
     return uuidv4();
   }
@@ -255,8 +255,67 @@ class Database {
     // Para PostgreSQL/Supabase, o backup seria feito via pg_dump
     // ou através do painel do Supabase
     console.log('Backup do PostgreSQL deve ser feito via Supabase Dashboard ou pg_dump');
-    console.log('Para fazer backup manual: pg_dump', DATABASE_URL);
     return null;
+  }
+
+  // Função para migrar dados do SQLite para PostgreSQL
+  async migrateFromSQLite(sqliteDbPath) {
+    const sqlite3 = require('sqlite3').verbose();
+    const path = require('path');
+    
+    return new Promise((resolve, reject) => {
+      const sqliteDb = new sqlite3.Database(sqliteDbPath, async (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        try {
+          // Migrar usuários
+          console.log('Migrando usuários...');
+          sqliteDb.all('SELECT * FROM users', async (err, users) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            for (const user of users) {
+              await this.run(
+                'INSERT INTO users (id, name, email, password_hash, username, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING',
+                [user.id, user.name, user.email, user.password_hash, user.username, user.created_at, user.updated_at]
+              );
+            }
+          });
+
+          // Migrar perfis
+          console.log('Migrando perfis...');
+          sqliteDb.all('SELECT * FROM profiles', async (err, profiles) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            for (const profile of profiles) {
+              await this.run(
+                `INSERT INTO profiles (id, user_id, photo_url, status, age, location, relationship_status, 
+                 birthday, bio, profile_views, join_date, last_active) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT (id) DO NOTHING`,
+                [profile.id, profile.user_id, profile.photo_url, profile.status, profile.age, 
+                 profile.location, profile.relationship_status, profile.birthday, profile.bio,
+                 profile.profile_views, profile.join_date, profile.last_active]
+              );
+            }
+          });
+
+          console.log('Migração concluída!');
+          sqliteDb.close();
+          resolve(true);
+
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   }
 }
 
@@ -266,7 +325,7 @@ let dbInstance = null;
 // Função para obter instância do banco
 async function getDatabase() {
   if (!dbInstance) {
-    dbInstance = new Database();
+    dbInstance = new PostgreSQLDatabase();
     await dbInstance.init();
   }
   return dbInstance;
@@ -274,5 +333,5 @@ async function getDatabase() {
 
 module.exports = {
   getDatabase,
-  Database
+  PostgreSQLDatabase
 };
