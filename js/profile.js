@@ -722,27 +722,53 @@ function addFriend() {
 // Buscar amigos
 function searchFriends() {
     const searchInput = document.getElementById('friendSearch');
-    const query = searchInput.value.trim();
+    const query = searchInput.value.trim().toLowerCase();
     
-    if (!query) {
-        showError('Digite um nome ou username para buscar.');
+    if (!query || query.length < 2) {
+        showError('Digite pelo menos 2 caracteres para buscar.');
         return;
     }
     
-    // Simular busca de usuários
-    const mockUsers = [
-        { id: 101, name: 'Carlos Santos', username: 'carlos_santos', photo: 'https://via.placeholder.com/48x48/28a745/ffffff?text=C', isFriend: false },
-        { id: 102, name: 'Maria Oliveira', username: 'maria_oliveira', photo: 'https://via.placeholder.com/48x48/ff6bb3/ffffff?text=M', isFriend: false },
-        { id: 103, name: 'João Silva', username: 'joao_silva', photo: 'https://via.placeholder.com/48x48/5bc0de/ffffff?text=J', isFriend: true },
-        { id: 104, name: 'Paula Costa', username: 'paula_costa', photo: 'https://via.placeholder.com/48x48/ffc107/ffffff?text=P', isFriend: false }
-    ];
+    // Mostrar loading
+    const resultsContainer = document.getElementById('searchResults');
+    resultsContainer.innerHTML = '<p class="loading-message">🔍 Buscando usuários...</p>';
+    resultsContainer.classList.remove('hidden');
     
-    const results = mockUsers.filter(user => 
-        user.name.toLowerCase().includes(query.toLowerCase()) || 
-        user.username.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    displaySearchResults(results);
+    // Simular delay de busca
+    setTimeout(() => {
+        // Buscar em usuários disponíveis
+        const searchResults = mockData.availableUsers.filter(user => 
+            user.name.toLowerCase().includes(query) || 
+            user.username.toLowerCase().includes(query) ||
+            user.location.toLowerCase().includes(query)
+        );
+        
+        // Adicionar amigos existentes nos resultados (para mostrar que já são amigos)
+        const existingFriends = mockData.friends.filter(friend =>
+            friend.name.toLowerCase().includes(query) ||
+            friend.username.toLowerCase().includes(query)
+        ).map(friend => ({ ...friend, isFriend: true }));
+        
+        // Combinar resultados
+        const allResults = [...searchResults, ...existingFriends];
+        
+        // Verificar se já tem solicitação pendente
+        const sentRequests = getSentRequests();
+        const receivedRequests = mockData.friendRequests.received;
+        
+        const enrichedResults = allResults.map(user => {
+            const hasSentRequest = sentRequests.some(req => req.id === user.id);
+            const hasReceivedRequest = receivedRequests.some(req => req.id === user.id);
+            
+            return {
+                ...user,
+                hasSentRequest,
+                hasReceivedRequest
+            };
+        });
+        
+        displaySearchResults(enrichedResults);
+    }, 1000);
 }
 
 // Exibir resultados da busca
@@ -1429,3 +1455,297 @@ const profileStyles = `
 const styleSheet = document.createElement('style');
 styleSheet.textContent = profileStyles;
 document.head.appendChild(styleSheet);
+
+// FUNÇÕES AUXILIARES PARA SISTEMA DE AMIZADES
+
+// Obter solicitações enviadas do localStorage
+function getSentRequests() {
+    return JSON.parse(localStorage.getItem('sentFriendRequests') || '[]');
+}
+
+// Salvar solicitações enviadas no localStorage
+function saveSentRequests(requests) {
+    localStorage.setItem('sentFriendRequests', JSON.stringify(requests));
+}
+
+// Verificar se já é amigo
+function isFriend(userId) {
+    return mockData.friends.some(friend => friend.id === userId);
+}
+
+// Verificar se já tem solicitação pendente
+function hasPendingRequest(userId) {
+    const sentRequests = getSentRequests();
+    const receivedRequests = mockData.friendRequests.received;
+    
+    return sentRequests.some(req => req.id === userId) || 
+           receivedRequests.some(req => req.id === userId);
+}
+
+// Atualizar status de amizade na interface
+function updateFriendshipStatus(userId, status) {
+    const statusMap = {
+        'friend': { text: '✓ Já é seu amigo', class: 'friend-status' },
+        'pending': { text: 'Solicitação enviada', class: 'btn btn-secondary btn-sm' },
+        'received': { text: 'Quer ser seu amigo', class: 'btn btn-info btn-sm' },
+        'none': { text: 'Adicionar', class: 'btn btn-primary btn-sm' }
+    };
+    
+    return statusMap[status] || statusMap['none'];
+}
+
+// Sistema de notificações para amizades
+function notifyFriendshipAction(action, userName, details = '') {
+    const messages = {
+        'request_sent': {
+            title: 'Solicitação enviada!',
+            message: `Solicitação de amizade enviada para ${userName}.`,
+            icon: '👋'
+        },
+        'request_accepted': {
+            title: 'Amizade aceita!',
+            message: `${userName} agora é seu amigo. ${details}`,
+            icon: '🎉'
+        },
+        'request_rejected': {
+            title: 'Solicitação recusada',
+            message: `Solicitação de ${userName} foi recusada.`,
+            icon: '❌'
+        },
+        'request_cancelled': {
+            title: 'Solicitação cancelada',
+            message: `Solicitação para ${userName} foi cancelada.`,
+            icon: '↩️'
+        },
+        'friend_removed': {
+            title: 'Amigo removido',
+            message: `${userName} foi removido da sua lista de amigos.`,
+            icon: '💔'
+        }
+    };
+    
+    const notification = messages[action];
+    if (notification) {
+        showNotification(notification.title, notification.message, notification.icon);
+    }
+}
+
+// Atualizar contadores gerais de amizade
+function updateGlobalFriendStats() {
+    const friendsCount = mockData.friends.length;
+    const requestsCount = mockData.friendRequests.received.length;
+    const sentCount = getSentRequests().length;
+    
+    // Atualizar no perfil principal
+    updateElement('friendsCount', friendsCount);
+    
+    // Atualizar badges nos modals
+    const friendsCountBadge = document.getElementById('friendsCountBadge');
+    const requestsCountBadge = document.getElementById('requestsCountBadge');
+    const sentCountBadge = document.getElementById('sentCountBadge');
+    
+    if (friendsCountBadge) friendsCountBadge.textContent = friendsCount;
+    if (requestsCountBadge) requestsCountBadge.textContent = requestsCount;
+    if (sentCountBadge) sentCountBadge.textContent = sentCount;
+}
+
+// Função para simular busca com filtros avançados
+function advancedUserSearch(query, filters = {}) {
+    const { location, ageRange, interests } = filters;
+    let results = mockData.availableUsers;
+    
+    // Filtro por texto
+    if (query) {
+        results = results.filter(user => 
+            user.name.toLowerCase().includes(query.toLowerCase()) ||
+            user.username.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+    
+    // Filtro por localização
+    if (location) {
+        results = results.filter(user => 
+            user.location.toLowerCase().includes(location.toLowerCase())
+        );
+    }
+    
+    // Adicionar dados de status de amizade
+    return results.map(user => {
+        const sentRequests = getSentRequests();
+        const receivedRequests = mockData.friendRequests.received;
+        
+        return {
+            ...user,
+            isFriend: isFriend(user.id),
+            hasSentRequest: sentRequests.some(req => req.id === user.id),
+            hasReceivedRequest: receivedRequests.some(req => req.id === user.id)
+        };
+    });
+}
+
+// Sistema de sugestões de amigos
+function generateFriendSuggestions() {
+    // Simular sugestões baseadas em amigos em comum, localização, etc.
+    const suggestions = mockData.availableUsers
+        .filter(user => !isFriend(user.id))
+        .slice(0, 5)
+        .map(user => ({
+            ...user,
+            reason: Math.random() > 0.5 ? 
+                'Amigos em comum' : 
+                `Mora em ${user.location.split(',')[0]}`
+        }));
+    
+    return suggestions;
+}
+
+// Exibir sugestões de amigos
+function showFriendSuggestions() {
+    const suggestions = generateFriendSuggestions();
+    const container = document.getElementById('searchResults');
+    
+    if (suggestions.length === 0) {
+        container.innerHTML = '<p class="no-results">Nenhuma sugestão disponível no momento.</p>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="suggestions-header">
+            <h4>💡 Pessoas que você pode conhecer</h4>
+            <p class="suggestions-subtitle">Baseado em amigos em comum e localização</p>
+        </div>
+        ${suggestions.map(user => `
+            <div class="search-result-item suggestion-item">
+                <img src="${user.photo}" alt="${user.name}" class="result-photo">
+                <div class="result-info">
+                    <div class="result-name">${user.name}</div>
+                    <div class="result-username">@${user.username}</div>
+                    <div class="suggestion-reason">${user.reason}</div>
+                </div>
+                <div class="result-actions">
+                    <button class="btn btn-primary btn-sm" onclick="sendFriendRequest(${user.id}, '${user.name}', '${user.username}')">
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        `).join('')}
+    `;
+    
+    container.classList.remove('hidden');
+}
+
+// Atualizar a função de busca para incluir botão de sugestões
+function enhanceSearchModal() {
+    const modal = document.getElementById('addFriendModal');
+    if (!modal) return;
+    
+    const formActions = modal.querySelector('.form-actions');
+    if (formActions && !formActions.querySelector('.suggestions-btn')) {
+        const suggestionsBtn = document.createElement('button');
+        suggestionsBtn.type = 'button';
+        suggestionsBtn.className = 'btn btn-info suggestions-btn';
+        suggestionsBtn.textContent = '💡 Ver sugestões';
+        suggestionsBtn.onclick = showFriendSuggestions;
+        
+        formActions.insertBefore(suggestionsBtn, formActions.children[1]);
+    }
+}
+
+// Melhorar a exibição dos resultados da busca
+function displaySearchResults(users) {
+    const container = document.getElementById('searchResults');
+    
+    if (users.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <p>🔍 Nenhum usuário encontrado.</p>
+                <p class="help-text">Tente buscar por:</p>
+                <ul class="search-tips">
+                    <li>Nome completo (ex: João Silva)</li>
+                    <li>Username (ex: joao_silva)</li>
+                    <li>Cidade (ex: São Paulo)</li>
+                </ul>
+                <button class="btn btn-light btn-sm" onclick="showFriendSuggestions()">💡 Ver sugestões</button>
+            </div>
+        `;
+    } else {
+        const resultHtml = users.map(user => {
+            let actionButton = '';
+            
+            if (user.isFriend) {
+                actionButton = '<span class="friend-status">✓ Já é seu amigo</span>';
+            } else if (user.hasSentRequest) {
+                actionButton = '<button class="btn btn-secondary btn-sm" disabled>Solicitação enviada</button>';
+            } else if (user.hasReceivedRequest) {
+                actionButton = '<button class="btn btn-info btn-sm" onclick="acceptFriendRequest(' + user.id + ', \'' + user.name + '\')">' +
+                               'Aceitar solicitação</button>';
+            } else {
+                actionButton = '<button class="btn btn-primary btn-sm" onclick="sendFriendRequest(' + user.id + ', \'' + 
+                               user.name + '\', \'' + user.username + '\')">Adicionar</button>';
+            }
+            
+            return `
+                <div class="search-result-item">
+                    <img src="${user.photo}" alt="${user.name}" class="result-photo">
+                    <div class="result-info">
+                        <div class="result-name">${user.name}</div>
+                        <div class="result-username">@${user.username}</div>
+                        ${user.location ? '<div class="result-location">' + user.location + '</div>' : ''}
+                    </div>
+                    <div class="result-actions">
+                        ${actionButton}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = `
+            <div class="search-results-header">
+                <p>Encontrados ${users.length} usuário(s)</p>
+            </div>
+            ${resultHtml}
+        `;
+    }
+    
+    container.classList.remove('hidden');
+}
+
+// Inicializar melhorias do sistema de amizades
+function initializeFriendshipSystem() {
+    enhanceSearchModal();
+    updateGlobalFriendStats();
+    
+    // Event listener para busca com Enter
+    const searchInput = document.getElementById('friendSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchFriends();
+            }
+        });
+        
+        // Busca automática após digitar (debounced)
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    searchFriends();
+                }, 500);
+            } else if (query.length === 0) {
+                document.getElementById('searchResults').classList.add('hidden');
+            }
+        });
+    }
+}
+
+// Chamar inicialização do sistema de amizades
+if (getCurrentPage() === 'profile') {
+    setTimeout(() => {
+        initializeFriendshipSystem();
+        loadTopFriends(); // Carregar amigos do Top 10
+    }, 500);
+}

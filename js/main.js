@@ -33,16 +33,40 @@ const mockData = {
     },
     
     friends: [
-        { id: 2, name: 'Carlos Santos', photo: 'images/julio.webp', online: true },
-        { id: 3, name: 'Maria Oliveira', photo: 'images/julio.webp', online: false },
-        { id: 4, name: 'João Silva', photo: 'images/julio.webp', online: true },
-        { id: 5, name: 'Paula Costa', photo: 'images/julio.webp', online: false },
-        { id: 6, name: 'Ricardo Lima', photo: 'images/julio.webp', online: true },
-        { id: 7, name: 'Ana Carolina', photo: 'images/julio.webp', online: false },
-        { id: 8, name: 'Bruno Ferreira', photo: 'images/julio.webp', online: true },
-        { id: 9, name: 'Camila Rocha', photo: 'images/julio.webp', online: false },
-        { id: 10, name: 'Diego Almeida', photo: 'images/julio.webp', online: true },
-        { id: 11, name: 'Fernanda Lima', photo: 'images/julio.webp', online: false }
+        { id: 2, name: 'Carlos Santos', username: 'carlos_santos', photo: 'https://via.placeholder.com/48x48/28a745/ffffff?text=C', online: true, friendshipDate: '2024-01-15' },
+        { id: 3, name: 'Maria Oliveira', username: 'maria_oliveira', photo: 'https://via.placeholder.com/48x48/ff6bb3/ffffff?text=M', online: false, friendshipDate: '2024-02-20' },
+        { id: 4, name: 'João Silva', username: 'joao_silva', photo: 'https://via.placeholder.com/48x48/5bc0de/ffffff?text=J', online: true, friendshipDate: '2024-01-10' },
+        { id: 5, name: 'Paula Costa', username: 'paula_costa', photo: 'https://via.placeholder.com/48x48/ffc107/ffffff?text=P', online: false, friendshipDate: '2024-03-05' },
+        { id: 6, name: 'Ricardo Lima', username: 'ricardo_lima', photo: 'https://via.placeholder.com/48x48/dc3545/ffffff?text=R', online: true, friendshipDate: '2024-02-14' },
+        { id: 7, name: 'Ana Carolina', username: 'ana_carolina', photo: 'https://via.placeholder.com/48x48/6f42c1/ffffff?text=A', online: false, friendshipDate: '2024-01-25' },
+        { id: 8, name: 'Bruno Ferreira', username: 'bruno_ferreira', photo: 'https://via.placeholder.com/48x48/fd7e14/ffffff?text=B', online: true, friendshipDate: '2024-03-10' },
+        { id: 9, name: 'Camila Rocha', username: 'camila_rocha', photo: 'https://via.placeholder.com/48x48/e83e8c/ffffff?text=C', online: false, friendshipDate: '2024-02-28' },
+        { id: 10, name: 'Diego Almeida', username: 'diego_almeida', photo: 'https://via.placeholder.com/48x48/20c997/ffffff?text=D', online: true, friendshipDate: '2024-03-15' }
+    ],
+    
+    // Sistema de amizades
+    friendRequests: {
+        received: [
+            { id: 101, name: 'Fernanda Lima', username: 'fernanda_lima', photo: 'https://via.placeholder.com/48x48/17a2b8/ffffff?text=F', requestDate: '2024-03-18' },
+            { id: 102, name: 'Gabriel Santos', username: 'gabriel_santos', photo: 'https://via.placeholder.com/48x48/6610f2/ffffff?text=G', requestDate: '2024-03-17' },
+            { id: 103, name: 'Helena Costa', username: 'helena_costa', photo: 'https://via.placeholder.com/48x48/e83e8c/ffffff?text=H', requestDate: '2024-03-16' }
+        ],
+        sent: [
+            { id: 201, name: 'Igor Pereira', username: 'igor_pereira', photo: 'https://via.placeholder.com/48x48/6c757d/ffffff?text=I', requestDate: '2024-03-19' },
+            { id: 202, name: 'Julia Alves', username: 'julia_alves', photo: 'https://via.placeholder.com/48x48/28a745/ffffff?text=J', requestDate: '2024-03-18' }
+        ]
+    },
+    
+    // Usuários disponíveis para busca
+    availableUsers: [
+        { id: 301, name: 'Lucas Martins', username: 'lucas_martins', photo: 'https://via.placeholder.com/48x48/007bff/ffffff?text=L', location: 'Rio de Janeiro, RJ', isFriend: false },
+        { id: 302, name: 'Marina Silva', username: 'marina_silva', photo: 'https://via.placeholder.com/48x48/dc3545/ffffff?text=M', location: 'Belo Horizonte, MG', isFriend: false },
+        { id: 303, name: 'Nathan Oliveira', username: 'nathan_oliveira', photo: 'https://via.placeholder.com/48x48/28a745/ffffff?text=N', location: 'Salvador, BA', isFriend: false },
+        { id: 304, name: 'Olivia Costa', username: 'olivia_costa', photo: 'https://via.placeholder.com/48x48/ffc107/ffffff?text=O', location: 'Fortaleza, CE', isFriend: false },
+        { id: 305, name: 'Pedro Henrique', username: 'pedro_henrique', photo: 'https://via.placeholder.com/48x48/6f42c1/ffffff?text=P', location: 'Brasília, DF', isFriend: false },
+        { id: 306, name: 'Rafaela Santos', username: 'rafaela_santos', photo: 'https://via.placeholder.com/48x48/fd7e14/ffffff?text=R', location: 'Recife, PE', isFriend: false },
+        { id: 307, name: 'Samuel Lima', username: 'samuel_lima', photo: 'https://via.placeholder.com/48x48/20c997/ffffff?text=S', location: 'Porto Alegre, RS', isFriend: false },
+        { id: 308, name: 'Tatiana Rocha', username: 'tatiana_rocha', photo: 'https://via.placeholder.com/48x48/e83e8c/ffffff?text=T', location: 'Curitiba, PR', isFriend: false }
     ],
     
     communities: [
