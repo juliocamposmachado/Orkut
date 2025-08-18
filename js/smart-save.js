@@ -608,26 +608,109 @@ class SmartSaveSystem {
         };
     }
     
-    // 🤖 Notificar IA Backend Manager sobre mudanças nos dados
+    // 🤖 Notificar IA Backend sobre mudanças nos dados
     notifyAIBackend(eventType, data) {
         try {
+            console.log(`🔔 SmartSave: Tentando notificar IA Backend Manager sobre ${eventType}...`);
+            
             // Verificar se a IA Backend Manager está disponível
             if (window.AIBackendManager && typeof window.AIBackendManager.onDataUpdate === 'function') {
-                console.log(`🤖 Notificando IA Backend Manager: ${eventType}`);
-                window.AIBackendManager.onDataUpdate(eventType, data, {
+                console.log(`🤖 SmartSave → IA Backend Manager: ${eventType}`);
+                
+                // Enriquecer metadados
+                const enrichedMetadata = {
                     timestamp: new Date().toISOString(),
                     source: 'SmartSave',
-                    userId: this.currentUser?.id,
-                    userName: this.currentUser?.name
-                });
+                    userId: this.currentUser?.id || this.generateId(),
+                    userName: this.currentUser?.name || 'Usuário Anônimo',
+                    userAgent: navigator.userAgent,
+                    online: navigator.onLine,
+                    syncStatus: this.currentUser?.syncStatus || 'unknown'
+                };
+                
+                window.AIBackendManager.onDataUpdate(eventType, data, enrichedMetadata);
+                console.log('✅ SmartSave: IA Backend Manager notificada com sucesso!');
+                
             } else {
-                // IA não está disponível ainda, aguardar e tentar novamente
+                console.warn('⚠️ SmartSave: IA Backend Manager não disponível ainda...');
+                
+                // Tentar novamente após um delay menor para perfis
+                const retryDelay = eventType === 'profile_updated' ? 500 : 1000;
+                
                 setTimeout(() => {
+                    console.log(`🔄 SmartSave: Retry para ${eventType}...`);
                     this.notifyAIBackend(eventType, data);
-                }, 1000);
+                }, retryDelay);
             }
+            
         } catch (error) {
-            console.warn('⚠️ Erro ao notificar IA Backend Manager:', error);
+            console.error('❌ SmartSave: Erro ao notificar IA Backend Manager:', error);
+            
+            // Salvar na fila de retry em caso de erro
+            this.addToRetryQueue(eventType, data);
+        }
+    }
+    
+    // 🔄 Adicionar à fila de retry para notificações de IA
+    addToRetryQueue(eventType, data) {
+        try {
+            const retryItem = {
+                id: this.generateId(),
+                eventType: eventType,
+                data: data,
+                timestamp: Date.now(),
+                attempts: 0,
+                maxAttempts: 5
+            };
+            
+            const retryQueue = JSON.parse(localStorage.getItem('orkut_ai_retry_queue') || '[]');
+            retryQueue.push(retryItem);
+            
+            // Manter apenas os últimos 20 itens
+            if (retryQueue.length > 20) {
+                retryQueue.splice(0, retryQueue.length - 20);
+            }
+            
+            localStorage.setItem('orkut_ai_retry_queue', JSON.stringify(retryQueue));
+            console.log(`📋 SmartSave: Item adicionado à fila de retry IA (${eventType})`);
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao adicionar à fila de retry:', error);
+        }
+    }
+    
+    // 🔄 Processar fila de retry da IA
+    processAIRetryQueue() {
+        try {
+            const retryQueue = JSON.parse(localStorage.getItem('orkut_ai_retry_queue') || '[]');
+            
+            if (retryQueue.length === 0) return;
+            
+            console.log(`🔄 SmartSave: Processando ${retryQueue.length} item(s) da fila de retry IA...`);
+            
+            const updatedQueue = [];
+            
+            retryQueue.forEach(item => {
+                if (item.attempts < item.maxAttempts) {
+                    item.attempts++;
+                    console.log(`🔄 Retry ${item.attempts}/${item.maxAttempts} para ${item.eventType}`);
+                    
+                    // Tentar notificar novamente
+                    this.notifyAIBackend(item.eventType, item.data);
+                    
+                    // Manter na fila se não atingiu o máximo
+                    if (item.attempts < item.maxAttempts) {
+                        updatedQueue.push(item);
+                    }
+                } else {
+                    console.warn(`⚠️ SmartSave: Item ${item.eventType} descartado após ${item.maxAttempts} tentativas`);
+                }
+            });
+            
+            localStorage.setItem('orkut_ai_retry_queue', JSON.stringify(updatedQueue));
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao processar fila de retry:', error);
         }
     }
     

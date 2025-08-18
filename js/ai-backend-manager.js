@@ -189,18 +189,40 @@ class AIBackendManager {
                 AI_BACKEND_CONFIG.SUPABASE_ANON_KEY
             );
             
-            // Testar conexão
-            const { data, error } = await this.supabaseClient.from('users').select('count').single();
+            // Testar conexão com tabela simples primeiro
+            console.log('🔄 ORKY-DB-AI: Testando conexão Supabase...');
             
-            if (error) {
-                console.warn('⚠️ Aviso Supabase:', error.message);
-            } else {
-                console.log('✅ Supabase conectado - Usuários no banco:', data?.count || 0);
+            try {
+                // Tentar acessar a tabela profiles primeiro
+                const { data, error } = await this.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    console.warn('⚠️ ORKY-DB-AI: Supabase com restrições - usando modo fallback');
+                    console.warn('   Erro específico:', error.message);
+                    this.supabaseMode = 'fallback'; // Modo fallback - salvar apenas local
+                } else {
+                    console.log('✅ ORKY-DB-AI: Supabase conectado com sucesso!');
+                    console.log('📊 Registros acessíveis:', data?.length || 0);
+                    this.supabaseMode = 'full'; // Modo completo
+                }
+                
+            } catch (testError) {
+                console.warn('⚠️ ORKY-DB-AI: Supabase indisponível - modo offline:', testError.message);
+                this.supabaseMode = 'offline';
+                this.supabaseClient = null;
             }
             
         } catch (error) {
-            console.error('❌ Erro ao conectar Supabase:', error);
+            console.error('❌ ORKY-DB-AI: Erro crítico na conexão Supabase:', error);
+            this.supabaseMode = 'offline';
+            this.supabaseClient = null;
         }
+        
+        // Informar modo de operação
+        console.log(`🤖 ORKY-DB-AI operando em modo: ${this.supabaseMode.toUpperCase()}`);
     }
     
     // Ativar personas de backend
@@ -464,38 +486,99 @@ class AIBackendManager {
     // 💾 Sincronizar perfil com banco de dados
     async syncProfileToDatabase(profileData) {
         try {
-            console.log('💾 DB-Admin-AI: Preparando sincronização...');
+            console.log('💾 ORKY-DB-AI: Preparando sincronização de perfil...');
             
-            // Verificar se o Supabase está disponível
-            if (!this.supabaseClient) {
-                console.warn('⚠️ DB-Admin-AI: Supabase não disponível, dados mantidos localmente');
+            // Verificar modo de operação
+            if (this.supabaseMode === 'offline' || !this.supabaseClient) {
+                console.log('📱 ORKY-DB-AI: Modo offline - salvando dados localmente');
+                await this.saveProfileLocally(profileData);
                 return;
             }
             
-            // Preparar dados para upsert (insert or update)
+            // Preparar dados para Supabase
             const dbData = {
-                id: profileData.id,
-                name: profileData.name,
-                username: profileData.username,
-                email: profileData.email,
-                bio: profileData.bio || '',
+                id: profileData.id || this.generateId(),
+                user_id: profileData.id || this.generateId(),
+                photo_url: profileData.photo || null,
+                status: profileData.status || '',
+                age: profileData.age || null,
                 location: profileData.location || '',
-                age: profileData.age,
                 relationship_status: profileData.relationship || '',
-                birthday: profileData.birthday,
-                photo_url: profileData.photo,
-                status: profileData.status,
-                last_active: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                birthday: profileData.birthday || null,
+                bio: profileData.bio || '',
+                profile_views: profileData.profileViews || 0,
+                join_date: profileData.createdAt || new Date().toISOString(),
+                last_active: new Date().toISOString()
             };
             
-            console.log('📤 DB-Admin-AI: Dados preparados para sincronização:', dbData);
+            console.log('📤 ORKY-DB-AI: Tentando sincronizar perfil com Supabase...');
             
-            // Por enquanto apenas log - a sincronização real seria implementada quando as APIs estiverem prontas
-            console.log('✅ DB-Admin-AI: Perfil preparado para sincronização com Supabase');
+            try {
+                // Tentar atualizar no Supabase
+                const { data, error } = await this.supabaseClient
+                    .from('profiles')
+                    .upsert([dbData])
+                    .select();
+                
+                if (error) {
+                    console.warn('⚠️ ORKY-DB-AI: Supabase inacessível - usando fallback local:', error.message);
+                    await this.saveProfileLocally(profileData);
+                    this.queueForSync('profiles', dbData);
+                } else {
+                    console.log('✅ ORKY-DB-AI: Perfil sincronizado com Supabase!', data[0]?.id);
+                    // Também salvar localmente como backup
+                    await this.saveProfileLocally(profileData);
+                }
+                
+            } catch (syncError) {
+                console.warn('⚠️ ORKY-DB-AI: Erro na sincronização - usando modo local:', syncError.message);
+                await this.saveProfileLocally(profileData);
+                this.queueForSync('profiles', dbData);
+            }
             
         } catch (error) {
-            console.error('❌ DB-Admin-AI: Erro na sincronização:', error);
+            console.error('❌ ORKY-DB-AI: Erro crítico na sincronização de perfil:', error);
+            // Garantir que os dados não sejam perdidos
+            await this.saveProfileLocally(profileData);
+        }
+    }
+    
+    // 💾 Salvar perfil localmente com estrutura melhorada
+    async saveProfileLocally(profileData) {
+        try {
+            console.log('💾 ORKY-DB-AI: Salvando perfil localmente...');
+            
+            // Enriquecer dados locais
+            const enrichedProfile = {
+                ...profileData,
+                lastSynced: new Date().toISOString(),
+                syncStatus: this.supabaseMode === 'offline' ? 'pending' : 'local_backup',
+                version: Date.now() // Versionamento para evitar conflitos
+            };
+            
+            // Salvar no localStorage com backup
+            localStorage.setItem('orkut_profile_main', JSON.stringify(enrichedProfile));
+            localStorage.setItem('orkut_profile_backup', JSON.stringify(enrichedProfile));
+            
+            // Salvar também histórico de mudanças
+            const profileHistory = JSON.parse(localStorage.getItem('orkut_profile_history') || '[]');
+            profileHistory.push({
+                timestamp: new Date().toISOString(),
+                changes: profileData,
+                version: enrichedProfile.version
+            });
+            
+            // Manter apenas as últimas 10 alterações
+            if (profileHistory.length > 10) {
+                profileHistory.splice(0, profileHistory.length - 10);
+            }
+            
+            localStorage.setItem('orkut_profile_history', JSON.stringify(profileHistory));
+            
+            console.log('✅ ORKY-DB-AI: Perfil salvo localmente com backup e histórico');
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao salvar perfil localmente:', error);
         }
     }
     
