@@ -79,7 +79,196 @@ O **Orkut Retrô** é uma homenagem nostálgica à famosa rede social que marcou
 ## 📁 Estrutura do Projeto
 
 ```
-Orkut2025/
+# Orkut Retrô 🎉
+
+Uma recriação nostálgica da famosa rede social dos anos 2000, construída com tecnologias modernas e hospedada no Vercel com banco de dados SQLite e backup no Google Drive.
+
+## 🚀 Funcionalidades
+
+- **Autenticação completa**: Cadastro e login com validações
+- **Perfis de usuário**: Fotos, status, informações pessoais
+- **Sistema de amizades**: Adicionar, aceitar e gerenciar amigos
+- **Scraps**: Sistema clássico de recados do Orkut
+- **Comunidades**: Criar e participar de grupos
+- **Feed de atividades**: Timeline com posts dos amigos
+- **Upload de fotos**: Sistema completo de upload e processamento
+- **Backup automático**: Sincronização com Google Drive
+- **Interface nostálgica**: Visual fiel ao Orkut original
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Frontend**: HTML5, CSS3, JavaScript ES6+
+- **Backend**: Node.js com APIs serverless (Vercel)
+- **Banco de dados**: SQLite com ORM personalizado
+- **Upload**: Multer + Sharp para processamento de imagens
+- **Backup**: Google Drive API
+- **Autenticação**: JWT (JSON Web Tokens)
+- **Deploy**: Vercel (automatizado)
+
+## 📋 Pré-requisitos
+
+- Node.js 18+ instalado
+- Conta no Vercel
+- Conta no Google Cloud (para backup)
+- Git
+
+## 🔧 Instalação Local
+
+1. **Clone o repositório**
+```bash
+git clone [URL_DO_SEU_REPOSITORIO]
+cd Orkut2025
+```
+
+2. **Instale as dependências**
+```bash
+npm install
+```
+
+3. **Configure as variáveis de ambiente**
+```bash
+cp .env.example .env
+```
+
+Edite o arquivo `.env` com suas configurações:
+- `JWT_SECRET`: Uma string aleatória e segura
+- `GOOGLE_DRIVE_FOLDER_ID`: ID da pasta no Google Drive para backup
+- `GOOGLE_SERVICE_ACCOUNT_KEY`: Chave JSON da conta de serviço
+
+4. **Inicie o servidor de desenvolvimento**
+```bash
+npm run dev
+```
+
+5. **Acesse o site**
+```
+http://localhost:3000
+```
+
+## 🚀 Deploy no Vercel
+
+1. **Conecte seu repositório**
+   - Faça login no [Vercel](https://vercel.com)
+   - Importe seu repositório do GitHub
+
+2. **Configure as variáveis de ambiente**
+   - No painel do Vercel, vá em Settings > Environment Variables
+   - Adicione todas as variáveis do arquivo `.env.example`
+
+3. **Deploy automático**
+   - O Vercel fará deploy automaticamente a cada push
+   - Seu site estará disponível em: `https://seu-projeto.vercel.app`
+
+## 🗄️ Estrutura do Banco de Dados
+
+O sistema utiliza SQLite com as seguintes tabelas principais:
+
+- **users**: Informações básicas dos usuários
+- **profiles**: Dados do perfil (foto, status, bio, etc.)
+- **friendships**: Relacionamentos entre usuários
+- **scraps**: Sistema de recados
+- **communities**: Comunidades criadas
+- **posts**: Feed de atividades
+- **uploads**: Controle de arquivos enviados
+
+## 🔐 Configuração do Google Drive
+
+Para habilitar o backup automático:
+
+1. **Crie um projeto no Google Cloud Console**
+2. **Ative a Google Drive API**
+3. **Crie uma conta de serviço**
+4. **Baixe o arquivo JSON das credenciais**
+5. **Adicione a chave como variável de ambiente**
+
+## 📡 APIs Disponíveis
+
+- `POST /api/register` - Cadastro de usuários
+- `POST /api/login` - Autenticação
+- `POST /api/upload-photo` - Upload de fotos
+- `GET /api/backup?action=list` - Listar backups
+- `POST /api/backup?action=create` - Criar backup
+
+## 🔒 Segurança
+
+- Senhas criptografadas com bcrypt
+- Tokens JWT com expiração
+- Validação de dados no frontend e backend
+- Proteção contra tentativas de login excessivas
+- Sanitização de uploads de arquivos
+
+## 🎨 Personalização
+
+O visual pode ser customizado editando os arquivos CSS em `/css/`. O tema mantém a nostalgia do Orkut original com:
+
+- Cores roxas características
+- Layout familiar
+- Ícones e elementos visuais nostálgicos
+
+## 🔄 Backup Automático
+
+O sistema faz backup automático diário para o Google Drive:
+
+- Mantém os 10 backups mais recentes
+- Remove automaticamente backups antigos
+- Notificações de sucesso/erro via console
+
+## 📱 Responsividade
+
+O site é totalmente responsivo e funciona em:
+- Desktop (todas as resoluções)
+- Tablets 
+- Smartphones
+- Navegadores modernos
+
+## 🐛 Solução de Problemas
+
+**Erro de conexão com banco:**
+- Verifique se o diretório `/data` existe
+- Permissões de escrita na pasta
+
+**Upload não funciona:**
+- Verifique o limite de tamanho (5MB)
+- Formatos aceitos: JPG, PNG, GIF, WebP
+
+**Backup falha:**
+- Verifique as credenciais do Google Drive
+- Confirme as permissões da conta de serviço
+
+## 🤝 Contribuindo
+
+1. Faça fork do projeto
+2. Crie uma branch: `git checkout -b feature/nova-funcionalidade`
+3. Commit suas mudanças: `git commit -m 'Adiciona nova funcionalidade'`
+4. Push para a branch: `git push origin feature/nova-funcionalidade`
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 🎯 Roadmap
+
+- [ ] Sistema de mensagens privadas
+- [ ] Notificações em tempo real
+- [ ] Chat integrado
+- [ ] Temas customizáveis
+- [ ] App móvel
+- [ ] Integração com redes sociais
+
+## 👥 Créditos
+
+- Inspirado no Orkut original (2004-2014)
+- Interface nostálgica recriada com carinho
+- Desenvolvimento moderno para uma experiência clássica
+
+---
+
+**Feito com 💜 em memória do Orkut original**
+
+🌐 **Site**: https://orkut-br.vercel.app
+📧 **Contato**: [seu-email@exemplo.com]
+🐙 **GitHub**: [seu-github]
 ├── index.html              # Página de login/cadastro
 ├── profile.html            # Perfil do usuário
 ├── communities.html        # Página de comunidades

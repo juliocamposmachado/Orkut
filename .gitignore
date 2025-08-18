@@ -1,0 +1,68 @@
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Credenciais do Google
+google-credentials.json
+service-account-key.json
+
+# Banco de dados
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Backups
+backups/
+backup_*
+*.backup
+
+# Logs
+logs/
+*.log
+
+# Uploads
+public/uploads/
+uploads/
+
+# Cache do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+.cache/
+
+# Arquivos do editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+build/
+dist/
+.next/
+
+# Vercel
+.vercel
+
+# Coverage reports
+coverage/
+.nyc_output
+
+# Outros
+*.pid
+*.seed
+*.pid.lock

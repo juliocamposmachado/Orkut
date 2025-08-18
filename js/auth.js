@@ -165,17 +165,32 @@ function handleLogin(event) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     
-    // Simular requisição de login
-    setTimeout(() => {
-        const success = simulateLogin(email, password);
-        
+// Fazer requisição real para API
+    fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password,
+            rememberMe: rememberMe
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
         submitBtn.textContent = originalText;
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         
-        if (success) {
+        if (data.success) {
             // Login bem-sucedido
-            const user = createUserSession(email);
+            const user = data.data.user;
+            const token = data.data.token;
+            
+            // Salvar token e usuário
+            localStorage.setItem('orkutToken', token);
+            localStorage.setItem('orkutUser', JSON.stringify(user));
             
             if (rememberMe) {
                 localStorage.setItem('rememberEmail', email);
@@ -187,8 +202,13 @@ function handleLogin(event) {
             loginAttempts = { count: 0, lastAttempt: 0 };
             localStorage.removeItem('loginAttempts');
             
+            // Definir expiração da sessão (7 dias ou 30 dias se remember)
+            const sessionDuration = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+            const sessionExpiry = Date.now() + sessionDuration;
+            localStorage.setItem('sessionExpiry', sessionExpiry.toString());
+            
             // Notificação de sucesso
-            showSuccess('Login realizado com sucesso! Bem-vindo(a) de volta!');
+            showSuccess(data.message || 'Login realizado com sucesso! Bem-vindo(a) de volta!');
             
             // Redirecionar após pequeno delay
             setTimeout(() => {
@@ -203,12 +223,21 @@ function handleLogin(event) {
             
             const remainingAttempts = AuthConfig.maxLoginAttempts - loginAttempts.count;
             if (remainingAttempts > 0) {
-                showError(`E-mail ou senha incorretos. ${remainingAttempts} tentativas restantes.`);
+                showError(data.details || `E-mail ou senha incorretos. ${remainingAttempts} tentativas restantes.`);
             } else {
                 showError('Muitas tentativas de login incorretas. Conta temporariamente bloqueada.');
             }
         }
-    }, 1500); // Simular delay de rede
+    })
+    .catch(error => {
+        console.error('Erro no login:', error);
+        
+        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        showError('Erro de conexão. Verifique sua internet e tente novamente.');
+    });
 }
 
 // Processar cadastro
@@ -223,7 +252,7 @@ function handleRegister(event) {
     const confirmPassword = formData.get('confirmPassword');
     const photo = formData.get('photo');
     
-    // Validações
+    // Validações básicas
     const validationErrors = [];
     
     if (!name || name.length < 2) {
@@ -246,11 +275,6 @@ function handleRegister(event) {
         validationErrors.push('Senha deve conter pelo menos uma letra e um número.');
     }
     
-    // Verificar se email já existe (simulação)
-    if (emailExists(email)) {
-        validationErrors.push('Este e-mail já está cadastrado.');
-    }
-    
     if (validationErrors.length > 0) {
         showError(validationErrors.join('<br>'));
         return;
@@ -263,20 +287,55 @@ function handleRegister(event) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     
-    // Simular criação de conta
-    setTimeout(() => {
-        const success = simulateRegister(name, email, password, photo);
-        
+    // Preparar dados para envio
+    const registerData = {
+        name: name,
+        email: email,
+        password: password
+    };
+    
+    // Se há foto, convertê-la para base64 (simplificado)
+    if (photo && photo.size > 0) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            registerData.photo = e.target.result;
+            sendRegisterRequest(registerData, submitBtn, originalText);
+        };
+        reader.readAsDataURL(photo);
+    } else {
+        sendRegisterRequest(registerData, submitBtn, originalText);
+    }
+}
+
+// Função para enviar requisição de cadastro
+function sendRegisterRequest(registerData, submitBtn, originalText) {
+    fetch('/api/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registerData)
+    })
+    .then(response => response.json())
+    .then(data => {
         submitBtn.textContent = originalText;
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         
-        if (success) {
+        if (data.success) {
             // Cadastro bem-sucedido
-            showSuccess('Conta criada com sucesso! Seja bem-vindo(a) ao Orkut Retrô!');
+            const user = data.data.user;
+            const token = data.data.token;
             
-            // Criar sessão
-            const user = createUserSession(email, name);
+            // Salvar token e usuário
+            localStorage.setItem('orkutToken', token);
+            localStorage.setItem('orkutUser', JSON.stringify(user));
+            
+            // Definir expiração da sessão (7 dias)
+            const sessionExpiry = Date.now() + (7 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('sessionExpiry', sessionExpiry.toString());
+            
+            showSuccess(data.message || 'Conta criada com sucesso! Seja bem-vindo(a) ao Orkut Retrô!');
             
             // Redirecionar
             setTimeout(() => {
@@ -284,9 +343,18 @@ function handleRegister(event) {
             }, 2000);
             
         } else {
-            showError('Erro ao criar conta. Tente novamente.');
+            showError(data.details || 'Erro ao criar conta. Tente novamente.');
         }
-    }, 2000);
+    })
+    .catch(error => {
+        console.error('Erro no cadastro:', error);
+        
+        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        showError('Erro de conexão. Verifique sua internet e tente novamente.');
+    });
 }
 
 // Simular login (em produção, seria uma chamada para API)
