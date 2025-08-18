@@ -47,20 +47,40 @@ function setupFeedEventListeners() {
 
 // Carregar informações do usuário na sidebar
 function loadUserInfoInSidebar() {
-    if (!OrkutRetro.currentUser) return;
-
-    const user = OrkutRetro.currentUser;
+    // Usar dados do SmartSave quando disponível, senão fallback para OrkutRetro
+    let user;
+    
+    if (typeof window.getCurrentUser === 'function') {
+        user = window.getCurrentUser();
+        if (!user || !user.name) {
+            user = OrkutRetro.currentUser;
+        }
+    } else {
+        user = OrkutRetro.currentUser;
+    }
+    
+    if (!user) {
+        console.warn('⚠️ Nenhum usuário encontrado para carregar na sidebar');
+        return;
+    }
+    
+    console.log('👤 Carregando info do usuário na sidebar:', user.name);
 
     // Header
     updateElement('headerUserName', user.name);
-    updateElement('headerUserPhoto', user.photo, 'src');
+    updateElement('headerUserPhoto', user.photo || 'https://via.placeholder.com/150x150/a855c7/ffffff?text=👤', 'src');
 
     // Sidebar
     updateElement('sidebarUserName', user.name);
-    updateElement('sidebarUserStatus', `"${user.status}"`);
-    updateElement('sidebarFriendsCount', user.friendsCount);
-    updateElement('sidebarProfileViews', user.profileViews);
-    updateElement('sidebarUserPhoto', user.photo, 'src');
+    updateElement('sidebarUserStatus', user.status ? `"${user.status}"` : '');
+    updateElement('sidebarFriendsCount', user.friendsCount || 0);
+    updateElement('sidebarProfileViews', user.profileViews || 0);
+    updateElement('sidebarUserPhoto', user.photo || 'https://via.placeholder.com/150x150/a855c7/ffffff?text=👤', 'src');
+    
+    // Atualizar OrkutRetro com dados atualizados se necessário
+    if (user && OrkutRetro) {
+        OrkutRetro.currentUser = user;
+    }
 }
 
 // Carregar amigos online

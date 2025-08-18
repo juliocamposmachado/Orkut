@@ -16,7 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Inicializar página de perfil
 function initializeProfile() {
-    currentProfile = OrkutRetro.currentUser || mockData.currentUser;
+    // Usar SmartSave para carregar usuário atual
+    currentProfile = window.getCurrentUser();
+    
+    // Se não existe usuário, criar um padrão
+    if (!currentProfile || !currentProfile.name) {
+        console.log('Criando perfil padrão');
+        currentProfile = window.SmartSave.createDefaultUser();
+    }
+    
+    console.log('👤 Perfil carregado:', currentProfile);
+    
+    // Atualizar interface com dados do perfil
+    updateProfileDisplay();
     
     // Verificar e atualizar URL se necessário
     checkAndUpdateProfileURL();
@@ -91,7 +103,7 @@ function populateEditForm() {
 }
 
 // Salvar alterações do perfil
-function saveProfile(event) {
+async function saveProfile(event) {
     event.preventDefault();
     
     const form = event.target;
@@ -121,21 +133,27 @@ function saveProfile(event) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     
-    // Simular salvamento
-    setTimeout(() => {
-        // Atualizar dados do perfil
-        currentProfile.name = name;
-        if (username) {
-            currentProfile.username = username;
-        }
-        currentProfile.status = formData.get('status') || '';
-        currentProfile.age = formData.get('age') || null;
-        currentProfile.relationship = formData.get('relationship') || '';
-        currentProfile.location = formData.get('location') || '';
-        currentProfile.birthday = formatDateForDisplay(formData.get('birthday'));
+    try {
+        // Preparar dados para salvamento
+        const profileData = {
+            name: name,
+            username: username || currentProfile.username,
+            status: formData.get('status') || '',
+            age: formData.get('age') || null,
+            relationship: formData.get('relationship') || '',
+            location: formData.get('location') || '',
+            bio: formData.get('bio') || currentProfile.bio || '',
+            birthday: formatDateForDisplay(formData.get('birthday'))
+        };
         
-        // Salvar no localStorage
-        localStorage.setItem('orkutUser', JSON.stringify(currentProfile));
+        // Usar SmartSave para salvar
+        const updatedProfile = await window.saveProfile(profileData, {
+            showNotification: true,
+            updateURL: true
+        });
+        
+        // Atualizar perfil atual
+        currentProfile = updatedProfile;
         
         // Atualizar interface
         updateProfileDisplay();
@@ -146,35 +164,65 @@ function saveProfile(event) {
         submitBtn.disabled = false;
         
         closeModal('editProfileModal');
-        showNotification('Perfil atualizado!', 'Suas informações foram salvas com sucesso.', '✅');
         
-        // Se o username foi atualizado, redirecionar para a nova URL
-        if (username && username !== window.location.pathname.split('/').pop()) {
-            setTimeout(() => {
-                // Atualizar URL sem recarregar a página
-                const newUrl = `/profile/${username}`;
-                window.history.pushState({username: username}, '', newUrl);
-                showNotification('URL atualizada!', `Seu perfil agora está disponível em: orkut.com/profile/${username}`, '🔗');
-            }, 2000);
-        }
+        // Notificação de sucesso
+        showNotification(
+            'Perfil salvo! ✅', 
+            'Salvamento local concluído. Sincronizando em segundo plano...', 
+            '💾'
+        );
         
-    }, 1500);
+    } catch (error) {
+        console.error('❌ Erro ao salvar perfil:', error);
+        
+        // Restaurar botão
+        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        showError('Erro ao salvar perfil. Tente novamente.');
+    }
 }
 
 // Atualizar exibição do perfil
 function updateProfileDisplay() {
-    updateElement('profileName', currentProfile.name);
-    updateElement('profileStatus', `"${currentProfile.status}"`);
-    updateElement('profileAge', currentProfile.age ? `${currentProfile.age} anos` : '');
-    updateElement('profileLocation', currentProfile.location);
-    updateElement('profileRelationship', currentProfile.relationship);
-    updateElement('profileBirthday', currentProfile.birthday);
-    
-    // Atualizar foto se mudou
-    const profilePhoto = document.getElementById('profilePhoto');
-    if (profilePhoto && currentProfile.photo) {
-        profilePhoto.src = currentProfile.photo;
+    if (!currentProfile) {
+        console.warn('⚠️ updateProfileDisplay: Perfil não definido');
+        return;
     }
+    
+    // Atualizar elementos básicos do perfil
+    updateElement('profileName', currentProfile.name || 'Usuário');
+    updateElement('profileStatus', currentProfile.status ? `"${currentProfile.status}"` : '');
+    updateElement('profileAge', currentProfile.age ? `${currentProfile.age} anos` : '');
+    updateElement('profileLocation', currentProfile.location || '');
+    updateElement('profileRelationship', currentProfile.relationship || '');
+    updateElement('profileBirthday', currentProfile.birthday || '');
+    updateElement('profileBio', currentProfile.bio || 'Nenhuma biografia adicionada ainda.');
+    
+    // Atualizar foto de perfil
+    const profilePhoto = document.getElementById('profilePhoto');
+    if (profilePhoto) {
+        if (currentProfile.photo && currentProfile.photo !== 'https://via.placeholder.com/150x150/a855c7/ffffff?text=👤') {
+            profilePhoto.src = currentProfile.photo;
+        } else {
+            profilePhoto.src = 'https://via.placeholder.com/150x150/a855c7/ffffff?text=👤';
+        }
+    }
+    
+    // Atualizar estatísticas do perfil
+    updateElement('friendsCount', currentProfile.friendsCount || 0);
+    updateElement('profileViews', currentProfile.profileViews || 0);
+    updateElement('photosCount', currentProfile.photosCount || 0);
+    
+    // Atualizar título da página se tiver username
+    if (currentProfile.username) {
+        document.title = `${currentProfile.name} (@${currentProfile.username}) - Orkut 2025`;
+    } else {
+        document.title = `${currentProfile.name} - Orkut 2025`;
+    }
+    
+    console.log('✅ Exibição do perfil atualizada:', currentProfile.name);
 }
 
 // FUNÇÕES DE UPLOAD DE FOTO
@@ -190,7 +238,7 @@ function changePhoto() {
 }
 
 // Processar upload de foto
-function handlePhotoUpload(event) {
+async function handlePhotoUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     
@@ -205,25 +253,51 @@ function handlePhotoUpload(event) {
         return;
     }
     
-    // Mostrar preview e salvar
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const imageData = e.target.result;
+    try {
+        // Mostrar loading
+        showNotification('📸 Processando...', 'Otimizando sua foto de perfil...', '⏳');
         
-        // Atualizar foto no perfil
-        currentProfile.photo = imageData;
-        localStorage.setItem('orkutUser', JSON.stringify(currentProfile));
+        // Redimensionar foto se necessário
+        const optimizedFile = await resizePhoto(file, 400, 400, 0.8);
         
-        // Atualizar interface
-        const profilePhoto = document.getElementById('profilePhoto');
-        if (profilePhoto) {
-            profilePhoto.src = imageData;
-        }
+        // Converter para base64
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const imageData = e.target.result;
+            
+            try {
+                // Usar SmartSave para salvar foto
+                const updatedProfile = await window.saveProfile({ 
+                    ...currentProfile, 
+                    photo: imageData 
+                }, {
+                    showNotification: false,
+                    skipValidation: true
+                });
+                
+                // Atualizar perfil atual
+                currentProfile = updatedProfile;
+                
+                // Atualizar interface
+                const profilePhoto = document.getElementById('profilePhoto');
+                if (profilePhoto) {
+                    profilePhoto.src = imageData;
+                }
+                
+                showNotification('Foto atualizada! ✅', 'Sua nova foto de perfil foi salva e sincronizada.', '📸');
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar foto:', error);
+                showError('Erro ao salvar foto. Tente novamente.');
+            }
+        };
         
-        showNotification('Foto atualizada!', 'Sua nova foto de perfil foi salva.', '📸');
-    };
-    
-    reader.readAsDataURL(file);
+        reader.readAsDataURL(optimizedFile);
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar foto:', error);
+        showError('Erro ao processar foto. Tente novamente.');
+    }
 }
 
 // FUNÇÕES DE BIOGRAFIA
@@ -287,7 +361,7 @@ function editBio() {
 }
 
 // Salvar biografia
-function saveBio() {
+async function saveBio() {
     const textarea = document.querySelector('.bio-editor');
     const actions = document.querySelector('.bio-actions');
     
@@ -295,20 +369,34 @@ function saveBio() {
     
     const newBio = textarea.value.trim();
     
-    // Atualizar dados
-    currentProfile.bio = newBio;
-    localStorage.setItem('orkutUser', JSON.stringify(currentProfile));
-    
-    // Restaurar interface
-    const bioElement = document.createElement('p');
-    bioElement.id = 'profileBio';
-    bioElement.textContent = newBio || 'Nenhuma biografia adicionada ainda.';
-    
-    const parent = textarea.parentNode;
-    parent.replaceChild(bioElement, textarea);
-    actions.remove();
-    
-    showNotification('Biografia salva!', 'Sua biografia foi atualizada.', '📝');
+    try {
+        // Usar SmartSave para salvar biografia
+        const updatedProfile = await window.saveProfile({ 
+            ...currentProfile, 
+            bio: newBio 
+        }, {
+            showNotification: false,
+            skipValidation: true
+        });
+        
+        // Atualizar perfil atual
+        currentProfile = updatedProfile;
+        
+        // Restaurar interface
+        const bioElement = document.createElement('p');
+        bioElement.id = 'profileBio';
+        bioElement.textContent = newBio || 'Nenhuma biografia adicionada ainda.';
+        
+        const parent = textarea.parentNode;
+        parent.replaceChild(bioElement, textarea);
+        actions.remove();
+        
+        showNotification('Biografia salva! ✅', 'Sua biografia foi atualizada e sincronizada.', '📝');
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar biografia:', error);
+        showError('Erro ao salvar biografia. Tente novamente.');
+    }
 }
 
 // Cancelar edição de biografia
@@ -1740,6 +1828,36 @@ function initializeFriendshipSystem() {
             }
         });
     }
+}
+
+// Carregar amigos do top 10
+function loadTopFriends() {
+    const topFriendsContainer = document.getElementById('topFriends');
+    if (!topFriendsContainer) return;
+    
+    // Simular top amigos baseado em interações, tempo de amizade, etc.
+    const topFriends = (mockData.friends || []).slice(0, 8).map(friend => ({
+        ...friend,
+        interactionScore: Math.floor(Math.random() * 100) + 50
+    })).sort((a, b) => b.interactionScore - a.interactionScore);
+    
+    if (topFriends.length === 0) {
+        topFriendsContainer.innerHTML = '<p class="no-friends-message">Você ainda não tem amigos para exibir no top.</p>';
+        return;
+    }
+    
+    topFriendsContainer.innerHTML = topFriends.map((friend, index) => `
+        <div class="top-friend-item" title="${friend.name} - ${friend.interactionScore} pontos de interação">
+            <div class="friend-rank">${index + 1}</div>
+            <img src="${friend.photo}" alt="${friend.name}" class="top-friend-photo">
+            <div class="top-friend-info">
+                <div class="top-friend-name">${friend.name.split(' ')[0]}</div>
+                <div class="interaction-badge">${friend.interactionScore} pts</div>
+            </div>
+        </div>
+    `).join('');
+    
+    console.log('✅ Top amigos carregado:', topFriends.length, 'amigos');
 }
 
 // Chamar inicialização do sistema de amizades

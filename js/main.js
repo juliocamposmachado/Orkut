@@ -293,16 +293,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Inicializar aplicação
 function initializeApp() {
-    // Verificar se está logado
-    const saved = localStorage.getItem('orkutUser');
-    if (saved) {
-        OrkutRetro.currentUser = JSON.parse(saved);
-        OrkutRetro.isLoggedIn = true;
+    // Carregar configurações salvas
+    loadSettings();
+    
+    // Verificar se está logado usando SmartSave quando disponível
+    if (typeof window.getCurrentUser === 'function') {
+        OrkutRetro.currentUser = window.getCurrentUser();
+        OrkutRetro.isLoggedIn = !!(OrkutRetro.currentUser && OrkutRetro.currentUser.name);
+        
+        // Se não existe usuário, criar um padrão
+        if (!OrkutRetro.currentUser || !OrkutRetro.currentUser.name) {
+            if (typeof window.SmartSave !== 'undefined' && window.SmartSave.createDefaultUser) {
+                OrkutRetro.currentUser = window.SmartSave.createDefaultUser();
+                OrkutRetro.isLoggedIn = true;
+                console.log('🎯 Usuário padrão criado via SmartSave');
+            } else {
+                // Fallback para dados mock
+                OrkutRetro.currentUser = mockData.currentUser;
+                OrkutRetro.isLoggedIn = true;
+                console.log('🎯 Usando dados mock como fallback');
+            }
+        }
     } else {
-        // Para desenvolvimento, usar dados mock
-        OrkutRetro.currentUser = mockData.currentUser;
-        OrkutRetro.isLoggedIn = true;
+        // Fallback para localStorage tradicional
+        const saved = localStorage.getItem('orkutUser');
+        if (saved) {
+            OrkutRetro.currentUser = JSON.parse(saved);
+            OrkutRetro.isLoggedIn = true;
+        } else {
+            // Para desenvolvimento, usar dados mock
+            OrkutRetro.currentUser = mockData.currentUser;
+            OrkutRetro.isLoggedIn = true;
+        }
+        console.log('🎯 SmartSave não disponível, usando localStorage tradicional');
     }
+    
+    console.log('👤 Usuário inicializado:', OrkutRetro.currentUser?.name);
     
     // Aplicar tema
     applyTheme();
