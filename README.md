@@ -39,6 +39,19 @@ O **Orkut Retrô** é uma homenagem nostálgica à famosa rede social que marcou
 - **Lista Completa**: Visualização de todos os amigos
 - **Sugestões**: Sistema de sugestão de novas amizades
 - **Status Online**: Indicador de amigos conectados
+- **Busca de Amigos**: Sistema de busca por username ou nome
+- **Gerenciamento**: Envio, aceitação e rejeição de solicitações
+- **Abas Organizadas**: Amigos, solicitações recebidas e enviadas
+
+### 🎵 Sistema de Chamadas de Áudio
+- **Interface Moderna**: Modal elegante com gradientes e animações
+- **Controles Completos**: Mute/unmute, alto-falante, volume ajustável
+- **Feedback Visual**: Animações de ondas sonoras e indicadores de status
+- **Áudio Simulado**: Web Audio API com sons de toque e beeps
+- **Timer em Tempo Real**: Cronômetro da duração da chamada
+- **Atalhos de Teclado**: Controle rápido via teclas
+- **Design Responsivo**: Otimizado para desktop e mobile
+- **Acessibilidade**: Suporte a preferências de movimento reduzido
 
 ### 🏠 Comunidades
 - **Criação**: Interface para criar novas comunidades
@@ -53,11 +66,13 @@ O **Orkut Retrô** é uma homenagem nostálgica à famosa rede social que marcou
 - **Organização**: Filtros por tipo (não lidas, enviadas, arquivadas)
 - **Busca**: Procurar mensagens por remetente ou conteúdo
 
-## 🛠️ Tecnologias Utilizadas
+## 🔧 Tecnologias Utilizadas
 
 - **HTML5**: Estrutura semântica e acessível
 - **CSS3**: Estilização avançada com gradientes e animações
 - **JavaScript Vanilla**: Funcionalidades dinâmicas sem frameworks
+- **Web Audio API**: Sistema de áudio para chamadas e efeitos sonoros
+- **getUserMedia API**: Acesso ao microfone para chamadas de áudio
 - **LocalStorage**: Armazenamento local de dados do usuário
 - **Responsive Design**: Layout adaptável para todos os dispositivos
 
@@ -73,10 +88,14 @@ Orkut2025/
 │   ├── style.css          # Estilos principais
 │   ├── login.css          # Estilos da página de login
 │   ├── profile.css        # Estilos do perfil
-│   └── communities.css    # Estilos das comunidades
+│   ├── communities.css    # Estilos das comunidades
+│   ├── friends-system.css # Sistema de amigos
+│   └── audio-call.css     # Sistema de chamadas de áudio
 ├── js/
 │   ├── main.js            # JavaScript principal
-│   └── auth.js            # Sistema de autenticação
+│   ├── auth.js            # Sistema de autenticação
+│   ├── profile.js         # Funcionalidades do perfil
+│   └── audio-call.js      # Sistema de chamadas de áudio
 ├── images/                # Imagens e recursos
 └── README.md              # Este arquivo
 ```
@@ -106,6 +125,13 @@ Orkut2025/
    - Use o menu superior para navegar entre seções
    - Explore as diferentes funcionalidades de cada página
    - Teste a responsividade em diferentes tamanhos de tela
+
+### 6. **Testar Chamadas de Áudio**
+   - No perfil, clique no botão "Chamada de Áudio" (📞)
+   - Permita acesso ao microfone quando solicitado
+   - Teste os controles: mute/unmute, alto-falante, volume
+   - Use atalhos de teclado: M (mute), S (speaker), Esc (encerrar)
+   - Observe as animações de ondas sonoras durante a "conexão"
 
 ## 🎯 Funcionalidades em Demonstração
 
