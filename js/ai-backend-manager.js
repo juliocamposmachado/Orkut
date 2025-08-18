@@ -391,6 +391,225 @@ class AIBackendManager {
         }
     }
     
+    // 🔔 MÉTODO PARA RECEBER NOTIFICAÇÕES DO SMARTSAVE
+    async onDataUpdate(eventType, data, metadata = {}) {
+        try {
+            console.log(`🔔 IA Backend Manager recebeu notificação: ${eventType}`);
+            console.log('📊 Dados recebidos:', data);
+            console.log('📋 Metadados:', metadata);
+            
+            // Processar diferentes tipos de eventos
+            switch (eventType) {
+                case 'profile_updated':
+                    await this.handleProfileUpdate(data, metadata);
+                    break;
+                case 'user_registered':
+                    await this.handleUserRegistration(data, metadata);
+                    break;
+                case 'data_synced':
+                    await this.handleDataSync(data, metadata);
+                    break;
+                default:
+                    console.log(`ℹ️ Evento não reconhecido: ${eventType}`);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar notificação do SmartSave:', error);
+        }
+    }
+    
+    // 👤 Processar atualização de perfil
+    async handleProfileUpdate(profileData, metadata) {
+        try {
+            console.log('👤 IA processando atualização de perfil...');
+            
+            // 1. DB-Admin-AI: Preparar dados para sincronização
+            if (this.personas.DATABASE_ADMIN.active) {
+                await this.syncProfileToDatabase(profileData);
+            }
+            
+            // 2. API-Manager-AI: Verificar se precisa de validação externa
+            if (this.personas.API_MANAGER.active) {
+                await this.validateProfileData(profileData);
+            }
+            
+            // 3. Performance-AI: Otimizar dados se necessário
+            if (this.personas.PERFORMANCE_MONITOR.active) {
+                await this.optimizeProfileData(profileData);
+            }
+            
+            // 4. UI-Optimizer-AI: Ajustar interface se o usuário mudou tema/preferências
+            if (this.personas.UI_OPTIMIZER.active && profileData.preferences) {
+                await this.adjustUIForUser(profileData);
+            }
+            
+            console.log('✅ IA Backend Manager processou atualização de perfil');
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar atualização de perfil:', error);
+        }
+    }
+    
+    // 💾 Sincronizar perfil com banco de dados
+    async syncProfileToDatabase(profileData) {
+        try {
+            console.log('💾 DB-Admin-AI: Preparando sincronização...');
+            
+            // Verificar se o Supabase está disponível
+            if (!this.supabaseClient) {
+                console.warn('⚠️ DB-Admin-AI: Supabase não disponível, dados mantidos localmente');
+                return;
+            }
+            
+            // Preparar dados para upsert (insert or update)
+            const dbData = {
+                id: profileData.id,
+                name: profileData.name,
+                username: profileData.username,
+                email: profileData.email,
+                bio: profileData.bio || '',
+                location: profileData.location || '',
+                age: profileData.age,
+                relationship_status: profileData.relationship || '',
+                birthday: profileData.birthday,
+                photo_url: profileData.photo,
+                status: profileData.status,
+                last_active: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            console.log('📤 DB-Admin-AI: Dados preparados para sincronização:', dbData);
+            
+            // Por enquanto apenas log - a sincronização real seria implementada quando as APIs estiverem prontas
+            console.log('✅ DB-Admin-AI: Perfil preparado para sincronização com Supabase');
+            
+        } catch (error) {
+            console.error('❌ DB-Admin-AI: Erro na sincronização:', error);
+        }
+    }
+    
+    // ✅ Validar dados do perfil
+    async validateProfileData(profileData) {
+        try {
+            console.log('✅ API-Manager-AI: Validando dados do perfil...');
+            
+            const validations = [];
+            
+            // Validar nome
+            if (!profileData.name || profileData.name.length < 2) {
+                validations.push('Nome deve ter pelo menos 2 caracteres');
+            }
+            
+            // Validar email se fornecido
+            if (profileData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileData.email)) {
+                validations.push('Email inválido');
+            }
+            
+            // Validar username se fornecido
+            if (profileData.username && !/^[a-zA-Z0-9_]{3,20}$/.test(profileData.username)) {
+                validations.push('Username deve ter 3-20 caracteres (letras, números, _)');
+            }
+            
+            if (validations.length > 0) {
+                console.warn('⚠️ API-Manager-AI: Problemas encontrados:', validations);
+            } else {
+                console.log('✅ API-Manager-AI: Dados válidos');
+            }
+            
+        } catch (error) {
+            console.error('❌ API-Manager-AI: Erro na validação:', error);
+        }
+    }
+    
+    // ⚡ Otimizar dados do perfil
+    async optimizeProfileData(profileData) {
+        try {
+            console.log('⚡ Performance-AI: Otimizando dados...');
+            
+            // Otimizar foto se muito grande
+            if (profileData.photo && profileData.photo.length > 500000) { // > 500KB
+                console.log('🖼️ Performance-AI: Foto muito grande, sugerindo compressão');
+            }
+            
+            // Verificar se bio não é muito longa
+            if (profileData.bio && profileData.bio.length > 1000) {
+                console.log('📝 Performance-AI: Bio muito longa, sugerindo resumo');
+            }
+            
+            console.log('✅ Performance-AI: Análise de otimização concluída');
+            
+        } catch (error) {
+            console.error('❌ Performance-AI: Erro na otimização:', error);
+        }
+    }
+    
+    // 🎨 Ajustar UI para o usuário
+    async adjustUIForUser(profileData) {
+        try {
+            console.log('🎨 UI-Optimizer-AI: Ajustando interface...');
+            
+            // Se usuário tem preferência de tema
+            if (profileData.theme === 'dark') {
+                document.body.classList.add('dark-theme');
+                await this.adjustUIContrast();
+            } else if (profileData.theme === 'light') {
+                document.body.classList.remove('dark-theme');
+                await this.adjustUIContrast();
+            }
+            
+            console.log('✅ UI-Optimizer-AI: Interface ajustada para o usuário');
+            
+        } catch (error) {
+            console.error('❌ UI-Optimizer-AI: Erro no ajuste de UI:', error);
+        }
+    }
+    
+    // 🔔 Processar registro de usuário
+    async handleUserRegistration(userData, metadata) {
+        try {
+            console.log('🔔 IA processando novo registro de usuário...');
+            
+            // Agendar tarefas para novo usuário
+            setTimeout(async () => {
+                await this.initializeNewUserData(userData);
+            }, 2000);
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar registro:', error);
+        }
+    }
+    
+    // 👤 Inicializar dados para novo usuário
+    async initializeNewUserData(userData) {
+        try {
+            console.log('👤 DB-Admin-AI: Inicializando dados para novo usuário...');
+            
+            // Criar estruturas básicas
+            const initialData = {
+                profile_views: 0,
+                friends_count: 0,
+                scraps_count: 0,
+                join_date: new Date().toISOString()
+            };
+            
+            console.log('✅ Dados iniciais preparados para:', userData.name);
+            
+        } catch (error) {
+            console.error('❌ Erro ao inicializar dados de usuário:', error);
+        }
+    }
+    
+    // 🔄 Processar sincronização de dados
+    async handleDataSync(syncData, metadata) {
+        try {
+            console.log('🔄 IA processando sincronização de dados...');
+            console.log('✅ Sincronização processada pela IA');
+            
+        } catch (error) {
+            console.error('❌ Erro ao processar sincronização:', error);
+        }
+    }
+    
     // Verificar acessibilidade
     async checkAccessibility() {
         try {

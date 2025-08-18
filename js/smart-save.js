@@ -25,6 +25,7 @@ class SmartSaveSystem {
         this.loadCurrentUser();
         this.startPeriodicSync();
         this.setupVisibilityListener();
+        this.registerAIListener();
     }
     
     // 🌐 Monitor de conectividade
@@ -103,7 +104,10 @@ class SmartSaveSystem {
                 this.updateProfileURL(updatedProfile.username);
             }
             
-            // 3. Tentar sincronizar em segundo plano
+            // 3. NOTIFICAR IA BACKEND MANAGER que dados foram atualizados
+            this.notifyAIBackend('profile_updated', updatedProfile);
+            
+            // 4. Tentar sincronizar em segundo plano
             if (this.isOnline || forceSync) {
                 this.scheduleSync(updatedProfile, 'profile');
             } else {
@@ -602,6 +606,43 @@ class SmartSaveSystem {
             lastModified: this.currentUser?.lastModified,
             totalAttempts: this.syncQueue.reduce((sum, item) => sum + item.attempts, 0)
         };
+    }
+    
+    // 🤖 Notificar IA Backend Manager sobre mudanças nos dados
+    notifyAIBackend(eventType, data) {
+        try {
+            // Verificar se a IA Backend Manager está disponível
+            if (window.AIBackendManager && typeof window.AIBackendManager.onDataUpdate === 'function') {
+                console.log(`🤖 Notificando IA Backend Manager: ${eventType}`);
+                window.AIBackendManager.onDataUpdate(eventType, data, {
+                    timestamp: new Date().toISOString(),
+                    source: 'SmartSave',
+                    userId: this.currentUser?.id,
+                    userName: this.currentUser?.name
+                });
+            } else {
+                // IA não está disponível ainda, aguardar e tentar novamente
+                setTimeout(() => {
+                    this.notifyAIBackend(eventType, data);
+                }, 1000);
+            }
+        } catch (error) {
+            console.warn('⚠️ Erro ao notificar IA Backend Manager:', error);
+        }
+    }
+    
+    // 📡 Registrar listener para eventos da IA
+    registerAIListener() {
+        // Expor método para IA consultar dados
+        window.SmartSaveAPI = {
+            getCurrentUser: () => this.currentUser,
+            getStats: () => this.getStats(),
+            getSyncQueue: () => this.syncQueue,
+            forcSync: (data, type) => this.scheduleSync(data, type, 0),
+            clearData: () => this.clearLocalData()
+        };
+        
+        console.log('📡 API SmartSave registrada para IA Backend Manager');
     }
 }
 
