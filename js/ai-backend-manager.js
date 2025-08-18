@@ -33,21 +33,32 @@ const AI_BACKEND_CONFIG = {
 // =============================================================================
 
 const AI_PERSONAS = {
-    // Persona 1: Gerenciador de Banco de Dados
-    DATABASE_ADMIN: {
-        name: "DB-Admin-AI",
-        role: "Database Administrator",
-        specialization: "Gerenciamento completo do Supabase",
+    // Persona 1: ORKY-DB-AI - Gerenciador Especializado Supabase
+    ORKY_DB_AI: {
+        name: "ORKY-DB-AI",
+        role: "Supabase Backend Manager",
+        specialization: "Gerenciamento TOTAL do Supabase - Backend Local → Cloud",
         responsibilities: [
-            "Monitorar integridade dos dados",
-            "Executar queries automáticas",
-            "Otimizar performance do banco",
-            "Fazer backups automáticos",
-            "Gerenciar usuários e permissões",
-            "Limpar dados desnecessários"
+            "🔄 Sincronizar TODOS os dados com Supabase em tempo real",
+            "📝 Atualizar banco a cada post, scrap, curtida, comentário",
+            "👥 Gerenciar perfis, amigos, comunidades automaticamente",
+            "📊 Manter estatísticas de usuários sempre atualizadas",
+            "🔐 Validar e sanitizar dados antes de inserir",
+            "⚡ Otimizar queries para máxima performance",
+            "🛡️ Garantir integridade e consistência dos dados",
+            "📱 Funcionar offline e sincronizar quando voltar online",
+            "🔍 Monitorar saúde e performance do Supabase",
+            "💾 Criar backups automáticos e recovery"
         ],
         priority: 1,
-        active: true
+        active: true,
+        supabaseOperations: {
+            realTimeSync: true,
+            autoUpdate: true,
+            offlineQueue: true,
+            validation: true,
+            optimization: true
+        }
     },
     
     // Persona 2: Gerenciador de APIs
@@ -607,6 +618,287 @@ class AIBackendManager {
             
         } catch (error) {
             console.error('❌ Erro ao processar sincronização:', error);
+        }
+    }
+    
+    // =============================================================================
+    // 🤖 ORKY-DB-AI - MÉTODOS ESPECIALIZADOS SUPABASE
+    // =============================================================================
+    
+    // 📝 ORKY-DB-AI: Processar nova postagem
+    async handleNewPost(postData, metadata = {}) {
+        try {
+            console.log('📝 ORKY-DB-AI: Processando nova postagem...');
+            
+            if (!this.supabaseClient) {
+                console.warn('⚠️ ORKY-DB-AI: Supabase offline - dados salvos localmente');
+                this.queueForSync('posts', postData);
+                return;
+            }
+            
+            // Preparar dados para Supabase
+            const dbPost = {
+                id: postData.id || this.generateId(),
+                user_id: postData.userId || metadata.userId,
+                content: postData.content,
+                post_type: postData.type || 'status',
+                community_id: postData.communityId || null,
+                likes_count: 0,
+                comments_count: 0,
+                created_at: new Date().toISOString()
+            };
+            
+            // Inserir no Supabase
+            const { data, error } = await this.supabaseClient
+                .from('posts')
+                .insert([dbPost])
+                .select();
+            
+            if (error) {
+                console.error('❌ ORKY-DB-AI: Erro ao inserir post:', error);
+                this.queueForSync('posts', dbPost);
+            } else {
+                console.log('✅ ORKY-DB-AI: Post inserido no Supabase:', data[0]);
+                await this.updateUserStats(dbPost.user_id, 'posts_count', 1);
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao processar postagem:', error);
+            this.queueForSync('posts', postData);
+        }
+    }
+    
+    // 💬 ORKY-DB-AI: Processar novo scrap
+    async handleNewScrap(scrapData, metadata = {}) {
+        try {
+            console.log('💬 ORKY-DB-AI: Processando novo scrap...');
+            
+            if (!this.supabaseClient) {
+                this.queueForSync('scraps', scrapData);
+                return;
+            }
+            
+            const dbScrap = {
+                id: scrapData.id || this.generateId(),
+                from_user_id: scrapData.fromUserId || metadata.userId,
+                to_user_id: scrapData.toUserId,
+                content: scrapData.content,
+                is_public: scrapData.isPublic !== false,
+                created_at: new Date().toISOString()
+            };
+            
+            const { data, error } = await this.supabaseClient
+                .from('scraps')
+                .insert([dbScrap])
+                .select();
+            
+            if (error) {
+                console.error('❌ ORKY-DB-AI: Erro ao inserir scrap:', error);
+                this.queueForSync('scraps', dbScrap);
+            } else {
+                console.log('✅ ORKY-DB-AI: Scrap inserido no Supabase:', data[0]);
+                await this.updateUserStats(dbScrap.to_user_id, 'scraps_count', 1);
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao processar scrap:', error);
+            this.queueForSync('scraps', scrapData);
+        }
+    }
+    
+    // ❤️ ORKY-DB-AI: Processar curtida
+    async handleNewLike(likeData, metadata = {}) {
+        try {
+            console.log('❤️ ORKY-DB-AI: Processando nova curtida...');
+            
+            if (!this.supabaseClient) {
+                this.queueForSync('likes', likeData);
+                return;
+            }
+            
+            const dbLike = {
+                id: likeData.id || this.generateId(),
+                user_id: likeData.userId || metadata.userId,
+                post_id: likeData.postId,
+                created_at: new Date().toISOString()
+            };
+            
+            // Verificar se já curtiu
+            const { data: existing } = await this.supabaseClient
+                .from('likes')
+                .select('id')
+                .eq('user_id', dbLike.user_id)
+                .eq('post_id', dbLike.post_id)
+                .single();
+            
+            if (existing) {
+                console.log('⚠️ ORKY-DB-AI: Usuário já curtiu este post');
+                return;
+            }
+            
+            const { data, error } = await this.supabaseClient
+                .from('likes')
+                .insert([dbLike])
+                .select();
+            
+            if (error) {
+                console.error('❌ ORKY-DB-AI: Erro ao inserir curtida:', error);
+                this.queueForSync('likes', dbLike);
+            } else {
+                console.log('✅ ORKY-DB-AI: Curtida inserida no Supabase:', data[0]);
+                // Atualizar contador de curtidas do post
+                await this.incrementPostLikes(dbLike.post_id);
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao processar curtida:', error);
+            this.queueForSync('likes', likeData);
+        }
+    }
+    
+    // 👥 ORKY-DB-AI: Processar nova amizade
+    async handleNewFriendship(friendshipData, metadata = {}) {
+        try {
+            console.log('👥 ORKY-DB-AI: Processando nova amizade...');
+            
+            if (!this.supabaseClient) {
+                this.queueForSync('friendships', friendshipData);
+                return;
+            }
+            
+            const dbFriendship = {
+                id: friendshipData.id || this.generateId(),
+                requester_id: friendshipData.requesterId || metadata.userId,
+                addressee_id: friendshipData.addresseeId,
+                status: friendshipData.status || 'pending',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            const { data, error } = await this.supabaseClient
+                .from('friendships')
+                .upsert([dbFriendship])
+                .select();
+            
+            if (error) {
+                console.error('❌ ORKY-DB-AI: Erro ao processar amizade:', error);
+                this.queueForSync('friendships', dbFriendship);
+            } else {
+                console.log('✅ ORKY-DB-AI: Amizade processada no Supabase:', data[0]);
+                
+                // Se foi aceita, atualizar contadores
+                if (dbFriendship.status === 'accepted') {
+                    await this.updateUserStats(dbFriendship.requester_id, 'friends_count', 1);
+                    await this.updateUserStats(dbFriendship.addressee_id, 'friends_count', 1);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao processar amizade:', error);
+            this.queueForSync('friendships', friendshipData);
+        }
+    }
+    
+    // 📊 ORKY-DB-AI: Atualizar estatísticas do usuário
+    async updateUserStats(userId, statField, increment = 1) {
+        try {
+            if (!this.supabaseClient || !userId) return;
+            
+            // Buscar perfil atual
+            const { data: profile } = await this.supabaseClient
+                .from('profiles')
+                .select(statField)
+                .eq('user_id', userId)
+                .single();
+            
+            if (profile) {
+                const currentValue = profile[statField] || 0;
+                const newValue = currentValue + increment;
+                
+                const { error } = await this.supabaseClient
+                    .from('profiles')
+                    .update({ [statField]: newValue })
+                    .eq('user_id', userId);
+                
+                if (error) {
+                    console.error(`❌ ORKY-DB-AI: Erro ao atualizar ${statField}:`, error);
+                } else {
+                    console.log(`📊 ORKY-DB-AI: ${statField} atualizado para ${newValue} (usuário: ${userId})`);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao atualizar estatísticas:', error);
+        }
+    }
+    
+    // ❤️ ORKY-DB-AI: Incrementar curtidas do post
+    async incrementPostLikes(postId) {
+        try {
+            if (!this.supabaseClient || !postId) return;
+            
+            const { error } = await this.supabaseClient
+                .rpc('increment_post_likes', { post_id: postId });
+            
+            if (error) {
+                console.error('❌ ORKY-DB-AI: Erro ao incrementar curtidas:', error);
+            } else {
+                console.log('❤️ ORKY-DB-AI: Curtidas do post incrementadas:', postId);
+            }
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao incrementar curtidas:', error);
+        }
+    }
+    
+    // 📋 ORKY-DB-AI: Adicionar à fila de sincronização offline
+    queueForSync(table, data) {
+        try {
+            const queueItem = {
+                id: this.generateId(),
+                table: table,
+                data: data,
+                timestamp: Date.now(),
+                attempts: 0
+            };
+            
+            // Buscar fila existente
+            const existingQueue = JSON.parse(localStorage.getItem('orkut_pending_sync') || '[]');
+            existingQueue.push(queueItem);
+            
+            // Salvar fila atualizada
+            localStorage.setItem('orkut_pending_sync', JSON.stringify(existingQueue));
+            
+            console.log(`📋 ORKY-DB-AI: Item adicionado à fila offline (${table}):`, queueItem.id);
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao adicionar à fila:', error);
+        }
+    }
+    
+    // 🆔 Gerar ID único
+    generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+    
+    // 🔔 ORKY-DB-AI: Processar visualização de perfil
+    async handleProfileView(profileViewData, metadata = {}) {
+        try {
+            console.log('👁️ ORKY-DB-AI: Processando visualização de perfil...');
+            
+            const viewedUserId = profileViewData.profileUserId;
+            const viewerUserId = metadata.userId;
+            
+            // Não contar visualizações próprias
+            if (viewedUserId === viewerUserId) return;
+            
+            // Incrementar contador de visualizações
+            await this.updateUserStats(viewedUserId, 'profile_views', 1);
+            
+            console.log('✅ ORKY-DB-AI: Visualização de perfil registrada');
+            
+        } catch (error) {
+            console.error('❌ ORKY-DB-AI: Erro ao processar visualização:', error);
         }
     }
     

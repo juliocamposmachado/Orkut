@@ -639,10 +639,219 @@ class SmartSaveSystem {
             getStats: () => this.getStats(),
             getSyncQueue: () => this.syncQueue,
             forcSync: (data, type) => this.scheduleSync(data, type, 0),
-            clearData: () => this.clearLocalData()
+            clearData: () => this.clearLocalData(),
+            // Métodos de interação social
+            notifyNewPost: (postData) => this.notifyNewPost(postData),
+            notifyNewScrap: (scrapData) => this.notifyNewScrap(scrapData),
+            notifyNewLike: (likeData) => this.notifyNewLike(likeData),
+            notifyNewFriendship: (friendshipData) => this.notifyNewFriendship(friendshipData),
+            notifyProfileView: (profileUserId) => this.notifyProfileView(profileUserId)
         };
         
         console.log('📡 API SmartSave registrada para IA Backend Manager');
+    }
+    
+    // =============================================================================
+    // 📱 MÉTODOS PARA INTERAÇÕES SOCIAIS
+    // =============================================================================
+    
+    // 📝 Notificar nova postagem
+    notifyNewPost(postData) {
+        try {
+            console.log('📝 SmartSave: Notificando nova postagem...');
+            
+            const enrichedPostData = {
+                id: postData.id || this.generateId(),
+                content: postData.content,
+                type: postData.type || 'status',
+                communityId: postData.communityId || null,
+                userId: this.currentUser?.id || this.generateId(),
+                timestamp: Date.now()
+            };
+            
+            // Salvar localmente primeiro
+            this.saveToLocal('recent_posts', enrichedPostData);
+            
+            // Notificar ORKY-DB-AI
+            if (window.AIBackendManager && window.AIBackendManager.handleNewPost) {
+                window.AIBackendManager.handleNewPost(enrichedPostData, {
+                    userId: this.currentUser?.id || 'unknown',
+                    source: 'smart_save',
+                    timestamp: Date.now()
+                });
+            }
+            
+            this.showSaveIndicator('📝 Post publicado!', 'success');
+            return enrichedPostData;
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao notificar postagem:', error);
+            this.showSaveIndicator('❌ Erro ao publicar post', 'error');
+            throw error;
+        }
+    }
+    
+    // 💬 Notificar novo scrap
+    notifyNewScrap(scrapData) {
+        try {
+            console.log('💬 SmartSave: Notificando novo scrap...');
+            
+            const enrichedScrapData = {
+                id: scrapData.id || this.generateId(),
+                content: scrapData.content,
+                toUserId: scrapData.toUserId,
+                fromUserId: this.currentUser?.id || this.generateId(),
+                isPublic: scrapData.isPublic !== false,
+                timestamp: Date.now()
+            };
+            
+            // Salvar localmente
+            this.saveToLocal('recent_scraps', enrichedScrapData);
+            
+            // Notificar ORKY-DB-AI
+            if (window.AIBackendManager && window.AIBackendManager.handleNewScrap) {
+                window.AIBackendManager.handleNewScrap(enrichedScrapData, {
+                    userId: this.currentUser?.id || 'unknown',
+                    source: 'smart_save',
+                    timestamp: Date.now()
+                });
+            }
+            
+            this.showSaveIndicator('💬 Scrap enviado!', 'success');
+            return enrichedScrapData;
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao notificar scrap:', error);
+            this.showSaveIndicator('❌ Erro ao enviar scrap', 'error');
+            throw error;
+        }
+    }
+    
+    // ❤️ Notificar curtida
+    notifyNewLike(likeData) {
+        try {
+            console.log('❤️ SmartSave: Notificando nova curtida...');
+            
+            const enrichedLikeData = {
+                id: likeData.id || this.generateId(),
+                postId: likeData.postId,
+                userId: this.currentUser?.id || this.generateId(),
+                timestamp: Date.now()
+            };
+            
+            // Salvar localmente
+            this.saveToLocal('recent_likes', enrichedLikeData);
+            
+            // Notificar ORKY-DB-AI
+            if (window.AIBackendManager && window.AIBackendManager.handleNewLike) {
+                window.AIBackendManager.handleNewLike(enrichedLikeData, {
+                    userId: this.currentUser?.id || 'unknown',
+                    source: 'smart_save',
+                    timestamp: Date.now()
+                });
+            }
+            
+            this.showSaveIndicator('❤️ Curtida registrada!', 'success');
+            return enrichedLikeData;
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao notificar curtida:', error);
+            this.showSaveIndicator('❌ Erro ao curtir', 'error');
+            throw error;
+        }
+    }
+    
+    // 👥 Notificar nova amizade
+    notifyNewFriendship(friendshipData) {
+        try {
+            console.log('👥 SmartSave: Notificando nova amizade...');
+            
+            const enrichedFriendshipData = {
+                id: friendshipData.id || this.generateId(),
+                requesterId: this.currentUser?.id || this.generateId(),
+                addresseeId: friendshipData.addresseeId,
+                status: friendshipData.status || 'pending',
+                timestamp: Date.now()
+            };
+            
+            // Salvar localmente
+            this.saveToLocal('recent_friendships', enrichedFriendshipData);
+            
+            // Notificar ORKY-DB-AI
+            if (window.AIBackendManager && window.AIBackendManager.handleNewFriendship) {
+                window.AIBackendManager.handleNewFriendship(enrichedFriendshipData, {
+                    userId: this.currentUser?.id || 'unknown',
+                    source: 'smart_save',
+                    timestamp: Date.now()
+                });
+            }
+            
+            const statusMessages = {
+                'pending': '👥 Pedido de amizade enviado!',
+                'accepted': '🎉 Amizade aceita!',
+                'declined': '❌ Pedido recusado'
+            };
+            
+            this.showSaveIndicator(statusMessages[friendshipData.status] || '👥 Amizade processada!', 'success');
+            return enrichedFriendshipData;
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao notificar amizade:', error);
+            this.showSaveIndicator('❌ Erro ao processar amizade', 'error');
+            throw error;
+        }
+    }
+    
+    // 👁️ Notificar visualização de perfil
+    notifyProfileView(profileUserId) {
+        try {
+            const currentUserId = this.currentUser?.id;
+            if (!profileUserId || profileUserId === currentUserId) {
+                return; // Não contar próprias visualizações
+            }
+            
+            console.log('👁️ SmartSave: Notificando visualização de perfil...');
+            
+            const profileViewData = {
+                profileUserId: profileUserId,
+                viewerId: currentUserId,
+                timestamp: Date.now()
+            };
+            
+            // Notificar ORKY-DB-AI
+            if (window.AIBackendManager && window.AIBackendManager.handleProfileView) {
+                window.AIBackendManager.handleProfileView(profileViewData, {
+                    userId: currentUserId || 'unknown',
+                    source: 'smart_save',
+                    timestamp: Date.now()
+                });
+            }
+            
+            console.log('✅ SmartSave: Visualização de perfil registrada');
+            return profileViewData;
+            
+        } catch (error) {
+            console.error('❌ SmartSave: Erro ao notificar visualização:', error);
+        }
+    }
+    
+    // 💾 Salvar dados localmente em categorias
+    saveToLocal(category, data) {
+        try {
+            const existingData = JSON.parse(localStorage.getItem(`orkut_${category}`) || '[]');
+            existingData.push(data);
+            
+            // Manter apenas os últimos 50 itens por categoria
+            if (existingData.length > 50) {
+                existingData.splice(0, existingData.length - 50);
+            }
+            
+            localStorage.setItem(`orkut_${category}`, JSON.stringify(existingData));
+            console.log(`💾 SmartSave: Dados salvos localmente (${category}):`, data.id);
+            
+        } catch (error) {
+            console.error(`❌ SmartSave: Erro ao salvar localmente (${category}):`, error);
+        }
     }
 }
 
