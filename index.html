@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut Retrô - A rede social dos anos 2000</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body class="login-body">
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>orkut retrô</h1>
+                <p class="tagline">conecte-se aos seus amigos e muito mais</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2>Bem-vindo ao Orkut Retrô!</h2>
+                <p>Reviva a magia das redes sociais dos anos 2000. Conecte-se com seus amigos, participe de comunidades e compartilhe seus momentos especiais!</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <span class="icon">👥</span>
+                        <h3>Conecte-se com Amigos</h3>
+                        <p>Encontre antigos amigos e faça novos</p>
+                    </div>
+                    <div class="feature">
+                        <span class="icon">💬</span>
+                        <h3>Scraps e Depoimentos</h3>
+                        <p>Deixe recados e depoimentos especiais</p>
+                    </div>
+                    <div class="feature">
+                        <span class="icon">🏠</span>
+                        <h3>Comunidades</h3>
+                        <p>Participe de grupos com seus interesses</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-section">
+                <!-- Login Form -->
+                <div class="auth-form" id="loginForm">
+                    <div class="form-header">
+                        <h3>Faça login</h3>
+                        <p>Entre na sua conta</p>
+                    </div>
+                    
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">E-mail:</label>
+                            <input type="email" id="loginEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">Senha:</label>
+                            <input type="password" id="loginPassword" name="password" required>
+                        </div>
+                        
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox"> Lembrar de mim
+                            </label>
+                            <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </form>
+                    
+                    <div class="form-footer">
+                        <p>Não tem uma conta? <a href="#" onclick="showRegister()">Cadastre-se</a></p>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div class="auth-form hidden" id="registerForm">
+                    <div class="form-header">
+                        <h3>Criar conta</h3>
+                        <p>Junte-se ao Orkut Retrô</p>
+                    </div>
+                    
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerName">Nome completo:</label>
+                            <input type="text" id="registerName" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="registerEmail">E-mail:</label>
+                            <input type="email" id="registerEmail" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="registerPassword">Senha:</label>
+                            <input type="password" id="registerPassword" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar senha:</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profilePhoto">Foto de perfil:</label>
+                            <input type="file" id="profilePhoto" name="photo" accept="image/*">
+                        </div>
+                        
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" required> Aceito os <a href="#">termos de uso</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Criar conta</button>
+                    </form>
+                    
+                    <div class="form-footer">
+                        <p>Já tem uma conta? <a href="#" onclick="showLogin()">Faça login</a></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Orkut Retrô - Uma homenagem nostálgica aos anos 2000</p>
+            <div class="footer-links">
+                <a href="#">Sobre</a>
+                <a href="#">Privacidade</a>
+                <a href="#">Termos</a>
+                <a href="#">Contato</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

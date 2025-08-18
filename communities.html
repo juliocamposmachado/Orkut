@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidades - Orkut Retrô</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/communities.css">
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <a href="home.html" class="nav-logo">orkut retrô</a>
+                <ul class="nav-menu">
+                    <li><a href="home.html">início</a></li>
+                    <li><a href="profile.html">perfil</a></li>
+                    <li><a href="friends.html">amigos</a></li>
+                    <li><a href="communities.html" class="active">comunidades</a></li>
+                    <li><a href="messages.html">mensagens</a></li>
+                    <li><a href="search.html">buscar</a></li>
+                    <li><a href="index.html" onclick="logout()">sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="communities-container">
+            <!-- Header das comunidades -->
+            <div class="communities-header">
+                <div class="header-content">
+                    <h1>Comunidades</h1>
+                    <p>Conecte-se com pessoas que compartilham seus interesses!</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showCreateCommunity()">criar comunidade</button>
+                    <button class="btn btn-secondary" onclick="showMyCommunities()">minhas comunidades</button>
+                </div>
+            </div>
+
+            <!-- Busca e filtros -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <input type="text" id="communitySearch" placeholder="Buscar comunidades..." onkeyup="searchCommunities()">
+                    <button class="btn btn-light" onclick="searchCommunities()">buscar</button>
+                </div>
+                
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="categoryFilter">Categoria:</label>
+                        <select id="categoryFilter" onchange="filterCommunities()">
+                            <option value="">Todas</option>
+                            <option value="tecnologia">Tecnologia</option>
+                            <option value="nostalgia">Nostalgia</option>
+                            <option value="música">Música</option>
+                            <option value="filmes">Filmes e TV</option>
+                            <option value="jogos">Jogos</option>
+                            <option value="esportes">Esportes</option>
+                            <option value="humor">Humor</option>
+                            <option value="relacionamentos">Relacionamentos</option>
+                            <option value="arte">Arte e Design</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="sortFilter">Ordenar por:</label>
+                        <select id="sortFilter" onchange="sortCommunities()">
+                            <option value="members">Mais Membros</option>
+                            <option value="recent">Mais Recentes</option>
+                            <option value="active">Mais Ativas</option>
+                            <option value="name">Nome A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seções principais -->
+            <div class="communities-content">
+                <!-- Sidebar -->
+                <div class="communities-sidebar">
+                    <!-- Comunidades em destaque -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>⭐ em destaque</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="featured-communities" id="featuredCommunities">
+                                <!-- Carregado via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categorias populares -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📂 categorias populares</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="category-list">
+                                <a href="#" onclick="filterByCategory('nostalgia')" class="category-item">
+                                    <span class="category-icon">🕰️</span>
+                                    <span>Nostalgia</span>
+                                    <span class="category-count">234</span>
+                                </a>
+                                <a href="#" onclick="filterByCategory('música')" class="category-item">
+                                    <span class="category-icon">🎵</span>
+                                    <span>Música</span>
+                                    <span class="category-count">189</span>
+                                </a>
+                                <a href="#" onclick="filterByCategory('tecnologia')" class="category-item">
+                                    <span class="category-icon">💻</span>
+                                    <span>Tecnologia</span>
+                                    <span class="category-count">156</span>
+                                </a>
+                                <a href="#" onclick="filterByCategory('jogos')" class="category-item">
+                                    <span class="category-icon">🎮</span>
+                                    <span>Jogos</span>
+                                    <span class="category-count">142</span>
+                                </a>
+                                <a href="#" onclick="filterByCategory('humor')" class="category-item">
+                                    <span class="category-icon">😄</span>
+                                    <span>Humor</span>
+                                    <span class="category-count">98</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Minhas comunidades -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>👥 minhas comunidades</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="my-communities-list" id="myCommunitiesList">
+                                <!-- Carregado via JavaScript -->
+                            </div>
+                            <button class="btn btn-light btn-sm" onclick="manageMyCommunities()">gerenciar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área principal -->
+                <div class="communities-main">
+                    <!-- Lista de comunidades -->
+                    <div class="communities-grid" id="communitiesGrid">
+                        <!-- Comunidades serão carregadas via JavaScript -->
+                    </div>
+
+                    <!-- Paginação -->
+                    <div class="pagination" id="pagination">
+                        <!-- Paginação será gerada via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para criar comunidade -->
+    <div class="modal hidden" id="createCommunityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Criar Nova Comunidade</h3>
+                <button class="close-btn" onclick="closeModal('createCommunityModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createCommunityForm" onsubmit="createCommunity(event)">
+                    <div class="form-group">
+                        <label for="communityName">Nome da comunidade:</label>
+                        <input type="text" id="communityName" name="name" required maxlength="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="communityDescription">Descrição:</label>
+                        <textarea id="communityDescription" name="description" rows="4" maxlength="500" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="communityCategory">Categoria:</label>
+                        <select id="communityCategory" name="category" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="tecnologia">Tecnologia</option>
+                            <option value="nostalgia">Nostalgia</option>
+                            <option value="música">Música</option>
+                            <option value="filmes">Filmes e TV</option>
+                            <option value="jogos">Jogos</option>
+                            <option value="esportes">Esportes</option>
+                            <option value="humor">Humor</option>
+                            <option value="relacionamentos">Relacionamentos</option>
+                            <option value="arte">Arte e Design</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="communityImage">Imagem da comunidade:</label>
+                        <input type="file" id="communityImage" name="image" accept="image/*">
+                        <small class="form-text">Recomendado: 200x200px, máximo 2MB</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="communityPublic" name="public" checked>
+                            Comunidade pública (qualquer pessoa pode participar)
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Criar Comunidade</button>
+                        <button type="button" class="btn btn-light" onclick="closeModal('createCommunityModal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar comunidade -->
+    <div class="modal hidden" id="communityModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="communityModalTitle">Comunidade</h3>
+                <button class="close-btn" onclick="closeModal('communityModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="community-details" id="communityDetails">
+                    <!-- Detalhes da comunidade carregados via JavaScript -->
+                </div>
+                
+                <!-- Tabs da comunidade -->
+                <div class="community-tabs">
+                    <button class="tab-btn active" onclick="showCommunityTab('description')">descrição</button>
+                    <button class="tab-btn" onclick="showCommunityTab('forum')">fórum <span class="badge badge-primary" id="forumCount">0</span></button>
+                    <button class="tab-btn" onclick="showCommunityTab('members')">membros <span class="badge badge-secondary" id="membersCount">0</span></button>
+                </div>
+                
+                <!-- Conteúdo das tabs -->
+                <div class="tab-content active" id="descriptionTab">
+                    <p id="communityFullDescription">Descrição da comunidade...</p>
+                </div>
+                
+                <div class="tab-content" id="forumTab">
+                    <div class="forum-section">
+                        <div class="new-topic-section">
+                            <button class="btn btn-primary btn-sm" onclick="createNewTopic()">novo tópico</button>
+                        </div>
+                        <div class="topics-list" id="topicsList">
+                            <!-- Tópicos carregados via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="membersTab">
+                    <div class="members-grid" id="membersGrid">
+                        <!-- Membros carregados via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/communities.js"></script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Orkut Retrô</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <a href="home.html" class="nav-logo">orkut retrô</a>
+                <ul class="nav-menu">
+                    <li><a href="home.html">início</a></li>
+                    <li><a href="profile.html" class="active">perfil</a></li>
+                    <li><a href="friends.html">amigos</a></li>
+                    <li><a href="communities.html">comunidades</a></li>
+                    <li><a href="messages.html">mensagens</a></li>
+                    <li><a href="search.html">buscar</a></li>
+                    <li><a href="index.html" onclick="logout()">sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-container">
+            <!-- Informações do perfil -->
+            <div class="profile-header">
+                <div class="profile-photo-section">
+                    <div class="profile-photo-container">
+                        <img src="https://via.placeholder.com/150x150/a855c7/ffffff?text=Foto" alt="Foto do perfil" class="profile-photo" id="profilePhoto">
+                        <button class="change-photo-btn" onclick="changePhoto()">alterar foto</button>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="profileViews">142</span>
+                            <span class="stat-label">visualizações</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="friendsCount">89</span>
+                            <span class="stat-label">amigos</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="fansCount">23</span>
+                            <span class="stat-label">fãs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-name" id="profileName">Ana Silva</h1>
+                    <p class="profile-status" id="profileStatus">"Revivendo os anos 2000! 💜"</p>
+                    
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">idade:</span>
+                            <span class="detail-value" id="profileAge">28 anos</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">relacionamento:</span>
+                            <span class="detail-value" id="profileRelationship">solteira</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">localização:</span>
+                            <span class="detail-value" id="profileLocation">São Paulo, SP</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">aniversário:</span>
+                            <span class="detail-value" id="profileBirthday">15 de março</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="editProfile()">editar perfil</button>
+                        <button class="btn btn-light" onclick="viewFullProfile()">ver perfil completo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout principal -->
+            <div class="profile-content">
+                <!-- Sidebar esquerda -->
+                <div class="profile-sidebar">
+                    <!-- Quem sou eu -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>quem sou eu</h3>
+                        </div>
+                        <div class="card-body">
+                            <p id="profileBio">Apaixonada por nostalgia e tecnologia! Adoro relembrar os anos 2000 e conectar com pessoas que compartilham as mesmas memórias. Sempre em busca de novas aventuras e bons amigos! 🌟</p>
+                            <button class="btn btn-light btn-sm" onclick="editBio()">editar</button>
+                        </div>
+                    </div>
+
+                    <!-- Top 10 amigos -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>top 10 amigos</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="friends-grid" id="topFriends">
+                                <!-- Amigos serão carregados via JavaScript -->
+                            </div>
+                            <button class="btn btn-light btn-sm" onclick="manageFriends()">gerenciar amigos</button>
+                        </div>
+                    </div>
+
+                    <!-- Comunidades -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>minhas comunidades</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="communities-list" id="myCommunities">
+                                <!-- Comunidades serão carregadas via JavaScript -->
+                            </div>
+                            <button class="btn btn-light btn-sm" onclick="browseCommunities()">buscar comunidades</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área principal -->
+                <div class="profile-main">
+                    <!-- Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" onclick="showTab('scraps')">scraps <span class="badge badge-primary">12</span></button>
+                        <button class="tab-btn" onclick="showTab('testimonials')">depoimentos <span class="badge badge-secondary">8</span></button>
+                        <button class="tab-btn" onclick="showTab('photos')">fotos <span class="badge badge-success">24</span></button>
+                    </div>
+
+                    <!-- Scraps -->
+                    <div class="tab-content active" id="scrapsTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>deixar um scrap</h3>
+                            </div>
+                            <div class="card-body">
+                                <form class="scrap-form" onsubmit="sendScrap(event)">
+                                    <textarea placeholder="Escreva seu recado aqui..." rows="3" id="scrapMessage" required></textarea>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">enviar scrap</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="scraps-list" id="scrapsList">
+                            <!-- Scraps serão carregados via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Depoimentos -->
+                    <div class="tab-content" id="testimonialsTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>escrever depoimento</h3>
+                            </div>
+                            <div class="card-body">
+                                <form class="testimonial-form" onsubmit="sendTestimonial(event)">
+                                    <textarea placeholder="Escreva um depoimento especial..." rows="4" id="testimonialMessage" required></textarea>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">enviar depoimento</button>
+                                        <p class="form-help">* Depoimentos precisam ser aprovados pelo usuário</p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="testimonials-list" id="testimonialsList">
+                            <!-- Depoimentos serão carregados via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Fotos -->
+                    <div class="tab-content" id="photosTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>minhas fotos</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="photos-grid" id="photosGrid">
+                                    <!-- Fotos serão carregadas via JavaScript -->
+                                </div>
+                                <button class="btn btn-primary" onclick="uploadPhoto()">adicionar foto</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar perfil -->
+    <div class="modal hidden" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="close-btn" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label for="editName">Nome:</label>
+                        <input type="text" id="editName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Status:</label>
+                        <input type="text" id="editStatus" name="status" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAge">Idade:</label>
+                        <input type="number" id="editAge" name="age" min="13" max="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRelationship">Relacionamento:</label>
+                        <select id="editRelationship" name="relationship">
+                            <option value="solteiro(a)">Solteiro(a)</option>
+                            <option value="namorando">Namorando</option>
+                            <option value="noivo(a)">Noivo(a)</option>
+                            <option value="casado(a)">Casado(a)</option>
+                            <option value="divorciado(a)">Divorciado(a)</option>
+                            <option value="viúvo(a)">Viúvo(a)</option>
+                            <option value="relacionamento aberto">Relacionamento aberto</option>
+                            <option value="é complicado">É complicado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocation">Localização:</label>
+                        <input type="text" id="editLocation" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBirthday">Aniversário:</label>
+                        <input type="date" id="editBirthday" name="birthday">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-light" onclick="closeModal('editProfileModal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
