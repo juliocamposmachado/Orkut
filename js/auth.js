@@ -75,9 +75,9 @@ function checkExistingSession() {
     if (savedUser && sessionExpiry) {
         const now = Date.now();
         if (now < parseInt(sessionExpiry)) {
-            // Sessão válida, redirecionar para perfil
+            // Sessão válida, redirecionar para home
             if (getCurrentPage() === 'index') {
-                window.location.href = 'profile.html';
+                window.location.href = 'home.html';
             }
             return true;
         } else {
@@ -192,7 +192,7 @@ function handleLogin(event) {
             
             // Redirecionar após pequeno delay
             setTimeout(() => {
-                window.location.href = 'profile.html';
+                window.location.href = 'home.html';
             }, 1500);
             
         } else {
@@ -280,7 +280,7 @@ function handleRegister(event) {
             
             // Redirecionar
             setTimeout(() => {
-                window.location.href = 'profile.html';
+                window.location.href = 'home.html';
             }, 2000);
             
         } else {

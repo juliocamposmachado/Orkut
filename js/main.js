@@ -32,11 +32,16 @@ const mockData = {
     },
     
     friends: [
-        { id: 2, name: 'Carlos Santos', photo: 'https://via.placeholder.com/40x40/5bc0de/ffffff?text=C', online: true },
-        { id: 3, name: 'Maria Oliveira', photo: 'https://via.placeholder.com/40x40/ff6bb3/ffffff?text=M', online: false },
-        { id: 4, name: 'João Silva', photo: 'https://via.placeholder.com/40x40/28a745/ffffff?text=J', online: true },
-        { id: 5, name: 'Paula Costa', photo: 'https://via.placeholder.com/40x40/ffc107/ffffff?text=P', online: false },
-        { id: 6, name: 'Ricardo Lima', photo: 'https://via.placeholder.com/40x40/dc3545/ffffff?text=R', online: true }
+        { id: 2, name: 'Carlos Santos', photo: 'images/julio.webp', online: true },
+        { id: 3, name: 'Maria Oliveira', photo: 'images/julio.webp', online: false },
+        { id: 4, name: 'João Silva', photo: 'images/julio.webp', online: true },
+        { id: 5, name: 'Paula Costa', photo: 'images/julio.webp', online: false },
+        { id: 6, name: 'Ricardo Lima', photo: 'images/julio.webp', online: true },
+        { id: 7, name: 'Ana Carolina', photo: 'images/julio.webp', online: false },
+        { id: 8, name: 'Bruno Ferreira', photo: 'images/julio.webp', online: true },
+        { id: 9, name: 'Camila Rocha', photo: 'images/julio.webp', online: false },
+        { id: 10, name: 'Diego Almeida', photo: 'images/julio.webp', online: true },
+        { id: 11, name: 'Fernanda Lima', photo: 'images/julio.webp', online: false }
     ],
     
     communities: [
@@ -46,7 +51,7 @@ const mockData = {
             description: 'Para quem sente saudades dos anos 2000! Músicas, filmes, moda e lembranças.',
             category: 'nostalgia',
             members: 1523,
-            image: 'https://via.placeholder.com/200x140/a855c7/ffffff?text=2000s',
+            image: 'images/orkut.png',
             joined: true
         },
         {
@@ -55,7 +60,7 @@ const mockData = {
             description: 'Relembrando os bons tempos do Orkut original.',
             category: 'tecnologia',
             members: 892,
-            image: 'https://via.placeholder.com/200x140/ff6bb3/ffffff?text=Orkut',
+            image: 'images/orkut.png',
             joined: false
         },
         {
@@ -64,8 +69,35 @@ const mockData = {
             description: 'As melhores bandas de pop rock do Brasil.',
             category: 'música',
             members: 2341,
-            image: 'https://via.placeholder.com/200x140/5bc0de/ffffff?text=Rock',
+            image: 'images/orkut.png',
             joined: true
+        },
+        {
+            id: 4,
+            name: 'Amor e Relacionamentos',
+            description: 'Dicas, conselhos e experiências sobre relacionamentos.',
+            category: 'relacionamentos',
+            members: 987,
+            image: 'images/orkut.png',
+            joined: false
+        },
+        {
+            id: 5,
+            name: 'Games Clássicos',
+            description: 'Para os amantes dos jogos clássicos dos anos 90 e 2000.',
+            category: 'jogos',
+            members: 1234,
+            image: 'images/orkut.png',
+            joined: true
+        },
+        {
+            id: 6,
+            name: 'Cinema Retrô',
+            description: 'Filmes clássicos que marcaram época.',
+            category: 'filmes',
+            members: 2567,
+            image: 'images/orkut.png',
+            joined: false
         }
     ],
     
@@ -73,16 +105,23 @@ const mockData = {
         {
             id: 1,
             author: 'Carlos Santos',
-            authorPhoto: 'https://via.placeholder.com/32x32/5bc0de/ffffff?text=C',
+            authorPhoto: 'images/julio.webp',
             content: 'Que saudades dos anos 2000! Adorei seu perfil retrô! 😍',
             date: '2 horas atrás'
         },
         {
             id: 2,
             author: 'Maria Oliveira',
-            authorPhoto: 'https://via.placeholder.com/32x32/ff6bb3/ffffff?text=M',
+            authorPhoto: 'images/julio.webp',
             content: 'Oiee! Vamos ser amigas? Tenho certeza que vamos nos dar super bem! 💕',
             date: '1 dia atrás'
+        },
+        {
+            id: 3,
+            author: 'João Silva',
+            authorPhoto: 'images/julio.webp',
+            content: 'E aí! Como está sendo essa volta ao passado? Orkut era demais mesmo! 😄',
+            date: '3 dias atrás'
         }
     ],
     
@@ -90,7 +129,7 @@ const mockData = {
         {
             id: 1,
             from: 'Carlos Santos',
-            fromPhoto: 'https://via.placeholder.com/40x40/5bc0de/ffffff?text=C',
+            fromPhoto: 'images/julio.webp',
             subject: 'Que tal se encontrarmos?',
             preview: 'Oi Ana! Como vai? Estava pensando se você...',
             date: '2 horas atrás',
@@ -99,11 +138,123 @@ const mockData = {
         {
             id: 2,
             from: 'João Silva',
-            fromPhoto: 'https://via.placeholder.com/40x40/28a745/ffffff?text=J',
+            fromPhoto: 'images/julio.webp',
             subject: 'Re: Festa de aniversário',
             preview: 'Obrigado pelo convite! Vou estar lá sim...',
             date: '1 dia atrás',
             unread: false
+        },
+        {
+            id: 3,
+            from: 'Paula Costa',
+            fromPhoto: 'images/julio.webp',
+            subject: 'Novidades por aqui!',
+            preview: 'Oi querida! Como você está? Tenho várias...',
+            date: '2 dias atrás',
+            unread: true
+        }
+    ],
+    
+    feedPosts: [
+        {
+            id: 1,
+            author: 'Carlos Santos',
+            authorPhoto: 'images/julio.webp', // masculino
+            content: 'Que nostalgia estar aqui no Orkut novamente! Lembra quando passávamos horas customizando nossos perfis? 😄',
+            time: '2 horas atrás',
+            likes: 15,
+            comments: 3,
+            type: 'status'
+        },
+        {
+            id: 2,
+            author: 'Maria Oliveira',
+            authorPhoto: 'images/juliette.jpg', // feminino
+            content: 'Acabei de entrar na comunidade "Nostalgia dos Anos 2000" e já me senti em casa! Quem mais sente falta dos tempos do MSN? 💜',
+            time: '4 horas atrás',
+            likes: 23,
+            comments: 8,
+            type: 'status'
+        },
+        {
+            id: 3,
+            author: 'João Silva',
+            authorPhoto: 'images/Abujamra.jpg', // masculino
+            content: 'Galera, alguém lembra da música que tocava quando você visitava um perfil no Orkut original? Era viciante! 🎵',
+            time: '6 horas atrás',
+            likes: 31,
+            comments: 12,
+            type: 'status'
+        },
+        {
+            id: 4,
+            author: 'Paula Costa',
+            authorPhoto: 'images/juliette.jpg', // feminino
+            content: 'Meu primeiro scrap em anos! Que emoção estar de volta. Orkut foi onde conheci meus melhores amigos! 🥺❤️',
+            time: '8 horas atrás',
+            likes: 42,
+            comments: 16,
+            type: 'status'
+        },
+        {
+            id: 5,
+            author: 'Ricardo Lima',
+            authorPhoto: 'images/julio.webp', // masculino
+            content: 'Acabei de descobrir que posso usar aqueles temas coloridos no perfil igual antigamente! Quem mais vai customizar o seu? 🌈',
+            time: '12 horas atrás',
+            likes: 28,
+            comments: 7,
+            type: 'status'
+        },
+        {
+            id: 6,
+            author: 'Ana Carolina',
+            authorPhoto: 'images/juliette.jpg', // feminino
+            content: 'Procurando por amigos da escola! Se você estudou no Colégio Santa Maria em São Paulo entre 2003-2006, me adiciona! 📚',
+            time: '1 dia atrás',
+            likes: 19,
+            comments: 4,
+            type: 'status'
+        },
+        {
+            id: 7,
+            author: 'Bruno Ferreira',
+            authorPhoto: 'images/Abujamra.jpg', // masculino
+            content: 'Criando uma playlist no Spotify com as músicas que marcaram a era Orkut. Sugestões? Começando com Fresno e NX Zero! 🎸',
+            time: '1 dia atrás',
+            likes: 37,
+            comments: 21,
+            type: 'status'
+        },
+        {
+            id: 8,
+            author: 'Camila Rocha',
+            authorPhoto: 'images/juliette.jpg', // feminino
+            content: 'Quem mais teve aquela fase emo/gótica e colocava letras de música tristes no perfil? Confessa! 🖤⛓️',
+            time: '2 dias atrás',
+            likes: 45,
+            comments: 18,
+            type: 'status'
+        },
+        {
+            id: 9,
+            author: 'Diego Almeida',
+            authorPhoto: 'images/julio.webp', // masculino
+            content: 'Lançamento oficial: criei a comunidade "Jogos de Browser dos Anos 2000"! Vamos relembrar Habbo Hotel, Club Penguin e muitos outros! 🎮',
+            time: '2 dias atrás',
+            likes: 52,
+            comments: 14,
+            type: 'community_post'
+        },
+        {
+            id: 10,
+            author: 'Fernanda Lima',
+            authorPhoto: 'images/juliette.jpg', // feminino
+            content: 'Alguém mais tinha vergonha de aparecer como "visitantes recentes" no perfil dos crushes? KKKKK as coisas que a gente se preocupava! 😂',
+            time: '3 dias atrás',
+            likes: 67,
+            comments: 25,
+            type: 'status'
         }
     ]
 };
@@ -163,6 +314,9 @@ function loadPageContent() {
     const currentPage = getCurrentPage();
     
     switch(currentPage) {
+        case 'home':
+            loadHomeData();
+            break;
         case 'profile':
             loadProfileData();
             break;
@@ -386,6 +540,12 @@ function saveUserData() {
 }
 
 // Funções específicas das páginas
+function loadHomeData() {
+    // A função loadHomeData é gerenciada pelo feed.js
+    // Aqui podemos adicionar inicializações específicas se necessário
+    console.log('Loading home page data...');
+}
+
 function loadProfileData() {
     if (!OrkutRetro.currentUser) return;
     
