@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeProfile() {
     currentProfile = OrkutRetro.currentUser || mockData.currentUser;
     
+    // Verificar e atualizar URL se necessário
+    checkAndUpdateProfileURL();
+    
     // Configurar contador de caracteres para textarea
     setupCharacterCounters();
     
@@ -144,6 +147,16 @@ function saveProfile(event) {
         
         closeModal('editProfileModal');
         showNotification('Perfil atualizado!', 'Suas informações foram salvas com sucesso.', '✅');
+        
+        // Se o username foi atualizado, redirecionar para a nova URL
+        if (username && username !== window.location.pathname.split('/').pop()) {
+            setTimeout(() => {
+                // Atualizar URL sem recarregar a página
+                const newUrl = `/profile/${username}`;
+                window.history.pushState({username: username}, '', newUrl);
+                showNotification('URL atualizada!', `Seu perfil agora está disponível em: orkut.com/profile/${username}`, '🔗');
+            }, 2000);
+        }
         
     }, 1500);
 }
@@ -313,6 +326,65 @@ function cancelBioEdit() {
     const parent = textarea.parentNode;
     parent.replaceChild(bioElement, textarea);
     actions.remove();
+}
+
+// Verificar e atualizar URL do perfil
+function checkAndUpdateProfileURL() {
+    if (!currentProfile) return;
+    
+    const currentPath = window.location.pathname;
+    const username = currentProfile.username;
+    
+    // Se o usuário tem username e a URL atual não reflete isso
+    if (username && !currentPath.includes(`/profile/${username}`)) {
+        // Verificar se estamos na página de perfil
+        if (currentPath === '/profile.html' || currentPath === '/profile' || currentPath.endsWith('profile.html')) {
+            const newUrl = `/profile/${username}`;
+            
+            // Atualizar a URL sem recarregar a página
+            window.history.replaceState(
+                { username: username, page: 'profile' }, 
+                `Perfil de ${currentProfile.name} (@${username})`, 
+                newUrl
+            );
+            
+            // Atualizar título da página
+            document.title = `${currentProfile.name} (@${username}) - Orkut 2025`;
+            
+            console.log(`URL atualizada para: ${newUrl}`);
+        }
+    }
+    
+    // Se a URL já tem um username, verificar se é o correto
+    else if (currentPath.includes('/profile/')) {
+        const urlUsername = currentPath.split('/profile/')[1];
+        
+        if (username && urlUsername !== username) {
+            // Username foi alterado, atualizar URL
+            const newUrl = `/profile/${username}`;
+            window.history.replaceState(
+                { username: username, page: 'profile' }, 
+                `Perfil de ${currentProfile.name} (@${username})`, 
+                newUrl
+            );
+            
+            document.title = `${currentProfile.name} (@${username}) - Orkut 2025`;
+            console.log(`URL atualizada de /${urlUsername} para: ${newUrl}`);
+        }
+        
+        else if (!username && urlUsername) {
+            // Usuário não tem username mas a URL tem, reverter para URL padrão
+            const newUrl = '/profile.html';
+            window.history.replaceState(
+                { page: 'profile' }, 
+                `Perfil de ${currentProfile.name}`, 
+                newUrl
+            );
+            
+            document.title = `Perfil de ${currentProfile.name} - Orkut 2025`;
+            console.log('URL revertida para URL padrão de perfil');
+        }
+    }
 }
 
 // FUNÇÕES DE SCRAPS
