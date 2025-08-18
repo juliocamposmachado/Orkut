@@ -649,6 +649,256 @@
     }
 }
 
+/* Botões de ação inline */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+    margin-left: 10px;
+    font-size: 12px;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.btn-icon:hover {
+    opacity: 1;
+    background: rgba(168, 85, 199, 0.1);
+}
+
+.scrap-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* Editor de biografia inline */
+.bio-editor {
+    animation: fadeIn 0.3s ease-out;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.bio-editor:focus {
+    box-shadow: 0 0 10px rgba(168, 85, 199, 0.3);
+}
+
+.bio-actions {
+    animation: slideUp 0.3s ease-out;
+    align-items: center;
+}
+
+.bio-actions .char-counter {
+    font-size: 10px;
+    color: var(--text-light);
+}
+
+/* Upload de foto aprimorado */
+.profile-photo-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-photo-container:hover .change-photo-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.change-photo-btn {
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+}
+
+/* Indicadores de edição */
+.editable-field {
+    position: relative;
+    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.editable-field:hover {
+    background: rgba(168, 85, 199, 0.05);
+    cursor: pointer;
+}
+
+.editable-field::after {
+    content: '✏️';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 10px;
+}
+
+.editable-field:hover::after {
+    opacity: 0.7;
+}
+
+/* Melhorias no header dos scraps */
+.scrap-header {
+    position: relative;
+}
+
+.scrap-item:hover .scrap-actions {
+    opacity: 1;
+}
+
+.scrap-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Feedback visual para salvamento */
+.saving-indicator {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-purple);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    z-index: 1001;
+    animation: slideDown 0.3s ease-out;
+}
+
+.field-saved {
+    background: #d4edda !important;
+    transition: background-color 0.3s ease;
+}
+
+/* Modal de foto aprimorado */
+.photo-modal .modal-content {
+    background: rgba(0, 0, 0, 0.9);
+    border: none;
+    border-radius: 0;
+}
+
+.photo-modal .modal-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.photo-modal .modal-header h3,
+.photo-modal .close-btn {
+    color: white;
+}
+
+.photo-modal .modal-body {
+    padding: 20px;
+    background: transparent;
+}
+
+/* Grid de fotos melhorado */
+.photos-grid .photo-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.photo-item .photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 24px;
+}
+
+.photo-item:hover .photo-overlay {
+    opacity: 1;
+}
+
+/* Drag & Drop para fotos */
+.photo-dropzone {
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.photo-dropzone.dragover {
+    border-color: var(--primary-purple);
+    background: rgba(168, 85, 199, 0.1);
+    color: var(--primary-purple);
+}
+
+.photo-dropzone .upload-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+/* Estados de carregamento */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--light-purple);
+    border-top-color: var(--primary-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+[data-tooltip]:hover::before {
+    opacity: 1;
+}
+
 /* Animações */
 .profile-header,
 .profile-sidebar .card,
@@ -678,5 +928,36 @@
     }
     to {
         opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    to { 
+        opacity: 0; 
+        transform: scale(0.9); 
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
     }
 }
