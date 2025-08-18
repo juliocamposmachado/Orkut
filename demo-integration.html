@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Integração SmartSave + IA Backend Manager</title>
+    <style>
+        body {
+            font-family: Verdana, Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(45deg, #e6d8f5, #ffe1f1);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .demo-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #a855c7;
+            border-radius: 10px;
+        }
+        .demo-section h3 {
+            color: #a855c7;
+            margin-top: 0;
+        }
+        .test-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .test-form input, .test-form textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #a855c7, #ff6bb3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(168, 85, 199, 0.3);
+        }
+        .logs {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+        
+        .ai-status {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✅ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Demo - Integração SmartSave + IA Backend Manager</h1>
+        
+        <div class="ai-status" id="aiStatus">
+            <h3>🤖 Status da IA Backend Manager</h3>
+            <p id="aiStatusText">Carregando...</p>
+            <div id="aiPersonas"></div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📝 Teste de Edição de Perfil</h3>
+            <p>Edite os dados abaixo e veja a IA Backend Manager reagir automaticamente:</p>
+            
+            <form class="test-form" id="profileTestForm" onsubmit="testProfileUpdate(event)">
+                <input type="text" id="testName" placeholder="Seu nome" value="João da Silva">
+                <input type="text" id="testUsername" placeholder="Username (opcional)" value="joao_silva">
+                <input type="text" id="testLocation" placeholder="Localização" value="São Paulo, SP">
+                <textarea id="testBio" placeholder="Biografia" rows="3">Desenvolvedor apaixonado por tecnologia e nostalgia dos anos 2000! 🎉</textarea>
+                <input type="number" id="testAge" placeholder="Idade" value="28">
+                
+                <button type="submit" class="test-btn">💾 Salvar Perfil (Teste da Integração)</button>
+            </form>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📊 Status do Sistema</h3>
+            <div id="systemStatus">
+                <p><span class="status-indicator status-pending"></span> <strong>SmartSave:</strong> <span id="smartSaveStatus">Carregando...</span></p>
+                <p><span class="status-indicator status-pending"></span> <strong>IA Backend:</strong> <span id="backendStatus">Carregando...</span></p>
+                <p><span class="status-indicator status-pending"></span> <strong>Sincronização:</strong> <span id="syncStatus">Carregando...</span></p>
+            </div>
+            
+            <button class="test-btn" onclick="refreshStatus()">🔄 Atualizar Status</button>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎯 Funcionalidades Integradas</h3>
+            <ul class="feature-list">
+                <li><strong>Salvamento Local Inteligente:</strong> Dados salvos primeiro localmente para performance máxima</li>
+                <li><strong>Notificação Automática da IA:</strong> SmartSave notifica a IA Backend Manager sobre mudanças</li>
+                <li><strong>Processamento Multi-Persona:</strong> IA processa dados com diferentes especialistas</li>
+                <li><strong>Validação Automática:</strong> API-Manager-AI valida dados automaticamente</li>
+                <li><strong>Otimização Inteligente:</strong> Performance-AI otimiza dados quando necessário</li>
+                <li><strong>Sincronização em Background:</strong> Dados sincronizados automaticamente quando online</li>
+                <li><strong>Backup Automático:</strong> Sistema cria backups locais automaticamente</li>
+                <li><strong>Interface Adaptativa:</strong> UI-Optimizer-AI ajusta interface baseado no usuário</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📋 Log do Sistema</h3>
+            <div class="logs" id="systemLogs">
+                <div>🧠 Sistema de logging iniciado...</div>
+                <div>📡 Aguardando eventos...</div>
+            </div>
+            <button class="test-btn" onclick="clearLogs()">🗑️ Limpar Logs</button>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🔧 Ferramentas de Teste</h3>
+            <button class="test-btn" onclick="testAINotification()">🤖 Testar Notificação IA</button>
+            <button class="test-btn" onclick="testSyncQueue()">📋 Testar Fila de Sincronização</button>
+            <button class="test-btn" onclick="testOfflineMode()">📱 Simular Modo Offline</button>
+            <button class="test-btn" onclick="exportData()">💾 Exportar Dados</button>
+        </div>
+    </div>
+
+    <!-- Carregar scripts do sistema -->
+    <script src="js/smart-save.js"></script>
+    <script src="js/ai-backend-manager.js"></script>
+    <script src="config/ai-credentials.js"></script>
+    
+    <script>
+        // Logs do sistema
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('systemLogs');
+            const logEntry = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const colors = {
+                info: '#00ff00',
+                success: '#00ff88',
+                warning: '#ffaa00', 
+                error: '#ff4444',
+                ai: '#8844ff'
+            };
+            
+            logEntry.style.color = colors[type] || colors.info;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+        
+        // Interceptar console.log para mostrar nos logs
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            if (args[0] && typeof args[0] === 'string') {
+                let type = 'info';
+                if (args[0].includes('🤖') || args[0].includes('IA')) type = 'ai';
+                if (args[0].includes('✅')) type = 'success';
+                if (args[0].includes('⚠️')) type = 'warning';
+                if (args[0].includes('❌')) type = 'error';
+                
+                addLog(args.join(' '), type);
+            }
+        };
+        
+        // Teste de atualização de perfil
+        async function testProfileUpdate(event) {
+            event.preventDefault();
+            
+            addLog('🧪 Iniciando teste de atualização de perfil...', 'info');
+            
+            const profileData = {
+                name: document.getElementById('testName').value,
+                username: document.getElementById('testUsername').value,
+                location: document.getElementById('testLocation').value,
+                bio: document.getElementById('testBio').value,
+                age: parseInt(document.getElementById('testAge').value) || null
+            };
+            
+            try {
+                const result = await window.saveProfile(profileData, {
+                    showNotification: true,
+                    updateURL: false
+                });
+                
+                addLog('✅ Teste concluído - Perfil salvo e IA notificada!', 'success');
+                refreshStatus();
+                
+            } catch (error) {
+                addLog('❌ Erro no teste: ' + error.message, 'error');
+            }
+        }
+        
+        // Atualizar status do sistema
+        function refreshStatus() {
+            // Status do SmartSave
+            if (window.SmartSave) {
+                const stats = window.SmartSave.getStats();
+                document.getElementById('smartSaveStatus').textContent = 
+                    `${stats.syncStatus.toUpperCase()} | Usuário: ${stats.user} | Fila: ${stats.queueSize}`;
+            }
+            
+            // Status da IA Backend
+            if (window.AIBackendManager) {
+                const aiStatus = window.AIBackendManager.getSystemStatus();
+                document.getElementById('backendStatus').textContent = 
+                    `${aiStatus.health} | Personas ativas: ${aiStatus.activePersonas.length}`;
+                
+                // Mostrar personas ativas
+                const personasDiv = document.getElementById('aiPersonas');
+                personasDiv.innerHTML = '<strong>Personas Ativas:</strong> ' + 
+                    aiStatus.activePersonas.join(', ');
+            }
+            
+            // Status de sincronização
+            const user = window.getCurrentUser();
+            if (user) {
+                document.getElementById('syncStatus').textContent = 
+                    `${user.syncStatus || 'Local'} | Modificado: ${new Date(user.lastModified).toLocaleString()}`;
+            }
+            
+            addLog('🔄 Status do sistema atualizado', 'info');
+        }
+        
+        // Testar notificação da IA
+        function testAINotification() {
+            addLog('🧪 Testando notificação manual da IA...', 'info');
+            
+            if (window.SmartSave) {
+                window.SmartSave.notifyAIBackend('test_event', {
+                    message: 'Teste manual de notificação',
+                    timestamp: new Date().toISOString()
+                });
+                addLog('📡 Notificação de teste enviada para IA Backend Manager', 'ai');
+            } else {
+                addLog('❌ SmartSave não disponível', 'error');
+            }
+        }
+        
+        // Testar fila de sincronização
+        function testSyncQueue() {
+            addLog('🧪 Testando fila de sincronização...', 'info');
+            
+            if (window.SmartSave) {
+                const queueSize = window.SmartSave.syncQueue.length;
+                addLog(`📋 Itens na fila: ${queueSize}`, 'info');
+                
+                if (queueSize > 0) {
+                    window.SmartSave.processSyncQueue();
+                    addLog('🔄 Processamento da fila iniciado', 'info');
+                } else {
+                    addLog('📭 Fila vazia - adicionando item de teste', 'info');
+                    window.SmartSave.addToSyncQueue('test', { test: true });
+                }
+            }
+        }
+        
+        // Simular modo offline
+        function testOfflineMode() {
+            addLog('🧪 Simulando modo offline...', 'info');
+            
+            if (window.SmartSave) {
+                window.SmartSave.isOnline = false;
+                addLog('📱 Modo offline ativado - próximos salvamentos serão locais apenas', 'warning');
+                
+                // Restaurar após 10 segundos
+                setTimeout(() => {
+                    window.SmartSave.isOnline = navigator.onLine;
+                    addLog('🌐 Modo online restaurado', 'success');
+                }, 10000);
+            }
+        }
+        
+        // Exportar dados
+        function exportData() {
+            addLog('💾 Exportando dados do sistema...', 'info');
+            
+            if (window.SmartSave) {
+                window.SmartSave.exportData();
+                addLog('📤 Backup criado e download iniciado', 'success');
+            }
+        }
+        
+        // Limpar logs
+        function clearLogs() {
+            document.getElementById('systemLogs').innerHTML = 
+                '<div>🧠 Sistema de logging reiniciado...</div>';
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🚀 Demo carregada - Sistemas iniciados', 'success');
+            
+            // Atualizar status a cada 5 segundos
+            setInterval(refreshStatus, 5000);
+            
+            // Status inicial
+            setTimeout(refreshStatus, 2000);
+        });
+    </script>
+</body>
+</html>
