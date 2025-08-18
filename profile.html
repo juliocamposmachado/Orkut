@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="css/friends-system.css">
+    <link rel="stylesheet" href="css/audio-call.css">
 </head>
 <body>
     <!-- Navegação -->
@@ -79,6 +80,9 @@
                     <div class="profile-actions">
                         <button class="btn btn-primary" onclick="editProfile()">editar perfil</button>
                         <button class="btn btn-light" onclick="viewFullProfile()">ver perfil completo</button>
+                        <button class="btn btn-success" onclick="startAudioCall()" id="audioCallBtn">
+                            <span class="call-icon">📞</span> Chamada de Áudio
+                        </button>
                     </div>
                 </div>
             </div>
@@ -320,7 +324,54 @@
         </div>
     </div>
 
+    <!-- Modal para chamada de áudio -->
+    <div class="modal hidden" id="audioCallModal">
+        <div class="modal-content audio-call-modal">
+            <div class="call-interface">
+                <div class="call-header">
+                    <h3 id="callTitle">Conectando...</h3>
+                    <div class="call-status" id="callStatus">Iniciando chamada...</div>
+                </div>
+                
+                <div class="call-avatar">
+                    <img src="https://via.placeholder.com/120x120/a855c7/ffffff?text=Ana" alt="Perfil" id="callAvatar">
+                    <div class="call-animation">
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                    </div>
+                </div>
+                
+                <div class="call-info">
+                    <div class="call-name" id="callName">Ana Silva</div>
+                    <div class="call-timer" id="callTimer">00:00</div>
+                </div>
+                
+                <div class="call-controls">
+                    <button class="call-btn mute-btn" onclick="toggleMute()" id="muteBtn" title="Silenciar">
+                        <span class="btn-icon">🎤</span>
+                    </button>
+                    
+                    <button class="call-btn speaker-btn" onclick="toggleSpeaker()" id="speakerBtn" title="Alto-falante">
+                        <span class="btn-icon">🔊</span>
+                    </button>
+                    
+                    <button class="call-btn end-call-btn" onclick="endCall()" id="endCallBtn" title="Encerrar chamada">
+                        <span class="btn-icon">📞</span>
+                    </button>
+                </div>
+                
+                <div class="call-volume">
+                    <label>Volume:</label>
+                    <input type="range" min="0" max="100" value="70" id="volumeSlider" onchange="adjustVolume(this.value)">
+                    <span id="volumeLevel">70%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
     <script src="js/profile.js"></script>
+    <script src="js/audio-call.js"></script>
 </body>
 </html>
