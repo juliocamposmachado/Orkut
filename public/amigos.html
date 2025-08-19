@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Orkut2025 - Perfil</title>
+  <title>Orkut2025 - Amigos</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -21,21 +21,33 @@
   </header>
   <main>
     <div class="card">
-      <h1>Perfil</h1>
+      <h1>Meus Amigos</h1>
       <div class="grid cols-2">
         <div>
-          <label>Nome</label>
-          <input class="input" id="nameInput" placeholder="Seu nome" />
+          <h3>Adicionar Amigo</h3>
+          <input class="input" id="friendSearchInput" placeholder="Buscar por nome ou ID" />
+          <button class="btn" id="addFriendBtn" style="margin-top:8px">Adicionar</button>
         </div>
         <div>
-          <label>Bio</label>
-          <input class="input" id="bioInput" placeholder="Sua bio" />
+          <h3>Estatísticas</h3>
+          <p>Amigos: <span id="friendsCount">0</span></p>
+          <p>Solicitações pendentes: <span id="pendingCount">0</span></p>
         </div>
       </div>
-      <div style="margin-top:8px">
-        <button class="btn" id="saveProfileBtn">Salvar Perfil</button>
+    </div>
+
+    <div class="card">
+      <h2>Lista de Amigos</h2>
+      <div id="friendsList">
+        <div class="center" style="color:#6b7280">Carregando amigos...</div>
       </div>
-      <div id="profileMsg" style="margin-top:8px;color:#065f46"></div>
+    </div>
+
+    <div class="card">
+      <h2>Solicitações de Amizade</h2>
+      <div id="friendRequestsList">
+        <div class="center" style="color:#6b7280">Nenhuma solicitação pendente</div>
+      </div>
     </div>
   </main>
   <footer>© 2025 Orkut2025</footer>
@@ -43,7 +55,7 @@
   <script src="/js/app.js"></script>
   <script src="/js/voice.js"></script>
   <script>
-    window.App && window.App.initProfile && window.App.initProfile();
+    window.App && window.App.initFriends && window.App.initFriends();
     window.Voice && window.Voice.init && window.Voice.init();
   </script>
 </body>

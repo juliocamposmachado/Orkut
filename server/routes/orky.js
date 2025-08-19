@@ -4,7 +4,29 @@ const { Pool } = require('pg');
 const router = Router();
 
 const connectionString = process.env.DATABASE_URL;
-const pool = connectionString ? new Pool({ connectionString, ssl: { rejectUnauthorized: false } }) : null;
+// Configuração SSL inteligente para Supabase
+function getSSLConfig() {
+  if (!connectionString) return null;
+  
+  const fs = require('fs');
+  const path = require('path');
+  
+  // Tenta usar certificado personalizado se existir
+  const certPath = path.join(__dirname, '..', '..', 'certs', 'prod-ca-2021.crt');
+  if (fs.existsSync(certPath)) {
+    console.log('Orky: Usando certificado SSL personalizado:', certPath);
+    return {
+      rejectUnauthorized: true,
+      ca: fs.readFileSync(certPath).toString()
+    };
+  }
+  
+  // Fallback para configuração padrão Supabase
+  console.log('Orky: Usando SSL padrão (rejectUnauthorized: false)');
+  return { rejectUnauthorized: false };
+}
+
+const pool = connectionString ? new Pool({ connectionString, ssl: getSSLConfig() }) : null;
 
 // Controle simples de taxa e jitter para evitar bursts
 let tokens = 5; // capacidade
