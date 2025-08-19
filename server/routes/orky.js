@@ -1,32 +1,7 @@
 const { Router } = require('express');
-const { Pool } = require('pg');
+const { supabase } = require('../config/supabase');
 
 const router = Router();
-
-const connectionString = process.env.DATABASE_URL;
-// Configuração SSL inteligente para Supabase
-function getSSLConfig() {
-  if (!connectionString) return null;
-  
-  const fs = require('fs');
-  const path = require('path');
-  
-  // Tenta usar certificado personalizado se existir
-  const certPath = path.join(__dirname, '..', '..', 'certs', 'prod-ca-2021.crt');
-  if (fs.existsSync(certPath)) {
-    console.log('Orky: Usando certificado SSL personalizado:', certPath);
-    return {
-      rejectUnauthorized: true,
-      ca: fs.readFileSync(certPath).toString()
-    };
-  }
-  
-  // Fallback para configuração padrão Supabase
-  console.log('Orky: Usando SSL padrão (rejectUnauthorized: false)');
-  return { rejectUnauthorized: false };
-}
-
-const pool = connectionString ? new Pool({ connectionString, ssl: getSSLConfig() }) : null;
 
 // Controle simples de taxa e jitter para evitar bursts
 let tokens = 5; // capacidade
@@ -49,30 +24,34 @@ router.post('/healthcheck', async (req, res) => {
   const jitter = 100 + Math.floor(Math.random()*600);
   await sleep(jitter);
 
-  if(!pool){
-    return res.json({ ok:true, mode:'local-only', jitter });
-  }
-
   // Token bucket simples
   if(!takeToken()){
     return res.status(429).json({ ok:false, error:'rate_limited', retry_after_ms: 1000 });
   }
 
-  const client = await pool.connect();
-  try{
-    await client.query('BEGIN');
-    await client.query(
-      'INSERT INTO test_logs(test_type, status, details) VALUES ($1,$2,$3)',
-      ['db_health', 'ok', { jitter }]
-    );
-    await client.query('COMMIT');
-    res.json({ ok:true, jitter });
-  } catch (e){
-    try{ await client.query('ROLLBACK'); }catch(_){}
+  try {
+    // Insert test log using Supabase
+    const { data, error } = await supabase
+      .from('test_logs')
+      .insert({
+        test_type: 'db_health',
+        status: 'ok',
+        details: { jitter, timestamp: Date.now() }
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Orky healthcheck error:', error);
+      return res.status(500).json({ ok:false, error: 'supabase_error', details: error.message });
+    }
+    
+    console.log('✅ Orky healthcheck logged:', data.id);
+    res.json({ ok:true, jitter, logId: data.id });
+    
+  } catch (e) {
     console.error('Orky healthcheck error:', e);
-    res.status(500).json({ ok:false, error:'db_error' });
-  } finally {
-    client.release();
+    res.status(500).json({ ok:false, error:'db_error', message: e.message });
   }
 });
 
