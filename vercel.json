@@ -34,6 +34,14 @@
     {
       "source": "/home",
       "destination": "/home.html"
+    },
+    {
+      "source": "/inicio",
+      "destination": "/home.html"
+    },
+    {
+      "source": "/teste",
+      "destination": "/test-home.html"
     }
   ],
   "redirects": [

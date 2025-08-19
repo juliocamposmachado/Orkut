@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Home - Orkut Retrô</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .link {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Teste de Roteamento - Orkut Retrô</h1>
+        
+        <div class="status">
+            ✅ <strong>Página carregou com sucesso!</strong>
+        </div>
+        
+        <p>Se você está vendo esta página, o roteamento do Vercel está funcionando.</p>
+        
+        <div style="margin: 30px 0;">
+            <h3>🔗 Links de Teste:</h3>
+            <p><a href="/home" class="link">Ir para /home</a></p>
+            <p><a href="/home.html" class="link">Ir para /home.html</a></p>
+            <p><a href="/inicio" class="link">Ir para /inicio</a></p>
+            <p><a href="/" class="link">Ir para página inicial</a></p>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <h3>📊 Informações:</h3>
+            <p><strong>URL Atual:</strong> <span id="currentUrl"></span></p>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 80) + '...';
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('pt-BR');
+        
+        console.log('🧪 Teste Home - Página carregada:', {
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+        });
+    </script>
+</body>
+</html>
