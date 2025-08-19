@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orkut2025 - Configurações</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <div>Orkut2025</div>
+    <nav>
+      <a href="/index.html">Início</a>
+      <a href="/feed.html">Feed</a>
+      <a href="/profile.html">Perfil</a>
+      <a href="/amigos.html">Amigos</a>
+      <a href="/mensagens.html">Mensagens</a>
+      <a href="/comunidades.html">Comunidades</a>
+      <a href="/settings.html">Configurações</a>
+    </nav>
+  </header>
+  <main>
+    <div class="card">
+      <h1>Configurações locais</h1>
+      <p>Essas configurações ficam no seu navegador via localStorage.</p>
+      <div>
+        <label>ID do Usuário</label>
+        <input class="input" id="userIdInput" placeholder="ex: user_123" />
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" id="saveSettingsBtn">Salvar</button>
+      </div>
+      <div id="settingsMsg" style="margin-top:8px;color:#065f46"></div>
+    </div>
+  </main>
+  <footer>© 2025 Orkut2025</footer>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/voice.js"></script>
+  <script>
+    window.App && window.App.initSettings && window.App.initSettings();
+    window.Voice && window.Voice.init && window.Voice.init();
+  </script>
+</body>
+</html>

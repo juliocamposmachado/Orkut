@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Orkut Retrô</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/friends-system.css">
+    <link rel="stylesheet" href="css/audio-call.css">
+    <link rel="stylesheet" href="css/ai-system.css">
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <a href="home.html" class="nav-logo">orkut retrô</a>
+                <ul class="nav-menu">
+                    <li><a href="home.html">início</a></li>
+                    <li><a href="profile.html" class="active">perfil</a></li>
+                    <li><a href="friends.html">amigos</a></li>
+                    <li><a href="communities.html">comunidades</a></li>
+                    <li><a href="messages.html">mensagens</a></li>
+                    <li><a href="search.html">buscar</a></li>
+                    <li><a href="index.html" onclick="logout()">sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-container">
+            <!-- Informações do perfil -->
+            <div class="profile-header">
+                <div class="profile-photo-section">
+                    <div class="profile-photo-container">
+                        <img src="https://via.placeholder.com/150x150/a855c7/ffffff?text=Foto" alt="Foto do perfil" class="profile-photo" id="profilePhoto">
+                        <button class="change-photo-btn" onclick="changePhoto()">alterar foto</button>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="profileViews">142</span>
+                            <span class="stat-label">visualizações</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="friendsCount">89</span>
+                            <span class="stat-label">amigos</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="fansCount">23</span>
+                            <span class="stat-label">fãs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-name" id="profileName">Ana Silva</h1>
+                    <p class="profile-status" id="profileStatus">"Revivendo os anos 2000! 💜"</p>
+                    
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">idade:</span>
+                            <span class="detail-value" id="profileAge">28 anos</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">relacionamento:</span>
+                            <span class="detail-value" id="profileRelationship">solteira</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">localização:</span>
+                            <span class="detail-value" id="profileLocation">São Paulo, SP</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">aniversário:</span>
+                            <span class="detail-value" id="profileBirthday">15 de março</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="editProfile()">editar perfil</button>
+                        <button class="btn btn-light" onclick="viewFullProfile()">ver perfil completo</button>
+                        <button class="btn btn-success" onclick="startAudioCall()" id="audioCallBtn">
+                            <span class="call-icon">📞</span> Chamada de Áudio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout principal -->
+            <div class="profile-content">
+                <!-- Sidebar esquerda -->
+                <div class="profile-sidebar">
+                    <!-- Quem sou eu -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>quem sou eu</h3>
+                        </div>
+                        <div class="card-body">
+                            <p id="profileBio">Apaixonada por nostalgia e tecnologia! Adoro relembrar os anos 2000 e conectar com pessoas que compartilham as mesmas memórias. Sempre em busca de novas aventuras e bons amigos! 🌟</p>
+                            <button class="btn btn-light btn-sm" onclick="editBio()">editar</button>
+                        </div>
+                    </div>
+
+                    <!-- Top 10 amigos -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>top 10 amigos</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="friends-grid" id="topFriends">
+                                <!-- Amigos serão carregados via JavaScript -->
+                            </div>
+                            <button class="btn btn-light btn-sm" onclick="manageFriends()">gerenciar amigos</button>
+                            <button class="btn btn-primary btn-sm" onclick="addFriend()">adicionar amigo</button>
+                        </div>
+                    </div>
+
+                    <!-- Comunidades -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>minhas comunidades</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="communities-list" id="myCommunities">
+                                <!-- Comunidades serão carregadas via JavaScript -->
+                            </div>
+                            <button class="btn btn-light btn-sm" onclick="browseCommunities()">buscar comunidades</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área principal -->
+                <div class="profile-main">
+                    <!-- Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" onclick="showTab('scraps')">scraps <span class="badge badge-primary">12</span></button>
+                        <button class="tab-btn" onclick="showTab('testimonials')">depoimentos <span class="badge badge-secondary">8</span></button>
+                        <button class="tab-btn" onclick="showTab('photos')">fotos <span class="badge badge-success">24</span></button>
+                    </div>
+
+                    <!-- Scraps -->
+                    <div class="tab-content active" id="scrapsTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>deixar um scrap</h3>
+                            </div>
+                            <div class="card-body">
+                                <form class="scrap-form" onsubmit="sendScrap(event)">
+                                    <textarea placeholder="Escreva seu recado aqui..." rows="3" id="scrapMessage" required></textarea>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">enviar scrap</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="scraps-list" id="scrapsList">
+                            <!-- Scraps serão carregados via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Depoimentos -->
+                    <div class="tab-content" id="testimonialsTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>escrever depoimento</h3>
+                            </div>
+                            <div class="card-body">
+                                <form class="testimonial-form" onsubmit="sendTestimonial(event)">
+                                    <textarea placeholder="Escreva um depoimento especial..." rows="4" id="testimonialMessage" required></textarea>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">enviar depoimento</button>
+                                        <p class="form-help">* Depoimentos precisam ser aprovados pelo usuário</p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="testimonials-list" id="testimonialsList">
+                            <!-- Depoimentos serão carregados via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Fotos -->
+                    <div class="tab-content" id="photosTab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>minhas fotos</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="photos-grid" id="photosGrid">
+                                    <!-- Fotos serão carregadas via JavaScript -->
+                                </div>
+                                <button class="btn btn-primary" onclick="uploadPhoto()">adicionar foto</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar perfil -->
+    <div class="modal hidden" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="close-btn" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label for="editName">Nome:</label>
+                        <input type="text" id="editName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">Nome de usuário:</label>
+                        <input type="text" id="editUsername" name="username" placeholder="Ex: ana_silva" pattern="[a-zA-Z0-9_]{3,20}" title="3-20 caracteres, apenas letras, números e _">
+                        <small class="form-help">Será usado no link do seu perfil: orkut.com/perfil/seu_username</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Status:</label>
+                        <input type="text" id="editStatus" name="status" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAge">Idade:</label>
+                        <input type="number" id="editAge" name="age" min="13" max="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRelationship">Relacionamento:</label>
+                        <select id="editRelationship" name="relationship">
+                            <option value="solteiro(a)">Solteiro(a)</option>
+                            <option value="namorando">Namorando</option>
+                            <option value="noivo(a)">Noivo(a)</option>
+                            <option value="casado(a)">Casado(a)</option>
+                            <option value="divorciado(a)">Divorciado(a)</option>
+                            <option value="viúvo(a)">Viúvo(a)</option>
+                            <option value="relacionamento aberto">Relacionamento aberto</option>
+                            <option value="é complicado">É complicado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocation">Localização:</label>
+                        <input type="text" id="editLocation" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBirthday">Aniversário:</label>
+                        <input type="date" id="editBirthday" name="birthday">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-light" onclick="closeModal('editProfileModal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar amigo -->
+    <div class="modal hidden" id="addFriendModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Amigo</h3>
+                <button class="close-btn" onclick="closeModal('addFriendModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addFriendForm" onsubmit="sendFriendRequest(event)">
+                    <div class="form-group">
+                        <label for="friendSearch">Buscar por nome ou username:</label>
+                        <input type="text" id="friendSearch" name="search" placeholder="Ex: ana_silva ou Ana Silva" required>
+                        <small class="form-help">Digite o nome de usuário ou nome completo da pessoa</small>
+                    </div>
+                    <div id="searchResults" class="search-results hidden">
+                        <!-- Resultados da busca aparecerão aqui -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="searchFriends()">Buscar</button>
+                        <button type="button" class="btn btn-light" onclick="closeModal('addFriendModal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para gerenciar amigos -->
+    <div class="modal hidden" id="manageFriendsModal">
+        <div class="modal-content" style="max-width: 80%;">
+            <div class="modal-header">
+                <h3>Gerenciar Amigos</h3>
+                <button class="close-btn" onclick="closeModal('manageFriendsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="friends-tabs">
+                    <button class="tab-btn active" onclick="showFriendsTab('friends')">Amigos <span class="badge badge-primary" id="friendsCountBadge">0</span></button>
+                    <button class="tab-btn" onclick="showFriendsTab('requests')">Solicitações <span class="badge badge-warning" id="requestsCountBadge">0</span></button>
+                    <button class="tab-btn" onclick="showFriendsTab('sent')">Enviadas <span class="badge badge-info" id="sentCountBadge">0</span></button>
+                </div>
+                
+                <!-- Lista de amigos -->
+                <div class="friends-tab-content active" id="friendsTabContent">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Buscar amigos..." onkeyup="filterFriends(this.value)" class="form-control">
+                    </div>
+                    <div id="friendsList" class="friends-list">
+                        <!-- Lista de amigos será carregada via JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Solicitações recebidas -->
+                <div class="friends-tab-content" id="requestsTabContent">
+                    <div id="friendRequestsList" class="friends-list">
+                        <!-- Solicitações recebidas serão carregadas via JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Solicitações enviadas -->
+                <div class="friends-tab-content" id="sentTabContent">
+                    <div id="sentRequestsList" class="friends-list">
+                        <!-- Solicitações enviadas serão carregadas via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para chamada de áudio -->
+    <div class="modal hidden" id="audioCallModal">
+        <div class="modal-content audio-call-modal">
+            <div class="call-interface">
+                <div class="call-header">
+                    <h3 id="callTitle">Conectando...</h3>
+                    <div class="call-status" id="callStatus">Iniciando chamada...</div>
+                </div>
+                
+                <div class="call-avatar">
+                    <img src="https://via.placeholder.com/120x120/a855c7/ffffff?text=Ana" alt="Perfil" id="callAvatar">
+                    <div class="call-animation">
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                    </div>
+                </div>
+                
+                <div class="call-info">
+                    <div class="call-name" id="callName">Ana Silva</div>
+                    <div class="call-timer" id="callTimer">00:00</div>
+                </div>
+                
+                <div class="call-controls">
+                    <button class="call-btn mute-btn" onclick="toggleMute()" id="muteBtn" title="Silenciar">
+                        <span class="btn-icon">🎤</span>
+                    </button>
+                    
+                    <button class="call-btn speaker-btn" onclick="toggleSpeaker()" id="speakerBtn" title="Alto-falante">
+                        <span class="btn-icon">🔊</span>
+                    </button>
+                    
+                    <button class="call-btn end-call-btn" onclick="endCall()" id="endCallBtn" title="Encerrar chamada">
+                        <span class="btn-icon">📞</span>
+                    </button>
+                </div>
+                
+                <div class="call-volume">
+                    <label>Volume:</label>
+                    <input type="range" min="0" max="100" value="70" id="volumeSlider" onchange="adjustVolume(this.value)">
+                    <span id="volumeLevel">70%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config/ai-credentials.js"></script>
+    <script src="js/ai-backend-manager.js"></script>
+    <script src="js/smart-save.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/audio-call.js"></script>
+</body>
+</html>

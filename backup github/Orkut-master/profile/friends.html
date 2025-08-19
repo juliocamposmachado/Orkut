@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Amigos - Orkut Retrô</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/feed.css">
+    <link rel="stylesheet" href="../css/friends-system.css">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <meta name="description" content="Gerencie seus amigos no Orkut Retrô">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1><a href="../home.html">orkut</a></h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="../home.html" class="nav-link">início</a>
+                <a href="../profile.html" class="nav-link">perfil</a>
+                <a href="./friends.html" class="nav-link active">amigos</a>
+                <a href="../messages.html" class="nav-link">mensagens</a>
+                <a href="../communities.html" class="nav-link">comunidades</a>
+            </nav>
+            
+            <div class="user-info">
+                <img id="headerUserPhoto" src="https://via.placeholder.com/32x32/a855c7/ffffff?text=U" alt="Foto do usuário" class="user-photo">
+                <span id="headerUserName">Usuário</span>
+                <a href="#" onclick="logout()" class="logout-link">sair</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-message" style="display: block;">
+        <p>🔍 Carregando seus amigos...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error-message" style="display: none;">
+        <h2>😔 Erro ao carregar amigos</h2>
+        <p>Não foi possível carregar sua lista de amigos. Tente novamente.</p>
+        <button onclick="location.reload()" class="btn btn-primary">🔄 Tentar Novamente</button>
+        <a href="../index.html" class="btn btn-secondary">🏠 Voltar ao Início</a>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-container" style="display: none;">
+        <div class="content-wrapper">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                <div class="user-card">
+                    <img id="sidebarUserPhoto" src="https://via.placeholder.com/80x80/a855c7/ffffff?text=U" alt="Foto do usuário">
+                    <div class="user-info">
+                        <h3 id="sidebarUserName">Usuário</h3>
+                        <p id="sidebarUserStatus">"Gerenciando amizades"</p>
+                    </div>
+                    <div class="user-stats">
+                        <div class="stat">
+                            <span class="number" id="totalFriends">0</span>
+                            <span class="label">amigos</span>
+                        </div>
+                        <div class="stat">
+                            <span class="number" id="totalRequests">0</span>
+                            <span class="label">solicitações</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h4>Ações rápidas</h4>
+                    <ul>
+                        <li><a href="javascript:void(0)" onclick="friendsManager.syncWithDatabase()">🔄 Sincronizar dados</a></li>
+                        <li><a href="javascript:void(0)" onclick="friendsManager.exportFriends()">📤 Exportar lista</a></li>
+                        <li><a href="../home.html">🏠 Voltar ao início</a></li>
+                        <li><a href="../messages.html">💬 Ver mensagens</a></li>
+                    </ul>
+                </div>
+
+                <div class="online-friends">
+                    <h4>Amigos online</h4>
+                    <div id="onlineFriendsList">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Feed -->
+            <section class="main-feed">
+                <div class="feed-header">
+                    <h2>Gerenciar Amigos</h2>
+                    <p>Conecte-se com seus amigos e expanda sua rede social</p>
+                </div>
+
+                <!-- Buscar Amigos -->
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">🔍 Buscar Novos Amigos</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="friendSearchInput" placeholder="Digite o nome ou email de um amigo..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" />
+                        </div>
+                        <div class="feed-actions">
+                            <button class="feed-action-btn" id="searchBtn">🔍 Buscar</button>
+                            <button class="feed-action-btn" id="suggestionsBtn">✨ Ver Sugestões</button>
+                        </div>
+                        <div id="searchResults" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <!-- Abas de Amigos -->
+                <div class="feed-item">
+                    <div class="friends-tabs">
+                        <button class="tab-btn active" data-tab="friends">👥 Meus Amigos <span class="badge badge-primary" id="friendsCount">0</span></button>
+                        <button class="tab-btn" data-tab="requests">📩 Solicitações <span class="badge badge-warning" id="requestsCount">0</span></button>
+                        <button class="tab-btn" data-tab="sent">📤 Enviadas <span class="badge badge-info" id="sentCount">0</span></button>
+                        <button class="tab-btn" data-tab="suggestions">✨ Sugestões <span class="badge badge-success" id="suggestionsCount">0</span></button>
+                    </div>
+
+                    <!-- Lista de Amigos -->
+                    <div id="friends" class="friends-tab-content active">
+                        <div class="friends-list" id="friendsList">
+                            <div class="empty-message">
+                                Você ainda não tem amigos conectados.<br>
+                                Use a busca acima para encontrar e adicionar amigos!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solicitações Recebidas -->
+                    <div id="requests" class="friends-tab-content">
+                        <div class="friends-list" id="friendRequestsList">
+                            <div class="empty-message">
+                                Nenhuma solicitação de amizade pendente.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solicitações Enviadas -->
+                    <div id="sent" class="friends-tab-content">
+                        <div class="friends-list" id="sentRequestsList">
+                            <div class="empty-message">
+                                Nenhuma solicitação enviada.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sugestões de Amigos -->
+                    <div id="suggestions" class="friends-tab-content">
+                        <div class="friends-list" id="suggestionsList">
+                            <div class="empty-message">
+                                Nenhuma sugestão de amigo no momento.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <div class="trending-communities">
+                    <h4>📊 Estatísticas Detalhadas</h4>
+                    <div style="padding: 10px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>👥 Amigos:</span>
+                            <strong id="statFriends">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>📩 Solicitações:</span>
+                            <strong id="statRequests">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>📤 Enviadas:</span>
+                            <strong id="statSent">0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>🌟 Online:</span>
+                            <strong id="onlineFriends">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-photos">
+                    <h4>💡 Dicas para Amizades</h4>
+                    <div style="padding: 10px 0; font-size: 12px; line-height: 1.4;">
+                        <p style="margin-bottom: 8px;">• Use o email completo para encontrar amigos</p>
+                        <p style="margin-bottom: 8px;">• Experimente buscar pelo nome completo</p>
+                        <p style="margin-bottom: 8px;">• Clique em "Sugestões" para descobrir amigos</p>
+                        <p style="margin-bottom: 8px;">• Aceite solicitações para expandir sua rede</p>
+                        <p style="margin-bottom: 8px;">• Mantenha seu perfil atualizado</p>
+                    </div>
+                </div>
+
+                <div class="birthdays">
+                    <h4>⚡ Ferramentas</h4>
+                    <div style="padding: 10px 0;">
+                        <button onclick="friendsManager.clearCache()" style="width: 100%; margin-bottom: 8px; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 11px;">🗑️ Limpar Cache</button>
+                        <p style="font-size: 10px; color: #666; text-align: center; margin: 0;">Clique para limpar dados salvos</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Status/Loading Indicator -->
+    <div id="savingIndicator" class="saving-indicator" style="display: none;">
+        💾 Salvando no banco de dados...
+    </div>
+
+    <script src="../public/js/api.js"></script>
+    <script>
+        class FriendsManager {
+            constructor() {
+                this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || this.getDefaultUser();
+                this.friends = [];
+                this.friendRequests = [];
+                this.sentRequests = [];
+                this.suggestions = [];
+                
+                this.init();
+            }
+
+            getDefaultUser() {
+                // Se não há usuário logado, criar um usuário padrão para demonstração
+                const defaultUser = {
+                    id: 'demo-user-' + Date.now(),
+                    username: 'usuario_demo',
+                    email: 'demo@orkut2025.com',
+                    name: 'Usuário Demo'
+                };
+                localStorage.setItem('currentUser', JSON.stringify(defaultUser));
+                return defaultUser;
+            }
+
+            async init() {
+                try {
+                    await this.loadDataFromDatabase();
+                    this.setupEventListeners();
+                    this.initTabs();
+                    this.renderAll();
+                    this.hideLoading();
+                } catch (error) {
+                    console.error('Erro ao inicializar:', error);
+                    this.showError();
+                }
+            }
+
+            async loadDataFromDatabase() {
+                try {
+                    // Carregar dados reais do banco via API
+                    const response = await this.makeApiCall('GET', `/api/friends?userId=${this.currentUser.id}`);
+                    
+                    if (response.success) {
+                        this.friends = response.friends || [];
+                        this.friendRequests = response.requests || [];
+                        this.sentRequests = response.sent || [];
+                        this.suggestions = response.suggestions || [];
+                    } else {
+                        // Fallback para dados locais se API não estiver disponível
+                        await this.loadLocalData();
+                    }
+                } catch (error) {
+                    console.warn('API não disponível, usando dados locais:', error);
+                    await this.loadLocalData();
+                }
+            }
+
+            async loadLocalData() {
+                // Simular dados para demonstração
+                this.friends = JSON.parse(localStorage.getItem('orkut2025_friends')) || this.getMockFriends();
+                this.friendRequests = JSON.parse(localStorage.getItem('orkut2025_friend_requests')) || this.getMockRequests();
+                this.sentRequests = JSON.parse(localStorage.getItem('orkut2025_sent_requests')) || [];
+                this.suggestions = this.getMockSuggestions();
+                
+                // Salvar mock data localmente
+                this.saveLocalData();
+            }
+
+            getMockFriends() {
+                return [
+                    {
+                        id: 'friend-1',
+                        username: 'maria_silva',
+                        name: 'Maria Silva',
+                        email: 'maria@email.com',
+                        photo: 'https://via.placeholder.com/48x48/667eea/ffffff?text=MS',
+                        status: 'online',
+                        location: 'São Paulo, SP',
+                        since: Date.now() - (30 * 24 * 60 * 60 * 1000), // 30 dias atrás
+                        mutualFriends: 5
+                    },
+                    {
+                        id: 'friend-2',
+                        username: 'joao_santos',
+                        name: 'João Santos',
+                        email: 'joao@email.com',
+                        photo: 'https://via.placeholder.com/48x48/764ba2/ffffff?text=JS',
+                        status: 'offline',
+                        location: 'Rio de Janeiro, RJ',
+                        since: Date.now() - (60 * 24 * 60 * 60 * 1000), // 60 dias atrás
+                        mutualFriends: 12
+                    },
+                    {
+                        id: 'friend-3',
+                        username: 'ana_costa',
+                        name: 'Ana Costa',
+                        email: 'ana@email.com',
+                        photo: 'https://via.placeholder.com/48x48/f093fb/ffffff?text=AC',
+                        status: 'online',
+                        location: 'Belo Horizonte, MG',
+                        since: Date.now() - (15 * 24 * 60 * 60 * 1000), // 15 dias atrás
+                        mutualFriends: 8
+                    }
+                ];
+            }
+
+            getMockRequests() {
+                return [
+                    {
+                        id: 'request-1',
+                        username: 'pedro_lima',
+                        name: 'Pedro Lima',
+                        email: 'pedro@email.com',
+                        photo: 'https://via.placeholder.com/48x48/4facfe/ffffff?text=PL',
+                        location: 'Salvador, BA',
+                        mutualFriends: 3,
+                        requestDate: Date.now() - (2 * 24 * 60 * 60 * 1000) // 2 dias atrás
+                    }
+                ];
+            }
+
+            getMockSuggestions() {
+                return [
+                    {
+                        id: 'suggestion-1',
+                        username: 'carlos_pereira',
+                        name: 'Carlos Pereira',
+                        email: 'carlos@email.com',
+                        photo: 'https://via.placeholder.com/48x48/00d2ff/ffffff?text=CP',
+                        location: 'Fortaleza, CE',
+                        mutualFriends: 15,
+                        reason: 'Amigos em comum'
+                    },
+                    {
+                        id: 'suggestion-2',
+                        username: 'luciana_oliveira',
+                        name: 'Luciana Oliveira',
+                        email: 'luciana@email.com',
+                        photo: 'https://via.placeholder.com/48x48/ff6b6b/ffffff?text=LO',
+                        location: 'Porto Alegre, RS',
+                        mutualFriends: 7,
+                        reason: 'Mesma localização'
+                    }
+                ];
+            }
+
+            saveLocalData() {
+                localStorage.setItem('orkut2025_friends', JSON.stringify(this.friends));
+                localStorage.setItem('orkut2025_friend_requests', JSON.stringify(this.friendRequests));
+                localStorage.setItem('orkut2025_sent_requests', JSON.stringify(this.sentRequests));
+            }
+
+            async makeApiCall(method, url, data = null) {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                return await response.json();
+            }
+
+            setupEventListeners() {
+                // Botão de busca
+                const searchBtn = document.getElementById('searchBtn');
+                const searchInput = document.getElementById('friendSearchInput');
+                
+                searchBtn?.addEventListener('click', () => this.searchFriends());
+                searchInput?.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.searchFriends();
+                });
+
+                // Botão de sugestões
+                const suggestionsBtn = document.getElementById('suggestionsBtn');
+                suggestionsBtn?.addEventListener('click', () => this.showSuggestions());
+            }
+
+            initTabs() {
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.friends-tab-content');
+                
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tabId = btn.getAttribute('data-tab');
+                        
+                        // Remover classe active de todas as abas
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        
+                        // Adicionar classe active na aba atual
+                        btn.classList.add('active');
+                        const targetTab = document.getElementById(tabId);
+                        if (targetTab) targetTab.classList.add('active');
+                    });
+                });
+            }
+
+            renderAll() {
+                this.updateCounts();
+                this.renderFriends();
+                this.renderRequests();
+                this.renderSentRequests();
+                this.renderSuggestions();
+                this.renderOnlineFriends();
+            }
+
+            updateCounts() {
+                const friendsCount = this.friends.length;
+                const requestsCount = this.friendRequests.length;
+                const sentCount = this.sentRequests.length;
+                const suggestionsCount = this.suggestions.length;
+                const onlineCount = this.friends.filter(f => f.status === 'online').length;
+
+                // Atualizar badges nas abas
+                this.updateElement('friendsCount', friendsCount);
+                this.updateElement('requestsCount', requestsCount);
+                this.updateElement('sentCount', sentCount);
+                this.updateElement('suggestionsCount', suggestionsCount);
+
+                // Atualizar sidebar esquerda
+                this.updateElement('totalFriends', friendsCount);
+                this.updateElement('totalRequests', requestsCount);
+                this.updateElement('onlineFriends', onlineCount);
+                
+                // Atualizar sidebar direita
+                this.updateElement('statFriends', friendsCount);
+                this.updateElement('statRequests', requestsCount);
+                this.updateElement('statSent', sentCount);
+            }
+
+            updateElement(id, value) {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value;
+            }
+
+            renderFriends() {
+                const container = document.getElementById('friendsList');
+                if (!container) return;
+
+                if (this.friends.length === 0) {
+                    container.innerHTML = '<div class="empty-message">Você ainda não tem amigos conectados.<br>Use a busca acima para encontrar e adicionar amigos!</div>';
+                    return;
+                }
+
+                const html = this.friends.map(friend => `
+                    <div class="friend-item">
+                        <img src="${friend.photo}" alt="${friend.name}" class="friend-photo">
+                        <div class="friend-info">
+                            <div class="friend-name">${friend.name}</div>
+                            <div class="friend-status ${friend.status}">${friend.status === 'online' ? 'Online' : 'Offline'}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                ${friend.location} • ${friend.mutualFriends} amigos em comum
+                            </div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">
+                                Amigos desde ${new Date(friend.since).toLocaleDateString('pt-BR')}
+                            </div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn btn-light" onclick="friendsManager.viewProfile('${friend.username}')">👁️ Ver Perfil</button>
+                            <button class="btn btn-primary" onclick="friendsManager.sendMessage('${friend.username}')">💬 Mensagem</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            renderRequests() {
+                const container = document.getElementById('friendRequestsList');
+                if (!container) return;
+
+                if (this.friendRequests.length === 0) {
+                    container.innerHTML = '<div class="empty-message">Nenhuma solicitação de amizade pendente.</div>';
+                    return;
+                }
+
+                const html = this.friendRequests.map(request => `
+                    <div class="friend-request-item">
+                        <img src="${request.photo}" alt="${request.name}" class="request-photo">
+                        <div class="request-info">
+                            <div class="request-name">${request.name}</div>
+                            <div class="request-username">@${request.username}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                ${request.location} • ${request.mutualFriends} amigos em comum
+                            </div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">
+                                Solicitação enviada ${new Date(request.requestDate).toLocaleDateString('pt-BR')}
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-primary" onclick="friendsManager.acceptRequest('${request.id}')">✅ Aceitar</button>
+                            <button class="btn btn-secondary" onclick="friendsManager.rejectRequest('${request.id}')">❌ Recusar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            renderSentRequests() {
+                const container = document.getElementById('sentRequestsList');
+                if (!container) return;
+
+                if (this.sentRequests.length === 0) {
+                    container.innerHTML = '<div class="empty-message">Nenhuma solicitação enviada.</div>';
+                    return;
+                }
+
+                const html = this.sentRequests.map(sent => `
+                    <div class="sent-request-item">
+                        <img src="${sent.photo}" alt="${sent.name}" class="sent-photo">
+                        <div class="sent-info">
+                            <div class="sent-name">${sent.name}</div>
+                            <div class="sent-username">@${sent.username}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                Solicitação enviada em ${new Date(sent.sentDate).toLocaleDateString('pt-BR')}
+                            </div>
+                        </div>
+                        <div class="sent-actions">
+                            <button class="btn btn-secondary" onclick="friendsManager.cancelRequest('${sent.id}')">🚫 Cancelar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            renderSuggestions() {
+                const container = document.getElementById('suggestionsList');
+                if (!container) return;
+
+                if (this.suggestions.length === 0) {
+                    container.innerHTML = '<div class="empty-message">Nenhuma sugestão de amigo no momento.</div>';
+                    return;
+                }
+
+                const html = this.suggestions.map(suggestion => `
+                    <div class="suggestion-item">
+                        <img src="${suggestion.photo}" alt="${suggestion.name}" class="result-photo">
+                        <div class="result-info">
+                            <div class="result-name">${suggestion.name}</div>
+                            <div class="result-username">@${suggestion.username}</div>
+                            <div class="suggestion-reason">${suggestion.reason}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                ${suggestion.location} • ${suggestion.mutualFriends} amigos em comum
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn btn-primary" onclick="friendsManager.sendFriendRequest('${suggestion.id}')">👥 Adicionar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            renderOnlineFriends() {
+                const container = document.getElementById('onlineFriendsList');
+                if (!container) return;
+
+                const onlineFriends = this.friends.filter(f => f.status === 'online');
+
+                if (onlineFriends.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #666; font-style: italic; padding: 20px;">Nenhum amigo online no momento</div>';
+                    return;
+                }
+
+                const html = onlineFriends.map(friend => `
+                    <div class="list-group-item">
+                        <img src="${friend.photo}" alt="${friend.name}" class="avatar-sm">
+                        <div>
+                            <div style="font-weight: bold; font-size: 11px;">${friend.name}</div>
+                            <div style="font-size: 10px; color: #28a745;">🟢 Online</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            async searchFriends() {
+                const query = document.getElementById('friendSearchInput')?.value.trim();
+                const resultsContainer = document.getElementById('searchResults');
+                
+                if (!query) {
+                    if (resultsContainer) resultsContainer.innerHTML = '';
+                    return;
+                }
+
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '<div class="loading-message">🔍 Buscando...</div>';
+                }
+
+                try {
+                    // Simular busca (substituir por chamada real de API)
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const mockResults = [
+                        {
+                            id: 'search-1',
+                            username: 'resultado_' + query.toLowerCase(),
+                            name: 'Resultado para ' + query,
+                            email: query.includes('@') ? query : query + '@email.com',
+                            photo: 'https://via.placeholder.com/48x48/6c5ce7/ffffff?text=' + query.charAt(0).toUpperCase(),
+                            location: 'Brasil',
+                            mutualFriends: Math.floor(Math.random() * 10)
+                        }
+                    ];
+
+                    this.renderSearchResults(mockResults);
+                } catch (error) {
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '<div class="no-results">❌ Erro ao buscar. Tente novamente.</div>';
+                    }
+                }
+            }
+
+            renderSearchResults(results) {
+                const container = document.getElementById('searchResults');
+                if (!container) return;
+
+                if (results.length === 0) {
+                    container.innerHTML = '<div class="no-results">😔 Nenhum resultado encontrado. Tente outros termos de busca.</div>';
+                    return;
+                }
+
+                const html = `
+                    <div class="search-results">
+                        <div class="search-results-header">
+                            📍 ${results.length} resultado${results.length > 1 ? 's' : ''} encontrado${results.length > 1 ? 's' : ''}
+                        </div>
+                        ${results.map(result => `
+                            <div class="search-result-item">
+                                <img src="${result.photo}" alt="${result.name}" class="result-photo">
+                                <div class="result-info">
+                                    <div class="result-name">${result.name}</div>
+                                    <div class="result-username">@${result.username}</div>
+                                    <div class="result-location">${result.location}</div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                                        ${result.mutualFriends} amigos em comum
+                                    </div>
+                                </div>
+                                <div class="result-actions">
+                                    <button class="btn btn-primary" onclick="friendsManager.sendFriendRequest('${result.id}')">👥 Adicionar</button>
+                                    <button class="btn btn-secondary" onclick="friendsManager.viewProfile('${result.username}')" style="margin-left: 8px;">👁️ Ver Perfil</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            showSuggestions() {
+                // Ativar aba de sugestões
+                document.querySelector('[data-tab="suggestions"]')?.click();
+            }
+
+            async sendFriendRequest(userId) {
+                this.showSavingIndicator();
+                
+                try {
+                    // Simular envio (substituir por chamada real de API)
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Adicionar à lista de enviadas
+                    const user = this.findUserById(userId);
+                    if (user) {
+                        this.sentRequests.push({
+                            ...user,
+                            sentDate: Date.now()
+                        });
+                    }
+
+                    await this.syncWithDatabase();
+                    this.renderAll();
+                    this.showMessage('✅ Solicitação de amizade enviada!', 'success');
+                    
+                } catch (error) {
+                    this.showMessage('❌ Erro ao enviar solicitação. Tente novamente.', 'error');
+                }
+                
+                this.hideSavingIndicator();
+            }
+
+            async acceptRequest(requestId) {
+                this.showSavingIndicator();
+                
+                try {
+                    const request = this.friendRequests.find(r => r.id === requestId);
+                    if (request) {
+                        // Mover para lista de amigos
+                        this.friends.push({
+                            ...request,
+                            since: Date.now(),
+                            status: Math.random() > 0.5 ? 'online' : 'offline'
+                        });
+                        
+                        // Remover da lista de solicitações
+                        this.friendRequests = this.friendRequests.filter(r => r.id !== requestId);
+                    }
+
+                    await this.syncWithDatabase();
+                    this.renderAll();
+                    this.showMessage('✅ Amigo adicionado com sucesso!', 'success');
+                    
+                } catch (error) {
+                    this.showMessage('❌ Erro ao aceitar solicitação. Tente novamente.', 'error');
+                }
+                
+                this.hideSavingIndicator();
+            }
+
+            async rejectRequest(requestId) {
+                this.friendRequests = this.friendRequests.filter(r => r.id !== requestId);
+                await this.syncWithDatabase();
+                this.renderAll();
+                this.showMessage('❌ Solicitação recusada.', 'info');
+            }
+
+            async cancelRequest(requestId) {
+                this.sentRequests = this.sentRequests.filter(r => r.id !== requestId);
+                await this.syncWithDatabase();
+                this.renderAll();
+                this.showMessage('🚫 Solicitação cancelada.', 'info');
+            }
+
+            findUserById(userId) {
+                // Buscar em todas as listas
+                return this.suggestions.find(s => s.id === userId) ||
+                       this.friends.find(f => f.id === userId) ||
+                       this.friendRequests.find(r => r.id === userId);
+            }
+
+            async syncWithDatabase() {
+                this.showSavingIndicator('🔄 Sincronizando com banco de dados...');
+                
+                try {
+                    // Simular sincronização com API
+                    const data = {
+                        userId: this.currentUser.id,
+                        friends: this.friends,
+                        friendRequests: this.friendRequests,
+                        sentRequests: this.sentRequests,
+                        timestamp: Date.now()
+                    };
+
+                    // Fazer chamada real para API
+                    await this.makeApiCall('POST', '/api/sync-friends', data);
+                    
+                    // Salvar localmente também
+                    this.saveLocalData();
+                    
+                    this.showMessage('✅ Dados sincronizados com sucesso!', 'success');
+                    
+                } catch (error) {
+                    console.warn('Erro na sincronização com API, salvando localmente:', error);
+                    this.saveLocalData();
+                    this.showMessage('💾 Dados salvos localmente.', 'info');
+                }
+                
+                this.hideSavingIndicator();
+            }
+
+            exportFriends() {
+                const data = {
+                    exportDate: new Date().toISOString(),
+                    totalFriends: this.friends.length,
+                    friends: this.friends.map(f => ({
+                        name: f.name,
+                        username: f.username,
+                        email: f.email,
+                        location: f.location,
+                        since: new Date(f.since).toISOString()
+                    }))
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `orkut2025-amigos-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showMessage('📤 Lista de amigos exportada!', 'success');
+            }
+
+            clearCache() {
+                if (confirm('⚠️ Tem certeza que deseja limpar o cache? Isso removerá todos os dados salvos localmente.')) {
+                    localStorage.removeItem('orkut2025_friends');
+                    localStorage.removeItem('orkut2025_friend_requests');
+                    localStorage.removeItem('orkut2025_sent_requests');
+                    
+                    this.showMessage('🗑️ Cache limpo com sucesso!', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            }
+
+            viewProfile(username) {
+                window.open(`../profile/?u=${username}`, '_blank');
+            }
+
+            sendMessage(username) {
+                window.open(`../public/mensagens.html?to=${username}`, '_blank');
+            }
+
+            showSavingIndicator(message = '💾 Salvando no banco de dados...') {
+                const indicator = document.getElementById('savingIndicator');
+                if (indicator) {
+                    indicator.textContent = message;
+                    indicator.style.display = 'block';
+                }
+            }
+
+            hideSavingIndicator() {
+                const indicator = document.getElementById('savingIndicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                // Criar notificação temporária
+                const notification = document.createElement('div');
+                notification.className = 'saving-indicator';
+                notification.textContent = message;
+                notification.style.backgroundColor = type === 'success' ? '#28a745' : 
+                                                   type === 'error' ? '#dc3545' : '#17a2b8';
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 3000);
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }
+
+            showError() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        let friendsManager;
+        document.addEventListener('DOMContentLoaded', function() {
+            friendsManager = new FriendsManager();
+        });
+
+        // Função de logout
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('isLoggedIn');
+                window.location.href = '../index.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orkut2025 - Amigos</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/friends-system.css" />
+</head>
+<body>
+  <!-- Navegação -->
+  <nav class="nav">
+    <div class="container">
+      <div class="nav-container">
+        <a href="/index.html" class="nav-logo">
+          <img src="/images/orkut.png" alt="Orkut" style="height: 24px; margin-right: 8px; vertical-align: middle;" />
+          Orkut2025
+        </a>
+        <div class="nav-menu">
+          <a href="/index.html">🏠 início</a>
+          <a href="/profile.html">👤 perfil</a>
+          <a href="/amigos.html" class="active">👥 amigos</a>
+          <a href="/mensagens.html">💬 mensagens</a>
+          <a href="/comunidades.html">🌐 comunidades</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <div class="container">
+    <div class="row">
+      <div class="col-8">
+        <!-- Buscar Amigos -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🔍 Buscar Amigos</h3>
+          </div>
+          <div class="card-body">
+            <div class="search-bar">
+              <input type="text" id="friendSearchInput" placeholder="Digite o nome ou email de um amigo..." />
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <button class="btn btn-primary" id="searchBtn">🔍 Buscar</button>
+                <button class="btn btn-secondary suggestions-btn" id="suggestionsBtn" style="margin-left: 10px;">✨ Sugestões</button>
+              </div>
+              <div class="col-6 text-right">
+                <div class="help-text">💡 Dica: Busque por nome completo ou email</div>
+              </div>
+            </div>
+            <div id="searchResults"></div>
+          </div>
+        </div>
+
+        <!-- Abas de Amigos -->
+        <div class="card">
+          <div class="friends-tabs">
+            <button class="tab-btn active" data-tab="friends">👥 Meus Amigos <span class="badge badge-primary" id="friendsCount">0</span></button>
+            <button class="tab-btn" data-tab="requests">📩 Solicitações <span class="badge badge-warning" id="requestsCount">0</span></button>
+            <button class="tab-btn" data-tab="sent">📤 Enviadas <span class="badge badge-info" id="sentCount">0</span></button>
+          </div>
+
+          <!-- Lista de Amigos -->
+          <div id="friends" class="friends-tab-content active">
+            <div class="friends-list" id="friendsList">
+              <div class="empty-message">
+                Você ainda não tem amigos conectados.<br>
+                Use a busca acima para encontrar e adicionar amigos!
+              </div>
+            </div>
+          </div>
+
+          <!-- Solicitações Recebidas -->
+          <div id="requests" class="friends-tab-content">
+            <div class="friends-list" id="friendRequestsList">
+              <div class="empty-message">
+                Nenhuma solicitação de amizade pendente.
+              </div>
+            </div>
+          </div>
+
+          <!-- Solicitações Enviadas -->
+          <div id="sent" class="friends-tab-content">
+            <div class="friends-list" id="sentRequestsList">
+              <div class="empty-message">
+                Nenhuma solicitação enviada.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-4">
+        <!-- Estatísticas -->
+        <div class="sidebar">
+          <div class="sidebar-title">📊 Estatísticas</div>
+          <div class="list-group">
+            <div class="list-group-item">
+              👥 <strong>Amigos:</strong> <span id="totalFriends">0</span>
+            </div>
+            <div class="list-group-item">
+              📩 <strong>Solicitações:</strong> <span id="totalRequests">0</span>
+            </div>
+            <div class="list-group-item">
+              📤 <strong>Enviadas:</strong> <span id="totalSent">0</span>
+            </div>
+            <div class="list-group-item">
+              🌟 <strong>Amigos Online:</strong> <span id="onlineFriends">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amigos Online -->
+        <div class="sidebar">
+          <div class="sidebar-title">🟢 Amigos Online</div>
+          <div id="onlineFriendsList">
+            <div style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+              Nenhum amigo online no momento
+            </div>
+          </div>
+        </div>
+
+        <!-- Dicas -->
+        <div class="sidebar">
+          <div class="sidebar-title">💡 Dicas</div>
+          <ul class="search-tips">
+            <li>Use o email completo para encontrar amigos</li>
+            <li>Experimente buscar pelo nome completo</li>
+            <li>Clique em "Sugestões" para descobrir amigos</li>
+            <li>Aceite solicitações para expandir sua rede</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2025 Orkut2025</footer>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/voice.js"></script>
+  <script>
+    window.App && window.App.initFriends && window.App.initFriends();
+    window.Voice && window.Voice.init && window.Voice.init();
+  </script>
+</body>
+</html>

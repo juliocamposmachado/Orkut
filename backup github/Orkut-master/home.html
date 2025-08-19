@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut Retrô - Início</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/feed.css">
+    <link rel="stylesheet" href="css/ai-system.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1><a href="home.html">orkut</a></h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="home.html" class="nav-link active">início</a>
+                <a href="profile.html" class="nav-link">perfil</a>
+                <a href="friends.html" class="nav-link">amigos</a>
+                <a href="messages.html" class="nav-link">mensagens</a>
+                <a href="communities.html" class="nav-link">comunidades</a>
+            </nav>
+            
+            <div class="user-info">
+                <img id="headerUserPhoto" src="https://via.placeholder.com/32x32/a855c7/ffffff?text=U" alt="Foto do usuário" class="user-photo">
+                <span id="headerUserName">Usuário</span>
+                <a href="#" onclick="logout()" class="logout-link">sair</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                <div class="user-card">
+                    <img id="sidebarUserPhoto" src="https://via.placeholder.com/80x80/a855c7/ffffff?text=U" alt="Foto do usuário">
+                    <div class="user-info">
+                        <h3 id="sidebarUserName">Usuário</h3>
+                        <p id="sidebarUserStatus">"Status do usuário"</p>
+                    </div>
+                    <div class="user-stats">
+                        <div class="stat">
+                            <span class="number" id="sidebarFriendsCount">0</span>
+                            <span class="label">amigos</span>
+                        </div>
+                        <div class="stat">
+                            <span class="number" id="sidebarProfileViews">0</span>
+                            <span class="label">visitas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h4>Ações rápidas</h4>
+                    <ul>
+                        <li><a href="profile.html">Ver meu perfil</a></li>
+                        <li><a href="friends.html">Procurar amigos</a></li>
+                        <li><a href="communities.html">Encontrar comunidades</a></li>
+                        <li><a href="messages.html">Ver mensagens</a></li>
+                    </ul>
+                </div>
+
+                <div class="online-friends">
+                    <h4>Amigos online</h4>
+                    <div id="onlineFriendsList">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Feed -->
+            <section class="main-feed">
+                <div class="feed-header">
+                    <h2>Últimas atualizações</h2>
+                    <p>Veja o que seus amigos estão fazendo</p>
+                </div>
+
+                <!-- Welcome Message -->
+                <div class="feed-item welcome-message">
+                    <div class="feed-header-info">
+                        <img src="images/orkut.png" alt="Orkut" class="feed-avatar">
+                        <div class="feed-author-info">
+                            <span class="feed-author">Orkut Retrô</span>
+                            <span class="feed-time">agora</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <h3>🎉 Bem-vindo de volta ao Orkut!</h3>
+                        <p>A rede social dos anos 2000 está de volta! Reconnecte-se com seus amigos, participe de comunidades e reviva os melhores momentos da internet retrô. Que a nostalgia comece! 💜</p>
+                        <div class="feed-actions">
+                            <button class="feed-action-btn">❤️ Curtir</button>
+                            <button class="feed-action-btn">💬 Comentar</button>
+                            <button class="feed-action-btn">📤 Compartilhar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed Items -->
+                <div id="feedContainer">
+                    <div class="loading">
+                        <p>Carregando feed...</p>
+                    </div>
+                </div>
+
+                <!-- Load More -->
+                <div class="load-more">
+                    <button onclick="loadMoreFeed()" class="btn btn-secondary">Carregar mais</button>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <div class="trending-communities">
+                    <h4>Comunidades em alta</h4>
+                    <div id="trendingCommunitiesList">
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+
+                <div class="recent-photos">
+                    <h4>Fotos recentes</h4>
+                    <div class="photos-grid">
+                        <div class="photo-item">
+                            <img src="images/julio.webp" alt="Foto">
+                        </div>
+                        <div class="photo-item">
+                            <img src="images/juliette.jpg" alt="Foto">
+                        </div>
+                        <div class="photo-item">
+                            <img src="images/Abujamra.jpg" alt="Foto">
+                        </div>
+                        <div class="photo-item">
+                            <img src="images/orkut.png" alt="Foto">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="birthdays">
+                    <h4>Aniversários</h4>
+                    <div id="birthdaysList">
+                        <p>Nenhum aniversário hoje</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- SmartSave System -->
+    <script src="config/ai-credentials.js"></script>
+    <script src="js/ai-backend-manager.js"></script>
+    <script src="js/smart-save.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/feed.js"></script>
+    <script src="js/startup-check.js"></script>
+</body>
+</html>

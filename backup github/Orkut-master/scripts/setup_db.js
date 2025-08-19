@@ -13,26 +13,24 @@ async function setupDB() {
   
   const connectionString = process.env.DATABASE_URL || testConnectionString;
 
-  // Configuração SSL otimizada para Supabase
+  // Configuração SSL inteligente para Supabase
   function getSSLConfig() {
     const fs = require('fs');
     const path = require('path');
     
-    // Se estivermos em produção, usar SSL mais rigoroso
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Setup: Modo produção - SSL rigoroso');
+    // Tenta usar certificado personalizado se existir
+    const certPath = path.join(__dirname, '..', 'certs', 'prod-ca-2021.crt');
+    if (fs.existsSync(certPath)) {
+      console.log('Setup: Usando certificado SSL personalizado:', certPath);
       return {
         rejectUnauthorized: true,
-        sslmode: 'require'
+        ca: fs.readFileSync(certPath).toString()
       };
     }
     
-    // Para desenvolvimento, usar configuração flexível
-    console.log('Setup: Modo desenvolvimento - SSL flexível');
-    return {
-      rejectUnauthorized: false,
-      sslmode: 'prefer'
-    };
+    // Fallback para configuração padrão Supabase
+    console.log('Setup: Usando SSL padrão (rejectUnauthorized: false)');
+    return { rejectUnauthorized: false };
   }
 
   const pool = new Pool({

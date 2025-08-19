@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Música - Orkut Retrô</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/spotify-integration.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="Conecte seu Spotify e ouça música no Orkut Retrô">
+    
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1><a href="home.html">orkut</a></h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="home.html" class="nav-link">início</a>
+                <a href="profile.html" class="nav-link">perfil</a>
+                <a href="profile/friends.html" class="nav-link">amigos</a>
+                <a href="messages.html" class="nav-link">mensagens</a>
+                <a href="communities.html" class="nav-link">comunidades</a>
+                <a href="spotify.html" class="nav-link active">🎵 música</a>
+            </nav>
+            
+            <div class="user-info">
+                <img id="headerUserPhoto" src="https://via.placeholder.com/32x32/a855c7/ffffff?text=U" alt="Foto do usuário" class="user-photo">
+                <span id="headerUserName">Usuário</span>
+                <a href="#" onclick="logout()" class="logout-link">sair</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-message" style="display: block;">
+        <p>🎵 Carregando Spotify...</p>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-container" style="display: none;">
+        <div class="content-wrapper">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                <div class="user-card">
+                    <img id="sidebarUserPhoto" src="https://via.placeholder.com/80x80/a855c7/ffffff?text=U" alt="Foto do usuário">
+                    <div class="user-info">
+                        <h3 id="sidebarUserName">Usuário</h3>
+                        <p id="sidebarUserStatus">"Ouvindo música nostálgica"</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h4>🎵 Ações Musicais</h4>
+                    <ul>
+                        <li><a href="javascript:void(0)" onclick="connectToSpotify()">🔗 Conectar Spotify</a></li>
+                        <li><a href="javascript:void(0)" onclick="createNostalgicPlaylist('2000s')">💿 Playlist dos Anos 2000</a></li>
+                        <li><a href="javascript:void(0)" onclick="shareCurrentMusic()">📤 Compartilhar Música</a></li>
+                        <li><a href="javascript:void(0)" onclick="setProfileMusic()">🎶 Música do Perfil</a></li>
+                    </ul>
+                </div>
+
+                <!-- Now Playing -->
+                <div class="now-playing">
+                    <h4>🎧 Tocando Agora</h4>
+                    <div id="nowPlayingInfo">
+                        <p>Conecte seu Spotify para ver!</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Feed -->
+            <section class="main-feed">
+                <div class="feed-header">
+                    <h2>🎵 Central de Música do Orkut</h2>
+                    <p>Conecte seu Spotify e reviva a nostalgia musical dos anos 2000!</p>
+                </div>
+
+                <!-- Spotify Connection Card -->
+                <div class="feed-item spotify-connection-card">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <img src="https://via.placeholder.com/40x40/d63384/ffffff?text=S" alt="Spotify" class="feed-author-photo">
+                            <span class="feed-author">🎵 Conectar com Spotify</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div id="spotify-connection">
+                            <div class="spotify-disconnected">
+                                <h3>🎶 Bem-vindo à Central Musical!</h3>
+                                <p>Conecte sua conta do Spotify para:</p>
+                                <ul class="benefits-list">
+                                    <li>🎧 Ouvir música diretamente no Orkut</li>
+                                    <li>💿 Ter uma música no seu perfil (como no Orkut original!)</li>
+                                    <li>🎵 Compartilhar o que está ouvindo nos posts</li>
+                                    <li>📻 Descobrir playlists nostálgicas dos anos 2000</li>
+                                    <li>🤖 IA criar playlists personalizadas para você</li>
+                                </ul>
+                                <button class="btn btn-spotify" onclick="connectToSpotify()">
+                                    🎵 Conectar com Spotify
+                                </button>
+                                <p class="disclaimer">
+                                    ⚠️ Você será redirecionado para o login do Spotify. É seguro!
+                                </p>
+                            </div>
+                            
+                            <div class="spotify-connected" style="display: none;">
+                                <h3>✅ Spotify Conectado!</h3>
+                                <p>Agora você pode aproveitar todas as funcionalidades musicais!</p>
+                                <div class="connected-features">
+                                    <button class="btn btn-success" onclick="window.open('https://open.spotify.com/browse', '_blank')">
+                                        🎧 Abrir Web Player
+                                    </button>
+                                    <button class="btn btn-primary" onclick="createNostalgicPlaylist('2000s')">
+                                        💿 Playlist Nostálgica
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spotify Web Player Container -->
+                <div class="feed-item" id="spotify-player-container" style="display: none;">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <img src="https://via.placeholder.com/40x40/1db954/ffffff?text=🎵" alt="Player" class="feed-author-photo">
+                            <span class="feed-author">Spotify Web Player</span>
+                        </div>
+                        <div class="feed-actions">
+                            <button class="btn btn-sm" onclick="document.getElementById('spotify-player-container').style.display='none'">
+                                <span id="player-toggle-text">Minimizar</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div id="spotify-web-player">
+                            <iframe 
+                                src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4o1oenSJRJd" 
+                                width="100%" 
+                                height="380" 
+                                frameborder="0" 
+                                allowtransparency="true" 
+                                allow="encrypted-media">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Posts Feed -->
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">🎵 Posts Musicais</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div id="music-posts">
+                            <div class="music-post">
+                                <div class="post-author">
+                                    <img src="https://via.placeholder.com/32x32/667eea/ffffff?text=A" alt="Ana">
+                                    <div>
+                                        <strong>Ana Nostalgia</strong>
+                                        <span class="post-time">2 horas atrás</span>
+                                    </div>
+                                </div>
+                                <div class="post-content">
+                                    <p>Acabei de colocar "Bring Me To Life" do Evanescence! 🎵 Que saudade dessa época! 🖤</p>
+                                    <div class="spotify-embed">
+                                        <iframe src="https://open.spotify.com/embed/track/0COqiPhxzoWnW7kpCP0wHj" width="100%" height="152" frameborder="0"></iframe>
+                                    </div>
+                                </div>
+                                <div class="post-actions">
+                                    <button>❤️ 12</button>
+                                    <button>💬 5</button>
+                                    <button>🔄 2</button>
+                                </div>
+                            </div>
+
+                            <div class="music-post">
+                                <div class="post-author">
+                                    <img src="https://via.placeholder.com/32x32/764ba2/ffffff?text=J" alt="João">
+                                    <div>
+                                        <strong>João Gamer</strong>
+                                        <span class="post-time">4 horas atrás</span>
+                                    </div>
+                                </div>
+                                <div class="post-content">
+                                    <p>Playlist dos games dos anos 2000! 🎮 Vice City vibes! 🌴</p>
+                                    <div class="spotify-embed">
+                                        <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DWWzBc3TOlaAV" width="100%" height="152" frameborder="0"></iframe>
+                                    </div>
+                                </div>
+                                <div class="post-actions">
+                                    <button>❤️ 8</button>
+                                    <button>💬 3</button>
+                                    <button>🔄 1</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <!-- Trending Music -->
+                <div class="trending-communities">
+                    <h4>🔥 Músicas em Alta</h4>
+                    <div class="trending-songs">
+                        <div class="song-item">
+                            <img src="https://via.placeholder.com/40x40/d63384/ffffff?text=🎵" alt="Song">
+                            <div>
+                                <strong>My Immortal</strong>
+                                <p>Evanescence</p>
+                            </div>
+                        </div>
+                        <div class="song-item">
+                            <img src="https://via.placeholder.com/40x40/a855c7/ffffff?text=🎵" alt="Song">
+                            <div>
+                                <strong>In The End</strong>
+                                <p>Linkin Park</p>
+                            </div>
+                        </div>
+                        <div class="song-item">
+                            <img src="https://via.placeholder.com/40x40/d63384/ffffff?text=🎵" alt="Song">
+                            <div>
+                                <strong>Complicated</strong>
+                                <p>Avril Lavigne</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nostalgic Playlists -->
+                <div class="recent-photos">
+                    <h4>💿 Playlists Nostálgicas</h4>
+                    <div class="playlist-grid">
+                        <div class="playlist-item" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX4o1oenSJRJd', '_blank')">
+                            <img src="https://via.placeholder.com/60x60/d63384/ffffff?text=00s" alt="2000s">
+                            <span>Hits dos 2000</span>
+                        </div>
+                        <div class="playlist-item" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U', '_blank')">
+                            <img src="https://via.placeholder.com/60x60/a855c7/ffffff?text=EMO" alt="Emo">
+                            <span>Emo Rock</span>
+                        </div>
+                        <div class="playlist-item" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DWY4xmpBXqCx1', '_blank')">
+                            <img src="https://via.placeholder.com/60x60/d63384/ffffff?text=POP" alt="Pop">
+                            <span>Pop Punk</span>
+                        </div>
+                        <div class="playlist-item" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX1jqPwCJObdk', '_blank')">
+                            <img src="https://via.placeholder.com/60x60/a855c7/ffffff?text=NU" alt="Metal">
+                            <span>Nu Metal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Stats -->
+                <div class="birthdays">
+                    <h4>📊 Suas Stats Musicais</h4>
+                    <div id="music-stats">
+                        <p>🎧 Minutos ouvidos hoje: <strong>0</strong></p>
+                        <p>🎵 Músicas tocadas: <strong>0</strong></p>
+                        <p>💿 Artista favorito: <strong>-</strong></p>
+                        <p>🔥 Streak: <strong>0 dias</strong></p>
+                    </div>
+                    <p style="font-size: 10px; color: #666; text-align: center;">
+                        Conecte o Spotify para ver suas estatísticas!
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Spotify Integration Script -->
+    <script src="js/spotify-integration.js"></script>
+    <script>
+        // Hide loading and show content when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // SpotifyIntegration is initialized automatically by the script
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }, 1000);
+        });
+
+        // Logout function
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('spotify_access_token');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

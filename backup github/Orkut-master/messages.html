@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens - Orkut Retrô</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/messages.css">
+</head>
+<body>
+    <!-- Navegação -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <a href="home.html" class="nav-logo">orkut retrô</a>
+                <ul class="nav-menu">
+                    <li><a href="home.html">início</a></li>
+                    <li><a href="profile.html">perfil</a></li>
+                    <li><a href="friends.html">amigos</a></li>
+                    <li><a href="communities.html">comunidades</a></li>
+                    <li><a href="messages.html" class="active">mensagens <span class="badge badge-primary" id="unreadCount">3</span></a></li>
+                    <li><a href="search.html">buscar</a></li>
+                    <li><a href="index.html" onclick="logout()">sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="messages-container">
+            <!-- Header das mensagens -->
+            <div class="messages-header">
+                <div class="header-content">
+                    <h1>Mensagens</h1>
+                    <p>Conversas privadas com seus amigos</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showNewMessage()">nova mensagem</button>
+                    <button class="btn btn-light" onclick="markAllAsRead()">marcar todas como lidas</button>
+                </div>
+            </div>
+
+            <!-- Layout principal -->
+            <div class="messages-content">
+                <!-- Sidebar das conversas -->
+                <div class="messages-sidebar">
+                    <!-- Filtros -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📬 filtros</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" onclick="filterMessages('all')" data-filter="all">
+                                    <span class="filter-icon">💬</span>
+                                    <span>Todas</span>
+                                    <span class="filter-count" id="allCount">12</span>
+                                </button>
+                                <button class="filter-btn" onclick="filterMessages('unread')" data-filter="unread">
+                                    <span class="filter-icon">🔴</span>
+                                    <span>Não lidas</span>
+                                    <span class="filter-count" id="unreadFilterCount">3</span>
+                                </button>
+                                <button class="filter-btn" onclick="filterMessages('sent')" data-filter="sent">
+                                    <span class="filter-icon">📤</span>
+                                    <span>Enviadas</span>
+                                    <span class="filter-count" id="sentCount">8</span>
+                                </button>
+                                <button class="filter-btn" onclick="filterMessages('archived')" data-filter="archived">
+                                    <span class="filter-icon">📦</span>
+                                    <span>Arquivadas</span>
+                                    <span class="filter-count" id="archivedCount">2</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Busca -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>🔍 buscar mensagens</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="search-box">
+                                <input type="text" id="messageSearch" placeholder="Buscar por remetente ou conteúdo..." onkeyup="searchMessages()">
+                                <button class="btn btn-light btn-sm" onclick="searchMessages()">buscar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contatos online -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>🟢 amigos online</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="online-friends" id="onlineFriends">
+                                <!-- Carregado via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área principal -->
+                <div class="messages-main">
+                    <!-- Lista de conversas -->
+                    <div class="conversations-list" id="conversationsList">
+                        <!-- Conversas serão carregadas via JavaScript -->
+                    </div>
+
+                    <!-- Estado vazio -->
+                    <div class="empty-state hidden" id="emptyState">
+                        <div class="icon">📭</div>
+                        <h3>Nenhuma mensagem encontrada</h3>
+                        <p>Que tal enviar uma mensagem para um amigo?</p>
+                        <button class="btn btn-primary" onclick="showNewMessage()">Enviar primeira mensagem</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nova mensagem -->
+    <div class="modal hidden" id="newMessageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nova Mensagem</h3>
+                <button class="close-btn" onclick="closeModal('newMessageModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newMessageForm" onsubmit="sendNewMessage(event)">
+                    <div class="form-group">
+                        <label for="messageRecipient">Para:</label>
+                        <input type="text" id="messageRecipient" name="recipient" placeholder="Digite o nome do amigo..." required>
+                        <div class="recipient-suggestions" id="recipientSuggestions">
+                            <!-- Sugestões aparecerão aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="messageSubject">Assunto:</label>
+                        <input type="text" id="messageSubject" name="subject" maxlength="100" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="messageContent">Mensagem:</label>
+                        <textarea id="messageContent" name="content" rows="6" placeholder="Escreva sua mensagem aqui..." required></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span>/1000 caracteres
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+                        <button type="button" class="btn btn-light" onclick="closeModal('newMessageModal')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar mensagem -->
+    <div class="modal hidden" id="messageModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="messageModalTitle">Mensagem</h3>
+                <button class="close-btn" onclick="closeModal('messageModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message-thread" id="messageThread">
+                    <!-- Thread da conversa será carregada aqui -->
+                </div>
+                
+                <!-- Resposta -->
+                <div class="reply-section">
+                    <h4>Responder:</h4>
+                    <form id="replyForm" onsubmit="sendReply(event)">
+                        <textarea id="replyContent" name="reply" rows="4" placeholder="Digite sua resposta..." required></textarea>
+                        <div class="reply-actions">
+                            <button type="submit" class="btn btn-primary">Responder</button>
+                            <button type="button" class="btn btn-light" onclick="closeMessageModal()">Fechar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação -->
+    <div class="modal hidden" id="confirmModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Confirmar</h3>
+                <button class="close-btn" onclick="closeModal('confirmModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Tem certeza que deseja executar esta ação?</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-primary" id="confirmYes">Sim</button>
+                    <button class="btn btn-light" onclick="closeModal('confirmModal')">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/messages.js"></script>
+</body>
+</html>

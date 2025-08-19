@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orkut2025 - Comunidades</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <div>Orkut2025</div>
+    <nav>
+      <a href="/index.html">Início</a>
+      <a href="/feed.html">Feed</a>
+      <a href="/profile.html">Perfil</a>
+      <a href="/amigos.html">Amigos</a>
+      <a href="/mensagens.html">Mensagens</a>
+      <a href="/comunidades.html">Comunidades</a>
+      <a href="/settings.html">Configurações</a>
+    </nav>
+  </header>
+  <main>
+    <div class="card">
+      <h1>Comunidades</h1>
+      <div class="grid cols-2">
+        <div>
+          <h3>Criar Comunidade</h3>
+          <input class="input" id="communityNameInput" placeholder="Nome da comunidade" />
+          <input class="input" id="communityCategoryInput" placeholder="Categoria" style="margin-top:8px" />
+          <textarea id="communityDescInput" rows="3" placeholder="Descrição..." style="margin-top:8px"></textarea>
+          <button class="btn" id="createCommunityBtn" style="margin-top:8px">Criar</button>
+        </div>
+        <div>
+          <h3>Buscar Comunidades</h3>
+          <input class="input" id="searchCommunityInput" placeholder="Buscar por nome ou categoria" />
+          <button class="btn secondary" id="searchCommunityBtn" style="margin-top:8px">Buscar</button>
+          <div id="communityStatus" style="margin-top:8px;color:#065f46"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Minhas Comunidades</h2>
+      <div id="myCommunities">
+        <div class="center" style="color:#6b7280">Você ainda não participa de nenhuma comunidade</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Comunidades Populares</h2>
+      <div id="popularCommunities">
+        <div class="center" style="color:#6b7280">Carregando comunidades...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resultados da Busca</h2>
+      <div id="searchResults" style="display:none">
+        <div class="center" style="color:#6b7280">Nenhum resultado encontrado</div>
+      </div>
+    </div>
+  </main>
+  <footer>© 2025 Orkut2025</footer>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/voice.js"></script>
+  <script>
+    window.App && window.App.initCommunities && window.App.initCommunities();
+    window.Voice && window.Voice.init && window.Voice.init();
+  </script>
+</body>
+</html>

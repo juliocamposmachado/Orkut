@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Integração SmartSave + ORKY-DB-AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .demo-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        .demo-button:hover {
+            background: #45a049;
+        }
+        
+        .demo-button.secondary {
+            background: #2196F3;
+        }
+        
+        .demo-button.secondary:hover {
+            background: #0b7dda;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        
+        .status-display {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .emoji {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Demo - SmartSave + ORKY-DB-AI Integration</h1>
+    <p>Esta página demonstra como as interações sociais são processadas automaticamente pela ORKY-DB-AI através do SmartSave.</p>
+    
+    <!-- Status da IA -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">🔧</span>
+            Status do Sistema
+        </h2>
+        <button class="demo-button secondary" onclick="checkSystemStatus()">
+            Verificar Status da IA Backend
+        </button>
+        <button class="demo-button secondary" onclick="checkSmartSaveStatus()">
+            Verificar Status SmartSave
+        </button>
+        <div id="systemStatus" class="status-display"></div>
+    </div>
+    
+    <!-- Demo Postagem -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">📝</span>
+            Nova Postagem
+        </h2>
+        <textarea id="postContent" placeholder="Escreva seu post aqui...">Olá pessoal! Testando a integração da IA com o Orkut 2025! 🚀</textarea>
+        <br>
+        <select id="postType">
+            <option value="status">Status</option>
+            <option value="photo">Foto</option>
+            <option value="video">Vídeo</option>
+        </select>
+        <button class="demo-button" onclick="createPost()">
+            📝 Publicar Post
+        </button>
+    </div>
+    
+    <!-- Demo Scrap -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">💬</span>
+            Enviar Scrap
+        </h2>
+        <input type="text" id="scrapToUserId" placeholder="ID do usuário destinatário" value="user_123">
+        <textarea id="scrapContent" placeholder="Mensagem do scrap...">Oi! Como você está? Saudades do Orkut! 💙</textarea>
+        <br>
+        <label>
+            <input type="checkbox" id="scrapPublic" checked> Scrap público
+        </label>
+        <br><br>
+        <button class="demo-button" onclick="sendScrap()">
+            💬 Enviar Scrap
+        </button>
+    </div>
+    
+    <!-- Demo Curtida -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">❤️</span>
+            Curtir Post
+        </h2>
+        <input type="text" id="likePostId" placeholder="ID do post" value="post_456">
+        <button class="demo-button" onclick="likePost()">
+            ❤️ Curtir Post
+        </button>
+    </div>
+    
+    <!-- Demo Amizade -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">👥</span>
+            Pedido de Amizade
+        </h2>
+        <input type="text" id="friendUserId" placeholder="ID do usuário" value="user_789">
+        <select id="friendshipStatus">
+            <option value="pending">Enviar Pedido</option>
+            <option value="accepted">Aceitar Pedido</option>
+            <option value="declined">Recusar Pedido</option>
+        </select>
+        <button class="demo-button" onclick="manageFriendship()">
+            👥 Processar Amizade
+        </button>
+    </div>
+    
+    <!-- Demo Visualização de Perfil -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">👁️</span>
+            Visualizar Perfil
+        </h2>
+        <input type="text" id="viewProfileUserId" placeholder="ID do perfil" value="user_321">
+        <button class="demo-button" onclick="viewProfile()">
+            👁️ Visualizar Perfil
+        </button>
+    </div>
+    
+    <!-- Console Log -->
+    <div class="demo-section">
+        <h2 class="section-title">
+            <span class="emoji">📊</span>
+            Log do Sistema
+        </h2>
+        <button class="demo-button secondary" onclick="clearLog()">
+            🧹 Limpar Log
+        </button>
+        <div id="systemLog" class="status-display"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/smart-save.js"></script>
+    <script src="../js/ai-backend-manager.js"></script>
+    
+    <script>
+        // Interceptar console.log para mostrar no log da página
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            
+            const logElement = document.getElementById('systemLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.join(' ');
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        };
+        
+        // Funções de demonstração
+        function checkSystemStatus() {
+            const statusElement = document.getElementById('systemStatus');
+            
+            if (window.AIBackendManager) {
+                const status = window.AIBackendManager.getSystemStatus();
+                statusElement.textContent = `🤖 IA Backend Manager Status:
+Health: ${status.health}
+Initialized: ${status.initialized}
+Active Personas: ${status.activePersonas.join(', ')}
+Current Task: ${status.currentTask || 'Idle'}
+Social Interaction Available: ${status.socialInteractionAvailable}
+Last Check: ${status.lastCheck || 'Never'}`;
+            } else {
+                statusElement.textContent = '❌ IA Backend Manager não encontrada';
+            }
+        }
+        
+        function checkSmartSaveStatus() {
+            const statusElement = document.getElementById('systemStatus');
+            
+            if (window.SmartSave) {
+                const stats = window.SmartSave.getStats();
+                statusElement.textContent = `💾 SmartSave System Status:
+User: ${stats.user}
+Sync Status: ${stats.syncStatus}
+Queue Size: ${stats.queueSize}
+Online: ${stats.isOnline}
+Last Modified: ${stats.lastModified || 'Never'}
+Total Attempts: ${stats.totalAttempts}`;
+            } else {
+                statusElement.textContent = '❌ SmartSave não encontrado';
+            }
+        }
+        
+        function createPost() {
+            const content = document.getElementById('postContent').value;
+            const type = document.getElementById('postType').value;
+            
+            if (!content.trim()) {
+                alert('Por favor, escreva algo no post!');
+                return;
+            }
+            
+            console.log('📝 Criando nova postagem...');
+            
+            try {
+                const postData = {
+                    content: content,
+                    type: type
+                };
+                
+                // Usar a API do SmartSave
+                if (window.SmartSaveAPI && window.SmartSaveAPI.notifyNewPost) {
+                    const result = window.SmartSaveAPI.notifyNewPost(postData);
+                    console.log('✅ Post criado com sucesso:', result);
+                } else {
+                    console.error('❌ SmartSave API não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao criar post:', error);
+            }
+        }
+        
+        function sendScrap() {
+            const toUserId = document.getElementById('scrapToUserId').value;
+            const content = document.getElementById('scrapContent').value;
+            const isPublic = document.getElementById('scrapPublic').checked;
+            
+            if (!toUserId || !content.trim()) {
+                alert('Por favor, preencha o destinatário e a mensagem!');
+                return;
+            }
+            
+            console.log('💬 Enviando scrap...');
+            
+            try {
+                const scrapData = {
+                    toUserId: toUserId,
+                    content: content,
+                    isPublic: isPublic
+                };
+                
+                if (window.SmartSaveAPI && window.SmartSaveAPI.notifyNewScrap) {
+                    const result = window.SmartSaveAPI.notifyNewScrap(scrapData);
+                    console.log('✅ Scrap enviado com sucesso:', result);
+                } else {
+                    console.error('❌ SmartSave API não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao enviar scrap:', error);
+            }
+        }
+        
+        function likePost() {
+            const postId = document.getElementById('likePostId').value;
+            
+            if (!postId.trim()) {
+                alert('Por favor, informe o ID do post!');
+                return;
+            }
+            
+            console.log('❤️ Curtindo post...');
+            
+            try {
+                const likeData = {
+                    postId: postId
+                };
+                
+                if (window.SmartSaveAPI && window.SmartSaveAPI.notifyNewLike) {
+                    const result = window.SmartSaveAPI.notifyNewLike(likeData);
+                    console.log('✅ Post curtido com sucesso:', result);
+                } else {
+                    console.error('❌ SmartSave API não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao curtir post:', error);
+            }
+        }
+        
+        function manageFriendship() {
+            const addresseeId = document.getElementById('friendUserId').value;
+            const status = document.getElementById('friendshipStatus').value;
+            
+            if (!addresseeId.trim()) {
+                alert('Por favor, informe o ID do usuário!');
+                return;
+            }
+            
+            console.log('👥 Processando amizade...');
+            
+            try {
+                const friendshipData = {
+                    addresseeId: addresseeId,
+                    status: status
+                };
+                
+                if (window.SmartSaveAPI && window.SmartSaveAPI.notifyNewFriendship) {
+                    const result = window.SmartSaveAPI.notifyNewFriendship(friendshipData);
+                    console.log('✅ Amizade processada com sucesso:', result);
+                } else {
+                    console.error('❌ SmartSave API não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao processar amizade:', error);
+            }
+        }
+        
+        function viewProfile() {
+            const profileUserId = document.getElementById('viewProfileUserId').value;
+            
+            if (!profileUserId.trim()) {
+                alert('Por favor, informe o ID do perfil!');
+                return;
+            }
+            
+            console.log('👁️ Visualizando perfil...');
+            
+            try {
+                if (window.SmartSaveAPI && window.SmartSaveAPI.notifyProfileView) {
+                    const result = window.SmartSaveAPI.notifyProfileView(profileUserId);
+                    console.log('✅ Visualização de perfil registrada:', result);
+                } else {
+                    console.error('❌ SmartSave API não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao registrar visualização:', error);
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('systemLog').textContent = '';
+        }
+        
+        // Verificar status inicial quando a página carregar
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                checkSystemStatus();
+                console.log('🚀 Demo carregada - Sistemas prontos para teste!');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
