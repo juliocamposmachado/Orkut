@@ -7,11 +7,6 @@
   "github": {
     "silent": true
   },
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/profile/friends",
@@ -36,10 +31,6 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
     }
   ],
   "redirects": [
