@@ -30,14 +30,13 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/home",
+      "destination": "/home.html"
     }
   ],
   "redirects": [
-    {
-      "source": "/home",
-      "destination": "/home.html",
-      "permanent": false
-    },
     {
       "source": "/login",
       "destination": "/index.html",
