@@ -280,14 +280,18 @@ async function handlePhotoUpload(event) {
             const imageData = e.target.result;
             
             try {
-                // Usar SmartSave para salvar foto
-                const updatedProfile = await window.saveProfile({ 
-                    ...currentProfile, 
-                    photo: imageData 
-                }, {
-                    showNotification: false,
-                    skipValidation: true
-                });
+                // Salvar foto localmente primeiro
+                const updatedProfile = { ...currentProfile, photo: imageData };
+                localStorage.setItem('orkutUser', JSON.stringify(updatedProfile));
+                localStorage.setItem('orkut_user', JSON.stringify(updatedProfile)); // Compatibilidade
+                
+                // Disparar evento para AI Database Manager processar
+                window.dispatchEvent(new CustomEvent('profile_update_attempt', {
+                    detail: {
+                        user_id: currentProfile.id || currentProfile.email,
+                        photo: imageData
+                    }
+                }));
                 
                 // Atualizar perfil atual
                 currentProfile = updatedProfile;
@@ -384,14 +388,18 @@ async function saveBio() {
     const newBio = textarea.value.trim();
     
     try {
-        // Usar SmartSave para salvar biografia
-        const updatedProfile = await window.saveProfile({ 
-            ...currentProfile, 
-            bio: newBio 
-        }, {
-            showNotification: false,
-            skipValidation: true
-        });
+        // Salvar biografia localmente primeiro
+        const updatedProfile = { ...currentProfile, bio: newBio };
+        localStorage.setItem('orkutUser', JSON.stringify(updatedProfile));
+        localStorage.setItem('orkut_user', JSON.stringify(updatedProfile)); // Compatibilidade
+        
+        // Disparar evento para AI Database Manager processar
+        window.dispatchEvent(new CustomEvent('profile_update_attempt', {
+            detail: {
+                user_id: currentProfile.id || currentProfile.email,
+                bio: newBio
+            }
+        }));
         
         // Atualizar perfil atual
         currentProfile = updatedProfile;

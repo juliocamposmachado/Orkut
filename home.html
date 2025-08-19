@@ -120,7 +120,7 @@
             <!-- Right Sidebar -->
             <aside class="right-sidebar">
                 <div class="system-logs-panel">
-                    <h4>🤖 Sistema - Logs em Tempo Real</h4>
+                    <h4 onclick="toggleLogsPanel()" style="cursor: pointer;">🤖 Sistema - Logs em Tempo Real <span id="logsToggleIcon">🔽</span></h4>
                     <div class="logs-controls">
                         <button class="btn-small" onclick="clearSystemLogs()">🗑️ Limpar</button>
                         <button class="btn-small" onclick="toggleLogsPause()">⏸️ Pausar</button>

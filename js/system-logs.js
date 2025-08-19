@@ -411,6 +411,31 @@ class SystemLogger {
     user(message) { this.log(message, 'user'); }
 }
 
+// Função para expandir/contrair painel de logs
+function toggleLogsPanel() {
+    const container = document.getElementById('systemLogsContainer');
+    const controls = document.querySelector('.logs-controls');
+    const stats = document.querySelector('.logs-stats');
+    const icon = document.getElementById('logsToggleIcon');
+    
+    if (container && controls && stats && icon) {
+        const isCollapsed = container.style.display === 'none';
+        
+        if (isCollapsed) {
+            container.style.display = 'block';
+            controls.style.display = 'flex';
+            stats.style.display = 'block';
+            icon.textContent = '🔽';
+            window.SystemLog?.info('Painel de logs expandido');
+        } else {
+            container.style.display = 'none';
+            controls.style.display = 'none';
+            stats.style.display = 'none';
+            icon.textContent = '▶️';
+        }
+    }
+}
+
 // Funções globais para uso nos botões
 function clearSystemLogs() {
     if (window.systemLogger) {
