@@ -348,13 +348,14 @@ class AIStatusPanel {
         `;
         document.head.appendChild(style);
 
-        // Adicionar botão de toggle
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = 'ai-toggle-btn';
-        toggleBtn.innerHTML = '🤖';
-        toggleBtn.title = 'AI Status Panel';
-        toggleBtn.onclick = () => this.togglePanel();
-        document.body.appendChild(toggleBtn);
+        // Configurar botão toggle existente do HTML
+        const toggleBtn = document.getElementById('ai-status-toggle');
+        if (toggleBtn) {
+            toggleBtn.onclick = () => {
+                this.togglePanel();
+                toggleBtn.classList.toggle('active', this.isVisible);
+            };
+        }
     }
 
     attachEventListeners() {

@@ -4,9 +4,14 @@
 // Configuração da API Gemini
 const AI_DATABASE_CONFIG = {
     API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
-    API_KEY: "AIzaSyB8QXNgbYg6xZWVyYdI8bw64Kr8BmRlWGk",
+    API_KEY: "AIzaSyARj-yxZh68OyB6Krys9OOK2-U1A9n_ubQ",
     MAX_TOKENS: 2000,
-    TEMPERATURE: 0.3 // Baixa temperatura para operações precisas de dados
+    TEMPERATURE: 0.3, // Baixa temperatura para operações precisas de dados
+    RATE_LIMIT: {
+        MAX_REQUESTS_PER_MINUTE: 15,
+        MIN_DELAY_MS: 4000, // 4 segundos entre requisições
+        RETRY_DELAYS: [2000, 5000, 10000, 20000] // Backoff exponencial
+    }
 };
 
 // Estado da IA Database Manager
@@ -17,6 +22,15 @@ window.AIDatabaseManager = {
     lastSyncTime: null,
     errorCount: 0,
     maxRetries: 3,
+    
+    // Rate Limiting
+    rateLimiter: {
+        requests: [],
+        lastRequestTime: 0
+    },
+    
+    // Cache de operações
+    cache: new Map(),
     
     // Contexto da persona
     persona: {
@@ -31,7 +45,9 @@ window.AIDatabaseManager = {
         operationsProcessed: 0,
         successfulSyncs: 0,
         failedSyncs: 0,
-        averageResponseTime: 0
+        averageResponseTime: 0,
+        rateLimitHits: 0,
+        cacheHits: 0
     }
 };
 
@@ -348,7 +364,18 @@ Processe os dados fornecidos e determine a melhor ação.
     return prompt;
 }
 
-async function callGeminiAPI(prompt) {
+async function callGeminiAPI(prompt, retryAttempt = 0) {
+    // Verificar cache primeiro
+    const promptHash = btoa(prompt).substring(0, 50);
+    if (AIDatabaseManager.cache.has(promptHash)) {
+        console.log('📈 Cache hit para operação');
+        AIDatabaseManager.metrics.cacheHits++;
+        return AIDatabaseManager.cache.get(promptHash);
+    }
+    
+    // Rate Limiting - verificar se podemos fazer uma requisição
+    await enforceRateLimit();
+    
     const requestBody = {
         contents: [{
             parts: [{
@@ -361,20 +388,68 @@ async function callGeminiAPI(prompt) {
         }
     };
     
-    const response = await fetch(`${AI_DATABASE_CONFIG.API_URL}?key=${AI_DATABASE_CONFIG.API_KEY}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+    try {
+        console.log('🌐 Chamando API Gemini...');
+        
+        const response = await fetch(`${AI_DATABASE_CONFIG.API_URL}?key=${AI_DATABASE_CONFIG.API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        // Registrar requisição para rate limiting
+        recordApiRequest();
+        
+        if (!response.ok) {
+            // Tratar erro 429 (Rate Limit) especificamente
+            if (response.status === 429) {
+                AIDatabaseManager.metrics.rateLimitHits++;
+                
+                if (retryAttempt < AI_DATABASE_CONFIG.RATE_LIMIT.RETRY_DELAYS.length) {
+                    const delay = AI_DATABASE_CONFIG.RATE_LIMIT.RETRY_DELAYS[retryAttempt];
+                    console.log(`⚠️ Rate limit hit (429). Tentando novamente em ${delay}ms... (tentativa ${retryAttempt + 1})`);
+                    
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return await callGeminiAPI(prompt, retryAttempt + 1);
+                } else {
+                    throw new Error(`API Rate Limit - máximo de tentativas excedido`);
+                }
+            }
+            
+            throw new Error(`API Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const result = data.candidates[0].content.parts[0].text;
+        
+        // Salvar no cache
+        AIDatabaseManager.cache.set(promptHash, result);
+        
+        // Limpar cache se ficar muito grande
+        if (AIDatabaseManager.cache.size > 50) {
+            const firstKey = AIDatabaseManager.cache.keys().next().value;
+            AIDatabaseManager.cache.delete(firstKey);
+        }
+        
+        console.log('✅ Resposta da API Gemini recebida');
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Erro na API Gemini:', error.message);
+        
+        // Retry para outros erros (não 429)
+        if (!error.message.includes('Rate Limit') && retryAttempt < 2) {
+            const delay = 2000 * (retryAttempt + 1);
+            console.log(`🔄 Tentando novamente em ${delay}ms...`);
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return await callGeminiAPI(prompt, retryAttempt + 1);
+        }
+        
+        throw error;
     }
-    
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
 }
 
 async function processAIResponse(operation, aiResponse) {
@@ -666,6 +741,41 @@ async function loadPendingOperations() {
             }
         });
     }
+}
+
+// =============================================================================
+// RATE LIMITING E CACHE
+// =============================================================================
+
+async function enforceRateLimit() {
+    const now = Date.now();
+    const rateLimiter = AIDatabaseManager.rateLimiter;
+    
+    // Remover requisições antigas (mais de 1 minuto)
+    rateLimiter.requests = rateLimiter.requests.filter(time => now - time < 60000);
+    
+    // Verificar se atingimos o limite por minuto
+    if (rateLimiter.requests.length >= AI_DATABASE_CONFIG.RATE_LIMIT.MAX_REQUESTS_PER_MINUTE) {
+        const oldestRequest = Math.min(...rateLimiter.requests);
+        const waitTime = 60000 - (now - oldestRequest);
+        
+        console.log(`⏳ Rate limit ativo. Aguardando ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    // Garantir delay mínimo entre requisições
+    const timeSinceLastRequest = now - rateLimiter.lastRequestTime;
+    if (timeSinceLastRequest < AI_DATABASE_CONFIG.RATE_LIMIT.MIN_DELAY_MS) {
+        const waitTime = AI_DATABASE_CONFIG.RATE_LIMIT.MIN_DELAY_MS - timeSinceLastRequest;
+        console.log(`⏳ Aguardando ${waitTime}ms antes da próxima requisição...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+}
+
+function recordApiRequest() {
+    const now = Date.now();
+    AIDatabaseManager.rateLimiter.requests.push(now);
+    AIDatabaseManager.rateLimiter.lastRequestTime = now;
 }
 
 // =============================================================================
