@@ -123,7 +123,7 @@ function showRegister() {
     }
 }
 
-// Processar login
+// Processar login (funcionamento offline)
 function handleLogin(event) {
     event.preventDefault();
     
@@ -153,8 +153,8 @@ function handleLogin(event) {
         return;
     }
     
-    if (!password) {
-        showError('Por favor, insira sua senha.');
+    if (!password || password.length < AuthConfig.minPasswordLength) {
+        showError('Por favor, insira uma senha válida.');
         return;
     }
     
@@ -165,32 +165,12 @@ function handleLogin(event) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     
-// Fazer requisição real para API
-    fetch('/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            email: email,
-            password: password,
-            rememberMe: rememberMe
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        submitBtn.textContent = originalText;
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        
-        if (data.success) {
-            // Login bem-sucedido
-            const user = data.data.user;
-            const token = data.data.token;
-            
-            // Salvar token e usuário
-            localStorage.setItem('orkutToken', token);
-            localStorage.setItem('orkutUser', JSON.stringify(user));
+    // Simular processo de login (funciona offline)
+    setTimeout(() => {
+        // Para demo, aceitar qualquer email/senha válida
+        if (simulateLogin(email, password)) {
+            // Criar sessão local
+            const user = createUserSession(email);
             
             if (rememberMe) {
                 localStorage.setItem('rememberEmail', email);
@@ -208,7 +188,9 @@ function handleLogin(event) {
             localStorage.setItem('sessionExpiry', sessionExpiry.toString());
             
             // Notificação de sucesso
-            showSuccess(data.message || 'Login realizado com sucesso! Bem-vindo(a) de volta!');
+            showSuccess('Login realizado com sucesso! Bem-vindo(a) de volta!');
+            
+            console.log('✅ Login realizado para:', user.name);
             
             // Redirecionar após pequeno delay
             setTimeout(() => {
@@ -223,24 +205,20 @@ function handleLogin(event) {
             
             const remainingAttempts = AuthConfig.maxLoginAttempts - loginAttempts.count;
             if (remainingAttempts > 0) {
-                showError(data.details || `E-mail ou senha incorretos. ${remainingAttempts} tentativas restantes.`);
+                showError(`Credenciais inválidas. ${remainingAttempts} tentativas restantes.`);
             } else {
                 showError('Muitas tentativas de login incorretas. Conta temporariamente bloqueada.');
             }
         }
-    })
-    .catch(error => {
-        console.error('Erro no login:', error);
         
         submitBtn.textContent = originalText;
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         
-        showError('Erro de conexão. Verifique sua internet e tente novamente.');
-    });
+    }, 1200); // Simular delay de rede
 }
 
-// Processar cadastro
+// Processar cadastro usando AI Database Manager
 function handleRegister(event) {
     event.preventDefault();
     
@@ -275,6 +253,15 @@ function handleRegister(event) {
         validationErrors.push('Senha deve conter pelo menos uma letra e um número.');
     }
     
+    // Verificar se já existe usuário com este email localmente
+    const existingUser = localStorage.getItem('orkut_user');
+    if (existingUser) {
+        const user = JSON.parse(existingUser);
+        if (user.email === email) {
+            validationErrors.push('Já existe um usuário com este email.');
+        }
+    }
+    
     if (validationErrors.length > 0) {
         showError(validationErrors.join('<br>'));
         return;
@@ -287,24 +274,56 @@ function handleRegister(event) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     
-    // Preparar dados para envio
-    const registerData = {
-        name: name,
-        email: email,
-        password: password
-    };
-    
-    // Se há foto, convertê-la para base64 (simplificado)
+    // Processar foto se houver
     if (photo && photo.size > 0) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            registerData.photo = e.target.result;
-            sendRegisterRequest(registerData, submitBtn, originalText);
+            processRegisterWithAI(name, email, password, e.target.result, submitBtn, originalText);
         };
         reader.readAsDataURL(photo);
     } else {
-        sendRegisterRequest(registerData, submitBtn, originalText);
+        processRegisterWithAI(name, email, password, null, submitBtn, originalText);
     }
+}
+
+// Processar registro com AI Database Manager
+function processRegisterWithAI(name, email, password, photo, submitBtn, originalText) {
+    const userData = {
+        name: name,
+        email: email,
+        password: password,
+        photo: photo,
+        username: generateUsername(name),
+        status: 'Novo no Orkut Retrô! 🎉',
+        created_at: new Date().toISOString(),
+        profile_views: 0,
+        friends_count: 0,
+        fans_count: 0
+    };
+    
+    // Salvar dados localmente primeiro (UX rápida)
+    const user = createUserSession(email, name, userData);
+    
+    console.log('👤 Usuário criado localmente, processando com IA...');
+    
+    // Disparar evento para AI Database Manager
+    window.dispatchEvent(new CustomEvent('user_register_attempt', {
+        detail: userData
+    }));
+    
+    // Simular sucesso imediato
+    setTimeout(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        showSuccess('Conta criada com sucesso! Processando no servidor...');
+        
+        // Redirecionar para home
+        setTimeout(() => {
+            window.location.href = 'home.html';
+        }, 1500);
+    }, 1000);
 }
 
 // Função para enviar requisição de cadastro
@@ -377,14 +396,23 @@ function emailExists(email) {
 }
 
 // Criar sessão de usuário
-function createUserSession(email, name = null) {
+function createUserSession(email, name = null, userData = null) {
     const userName = name || getUserNameFromEmail(email);
-    const user = {
+    
+    // Usar dados fornecidos ou criar padrão
+    const user = userData ? {
+        ...userData,
+        id: generateUserId(),
+        username: userData.username || generateUsername(userName),
+        email: email,
+        name: userName,
+        joinDate: new Date().toISOString()
+    } : {
         id: generateUserId(),
         name: userName,
         username: generateUsername(userName),
         email: email,
-        photo: `https://via.placeholder.com/150x150/a855c7/ffffff?text=${userName ? userName.charAt(0) : 'U'}`,
+        photo: `images/orkutblack.png`, // Usar foto padrão local
         status: 'Novo no Orkut Retrô! 🎉',
         age: null,
         location: '',
@@ -399,17 +427,19 @@ function createUserSession(email, name = null) {
     
     // Salvar usuário
     localStorage.setItem('orkutUser', JSON.stringify(user));
+    localStorage.setItem('orkut_user', JSON.stringify(user)); // Para compatibilidade
     
     // Definir expiração da sessão
     const sessionExpiry = Date.now() + AuthConfig.sessionDuration;
     localStorage.setItem('sessionExpiry', sessionExpiry.toString());
     
     // Atualizar estado global
-    if (window.OrkutRetro) {
-        window.OrkutRetro.currentUser = user;
-        window.OrkutRetro.isLoggedIn = true;
+    if (window.OrkutApp) {
+        window.OrkutApp.user = user;
+        window.OrkutApp.initialized = true;
     }
     
+    console.log('💾 Sessão de usuário criada:', user.name);
     return user;
 }
 

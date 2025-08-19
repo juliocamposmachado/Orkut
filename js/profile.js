@@ -146,14 +146,28 @@ async function saveProfile(event) {
             birthday: formatDateForDisplay(formData.get('birthday'))
         };
         
-        // Usar SmartSave para salvar
-        const updatedProfile = await window.saveProfile(profileData, {
-            showNotification: true,
-            updateURL: true
-        });
+        // Salvar localmente primeiro (UX rápida)
+        const updatedProfile = { ...currentProfile, ...profileData, updated_at: new Date().toISOString() };
+        localStorage.setItem('orkutUser', JSON.stringify(updatedProfile));
+        localStorage.setItem('orkut_user', JSON.stringify(updatedProfile)); // Compatibilidade
+        
+        console.log('💾 Perfil salvo localmente, processando com IA...');
+        
+        // Disparar evento para AI Database Manager processar
+        window.dispatchEvent(new CustomEvent('profile_update_attempt', {
+            detail: {
+                user_id: currentProfile.id || currentProfile.email,
+                ...profileData
+            }
+        }));
         
         // Atualizar perfil atual
         currentProfile = updatedProfile;
+        
+        // Atualizar estado global
+        if (window.OrkutApp) {
+            window.OrkutApp.user = updatedProfile;
+        }
         
         // Atualizar interface
         updateProfileDisplay();

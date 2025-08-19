@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste AI Database Manager System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-section h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+        
+        .test-result {
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        
+        .error {
+            border-left-color: #f44336;
+            background: #ffeaea;
+        }
+        
+        .warning {
+            border-left-color: #ff9800;
+            background: #fff8e1;
+        }
+        
+        .status-display {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 AI Database Manager - Sistema de Testes</h1>
+        <p>Este painel permite testar todas as funcionalidades do sistema AI Database Manager integrado com a API Gemini.</p>
+        
+        <!-- Status Geral do Sistema -->
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <div class="controls">
+                <button class="test-button" onclick="checkSystemStatus()">Verificar Status</button>
+                <button class="test-button" onclick="toggleAIPanel()">Toggle AI Panel</button>
+                <button class="test-button" onclick="forceSyncNow()">Forçar Sincronização</button>
+            </div>
+            <div id="system-status" class="status-display">Aguardando verificação...</div>
+        </div>
+        
+        <!-- Teste de Criação de Usuário -->
+        <div class="test-section">
+            <h3>👤 Teste de Criação de Usuário</h3>
+            <div class="controls">
+                <input type="text" id="test-name" placeholder="Nome" value="João Teste">
+                <input type="email" id="test-email" placeholder="E-mail" value="joao@teste.com">
+                <input type="password" id="test-password" placeholder="Senha" value="123456">
+                <button class="test-button" onclick="testUserCreation()">Criar Usuário de Teste</button>
+            </div>
+            <div id="user-test-result" class="test-result" style="display: none;"></div>
+        </div>
+        
+        <!-- Teste de Posts -->
+        <div class="test-section">
+            <h3>📝 Teste de Posts</h3>
+            <div class="controls">
+                <input type="text" id="post-content" placeholder="Conteúdo do post" value="Este é um post de teste da IA!">
+                <button class="test-button" onclick="testPostCreation()">Criar Post de Teste</button>
+                <button class="test-button" onclick="listLocalPosts()">Listar Posts Locais</button>
+            </div>
+            <div id="post-test-result" class="test-result" style="display: none;"></div>
+        </div>
+        
+        <!-- Teste de Sincronização -->
+        <div class="test-section">
+            <h3>🔄 Teste de Sincronização</h3>
+            <div class="controls">
+                <button class="test-button" onclick="testSmartSync()">Testar Smart Sync</button>
+                <button class="test-button" onclick="simulateOfflineMode()">Simular Modo Offline</button>
+                <button class="test-button" onclick="clearAllData()">Limpar Todos os Dados</button>
+            </div>
+            <div id="sync-test-result" class="test-result" style="display: none;"></div>
+        </div>
+        
+        <!-- Console de Log -->
+        <div class="test-section">
+            <h3>📋 Console de Log</h3>
+            <div class="controls">
+                <button class="test-button" onclick="clearLog()">Limpar Log</button>
+                <button class="test-button" onclick="exportTestResults()">Exportar Resultados</button>
+            </div>
+            <div id="test-log" class="status-display">Sistema de testes iniciado...</div>
+        </div>
+    </div>
+
+    <!-- Incluir scripts necessários -->
+    <script src="js/ai-database-manager.js"></script>
+    <script src="js/smart-sync.js"></script>
+    <script src="js/ai-status-panel.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Sistema de Log
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            
+            logDiv.innerHTML += logEntry + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(logEntry);
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Log limpo...\n';
+        }
+
+        // Verificar Status do Sistema
+        function checkSystemStatus() {
+            log('Verificando status do sistema...');
+            
+            const statusDiv = document.getElementById('system-status');
+            let status = '';
+            
+            // Verificar AI Database Manager
+            if (window.AIDatabaseManager) {
+                const metrics = window.AIDatabaseManager.getMetrics();
+                const queueStatus = window.AIDatabaseManager.getQueueStatus();
+                
+                status += `AI Database Manager: ${window.AIDatabaseManager.initialized ? 'ATIVO' : 'INATIVO'}\n`;
+                status += `Operações processadas: ${metrics.operationsProcessed}\n`;
+                status += `Sucessos: ${metrics.successfulSyncs}\n`;
+                status += `Falhas: ${metrics.failedSyncs}\n`;
+                status += `Fila: ${queueStatus.queueLength} operações\n`;
+                status += `Processando: ${queueStatus.isProcessing ? 'SIM' : 'NÃO'}\n\n`;
+            } else {
+                status += 'AI Database Manager: NÃO CARREGADO\n\n';
+            }
+            
+            // Verificar Smart Sync Manager
+            if (window.smartSyncManager) {
+                const syncStatus = window.smartSyncManager.getStatus();
+                status += `Smart Sync Manager: ${syncStatus.isMonitoring ? 'ATIVO' : 'INATIVO'}\n`;
+                status += `Log de mudanças: ${syncStatus.changeLogSize} entradas\n`;
+                status += `Observers: ${syncStatus.observers}\n`;
+                status += `Mudanças pendentes: ${syncStatus.pendingChanges}\n\n`;
+            } else {
+                status += 'Smart Sync Manager: NÃO CARREGADO\n\n';
+            }
+            
+            // Verificar dados locais
+            const user = localStorage.getItem('orkut_user');
+            const posts = JSON.parse(localStorage.getItem('local_posts') || '[]');
+            const operations = JSON.parse(localStorage.getItem('pending_operations') || '[]');
+            
+            status += `Dados Locais:\n`;
+            status += `- Usuário: ${user ? 'LOGADO' : 'NÃO LOGADO'}\n`;
+            status += `- Posts locais: ${posts.length}\n`;
+            status += `- Operações pendentes: ${operations.length}\n`;
+            
+            statusDiv.textContent = status;
+            log('Status do sistema atualizado');
+        }
+
+        // Toggle AI Panel
+        function toggleAIPanel() {
+            if (window.aiStatusPanel) {
+                window.aiStatusPanel.togglePanel();
+                log('AI Status Panel alternado');
+            } else {
+                log('AI Status Panel não disponível', 'error');
+            }
+        }
+
+        // Forçar Sincronização
+        function forceSyncNow() {
+            log('Forçando sincronização...');
+            
+            if (window.AIDatabaseManager && window.AIDatabaseManager.forcSync) {
+                window.AIDatabaseManager.forcSync();
+                log('Sincronização AI Database Manager iniciada');
+            }
+            
+            if (window.smartSyncManager) {
+                window.smartSyncManager.forceSyncNow();
+                log('Sincronização Smart Sync Manager iniciada');
+            }
+        }
+
+        // Teste de Criação de Usuário
+        function testUserCreation() {
+            const name = document.getElementById('test-name').value;
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            const resultDiv = document.getElementById('user-test-result');
+            
+            if (!name || !email || !password) {
+                resultDiv.innerHTML = 'ERRO: Preencha todos os campos';
+                resultDiv.className = 'test-result error';
+                resultDiv.style.display = 'block';
+                return;
+            }
+            
+            log(`Testando criação de usuário: ${name} (${email})`);
+            
+            const userData = {
+                name: name,
+                email: email,
+                password: password,
+                username: name.toLowerCase().replace(' ', '_'),
+                avatar: '/images/default-avatar.jpg'
+            };
+            
+            // Disparar evento para AI Database Manager
+            window.dispatchEvent(new CustomEvent('user_register_attempt', {
+                detail: userData
+            }));
+            
+            resultDiv.innerHTML = `
+                <strong>Dados do teste:</strong><br>
+                Nome: ${name}<br>
+                Email: ${email}<br>
+                Username: ${userData.username}<br>
+                Evento disparado para AI Database Manager
+            `;
+            resultDiv.className = 'test-result';
+            resultDiv.style.display = 'block';
+            
+            log('Evento de criação de usuário disparado');
+        }
+
+        // Teste de Posts
+        function testPostCreation() {
+            const content = document.getElementById('post-content').value;
+            const resultDiv = document.getElementById('post-test-result');
+            
+            if (!content) {
+                resultDiv.innerHTML = 'ERRO: Digite o conteúdo do post';
+                resultDiv.className = 'test-result error';
+                resultDiv.style.display = 'block';
+                return;
+            }
+            
+            log(`Testando criação de post: "${content}"`);
+            
+            const postData = {
+                id: 'test_' + Date.now(),
+                content: content,
+                author: 'Usuário de Teste',
+                timestamp: new Date().toISOString(),
+                likes: 0,
+                synced: false
+            };
+            
+            // Adicionar aos posts locais
+            const localPosts = JSON.parse(localStorage.getItem('local_posts') || '[]');
+            localPosts.unshift(postData);
+            localStorage.setItem('local_posts', JSON.stringify(localPosts));
+            
+            // Disparar evento para Smart Sync
+            window.dispatchEvent(new CustomEvent('post_create_attempt', {
+                detail: postData
+            }));
+            
+            resultDiv.innerHTML = `
+                <strong>Post criado:</strong><br>
+                ID: ${postData.id}<br>
+                Conteúdo: ${content}<br>
+                Timestamp: ${postData.timestamp}<br>
+                Status: Salvo localmente, aguardando sincronização
+            `;
+            resultDiv.className = 'test-result';
+            resultDiv.style.display = 'block';
+            
+            log('Post de teste criado e evento disparado');
+        }
+
+        // Listar Posts Locais
+        function listLocalPosts() {
+            const posts = JSON.parse(localStorage.getItem('local_posts') || '[]');
+            const resultDiv = document.getElementById('post-test-result');
+            
+            if (posts.length === 0) {
+                resultDiv.innerHTML = 'Nenhum post local encontrado';
+            } else {
+                let html = `<strong>Posts locais (${posts.length}):</strong><br>`;
+                posts.slice(0, 5).forEach((post, index) => {
+                    html += `
+                        ${index + 1}. ${post.content}<br>
+                        <small>ID: ${post.id} | Sincronizado: ${post.synced ? 'SIM' : 'NÃO'}</small><br><br>
+                    `;
+                });
+                resultDiv.innerHTML = html;
+            }
+            
+            resultDiv.className = 'test-result';
+            resultDiv.style.display = 'block';
+            
+            log(`Listados ${posts.length} posts locais`);
+        }
+
+        // Testar Smart Sync
+        function testSmartSync() {
+            const resultDiv = document.getElementById('sync-test-result');
+            
+            log('Testando Smart Sync Manager...');
+            
+            if (!window.smartSyncManager) {
+                resultDiv.innerHTML = 'ERRO: Smart Sync Manager não está disponível';
+                resultDiv.className = 'test-result error';
+                resultDiv.style.display = 'block';
+                return;
+            }
+            
+            // Simular mudança nos dados
+            const testUser = {
+                id: 'test_123',
+                name: 'Usuário Teste Smart Sync',
+                email: 'smartsync@teste.com',
+                status: 'Testando Smart Sync! ' + new Date().toLocaleTimeString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            localStorage.setItem('orkut_user', JSON.stringify(testUser));
+            
+            const status = window.smartSyncManager.getStatus();
+            
+            resultDiv.innerHTML = `
+                <strong>Smart Sync Status:</strong><br>
+                Monitorando: ${status.isMonitoring ? 'SIM' : 'NÃO'}<br>
+                Log de mudanças: ${status.changeLogSize} entradas<br>
+                Observers ativos: ${status.observers}<br>
+                Mudanças pendentes: ${status.pendingChanges}<br>
+                Última sync: ${status.lastSync || 'Nunca'}<br><br>
+                <strong>Ação realizada:</strong><br>
+                Dados do usuário modificados para trigger sync
+            `;
+            
+            resultDiv.className = 'test-result';
+            resultDiv.style.display = 'block';
+            
+            log('Smart Sync testado - dados de usuário modificados');
+        }
+
+        // Simular Modo Offline
+        function simulateOfflineMode() {
+            const resultDiv = document.getElementById('sync-test-result');
+            
+            log('Simulando modo offline...');
+            
+            // Criar dados enquanto "offline"
+            const offlinePost = {
+                id: 'offline_' + Date.now(),
+                content: 'Post criado em modo offline',
+                author: 'Usuário Offline',
+                timestamp: new Date().toISOString(),
+                synced: false,
+                offline_created: true
+            };
+            
+            const localPosts = JSON.parse(localStorage.getItem('local_posts') || '[]');
+            localPosts.unshift(offlinePost);
+            localStorage.setItem('local_posts', JSON.stringify(localPosts));
+            
+            // Adicionar à fila de operações pendentes
+            const pendingOps = JSON.parse(localStorage.getItem('pending_operations') || '[]');
+            pendingOps.push({
+                id: 'op_' + Date.now(),
+                type: 'post_creation',
+                data: offlinePost,
+                timestamp: new Date().toISOString(),
+                attempts: 0,
+                status: 'pending'
+            });
+            localStorage.setItem('pending_operations', JSON.stringify(pendingOps));
+            
+            resultDiv.innerHTML = `
+                <strong>Modo Offline Simulado:</strong><br>
+                Post criado: "${offlinePost.content}"<br>
+                ID: ${offlinePost.id}<br>
+                Status: Não sincronizado<br>
+                Operação adicionada à fila de pendentes<br><br>
+                <em>Quando voltar online, a IA irá processar automaticamente</em>
+            `;
+            
+            resultDiv.className = 'test-result warning';
+            resultDiv.style.display = 'block';
+            
+            log('Modo offline simulado - post e operação pendente criados');
+        }
+
+        // Limpar Todos os Dados
+        function clearAllData() {
+            if (confirm('Tem certeza que deseja limpar todos os dados de teste?')) {
+                localStorage.removeItem('orkut_user');
+                localStorage.removeItem('local_posts');
+                localStorage.removeItem('local_interactions');
+                localStorage.removeItem('pending_operations');
+                localStorage.removeItem('failed_operations');
+                localStorage.removeItem('orkut_settings');
+                
+                const resultDiv = document.getElementById('sync-test-result');
+                resultDiv.innerHTML = '<strong>Todos os dados foram limpos!</strong>';
+                resultDiv.className = 'test-result warning';
+                resultDiv.style.display = 'block';
+                
+                log('Todos os dados de teste foram limpos');
+            }
+        }
+
+        // Exportar Resultados
+        function exportTestResults() {
+            const testData = {
+                timestamp: new Date().toISOString(),
+                systemStatus: {
+                    aiDatabaseManager: window.AIDatabaseManager ? 'loaded' : 'not-loaded',
+                    smartSyncManager: window.smartSyncManager ? 'loaded' : 'not-loaded',
+                    aiStatusPanel: window.aiStatusPanel ? 'loaded' : 'not-loaded'
+                },
+                localData: {
+                    user: localStorage.getItem('orkut_user'),
+                    posts: localStorage.getItem('local_posts'),
+                    operations: localStorage.getItem('pending_operations')
+                },
+                testLog: document.getElementById('test-log').textContent
+            };
+            
+            const blob = new Blob([JSON.stringify(testData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ai-system-test-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            
+            log('Resultados de teste exportados');
+        }
+
+        // Inicializar testes
+        window.addEventListener('DOMContentLoaded', function() {
+            log('Sistema de testes carregado');
+            
+            // Verificar status após 3 segundos
+            setTimeout(() => {
+                checkSystemStatus();
+            }, 3000);
+        });
+
+        // Escutar eventos do sistema
+        window.addEventListener('database_operation_success', function(event) {
+            log(`Operação bem-sucedida: ${event.detail.operation.type}`, 'success');
+        });
+
+        window.addEventListener('database_operation_failed', function(event) {
+            log(`Operação falhou: ${event.detail.error}`, 'error');
+        });
+    </script>
+</body>
+</html>
