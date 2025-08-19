@@ -1,28 +1,30 @@
 /* Spotify Integration Styles - Orkut Retrô 2025 */
+/* Seguindo o padrão visual do site */
 
 /* Spotify Connection Card */
 .spotify-connection-card {
-    background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
-    border: 2px solid #1db954;
+    background: white;
+    border: 1px solid rgba(213, 51, 132, 0.1);
     border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(29, 185, 84, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
 
 .spotify-connection-card .feed-content {
-    padding: 25px;
+    padding: 20px;
 }
 
 .spotify-connection-card h3 {
-    color: #fff;
+    color: #d63384;
     margin-bottom: 15px;
-    font-size: 20px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .spotify-connection-card p {
-    color: #f0f8f2;
+    color: #666;
     margin-bottom: 15px;
+    font-size: 14px;
 }
 
 .benefits-list {
@@ -32,7 +34,7 @@
 }
 
 .benefits-list li {
-    color: #f0f8f2;
+    color: #666;
     padding: 8px 0;
     font-size: 14px;
     display: flex;
@@ -41,7 +43,7 @@
 
 .benefits-list li::before {
     content: "✓";
-    background: rgba(255,255,255,0.2);
+    background: linear-gradient(135deg, #d63384, #a855c7);
     color: #fff;
     border-radius: 50%;
     width: 20px;
@@ -56,28 +58,29 @@
 
 /* Spotify Button */
 .btn-spotify {
-    background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
-    color: #1db954;
-    border: 2px solid #fff;
+    background: linear-gradient(135deg, #d63384, #a855c7);
+    color: white;
+    border: none;
     padding: 12px 24px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
-    border-radius: 25px;
+    border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-family: Verdana, Arial, sans-serif;
 }
 
 .btn-spotify:hover {
-    background: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #a855c7, #d63384);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .disclaimer {
     font-size: 11px;
-    color: rgba(255,255,255,0.8);
+    color: #999;
     text-align: center;
     margin-top: 15px;
     font-style: italic;
@@ -99,18 +102,21 @@
 .connected-features .btn {
     flex: 1;
     min-width: 140px;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 12px;
 }
 
 /* Spotify Player Container */
 #spotify-player-container {
-    border: 2px solid #1db954;
+    background: white;
+    border: 1px solid rgba(213, 51, 132, 0.1);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(29, 185, 84, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #spotify-player-container .feed-header-info {
-    background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+    background: linear-gradient(135deg, #d63384, #a855c7);
     color: #fff;
     padding: 10px 15px;
 }
@@ -121,17 +127,18 @@
 
 /* Music Posts */
 .music-post {
-    border: 1px solid #e1e8ed;
-    border-radius: 10px;
-    padding: 15px;
+    border: 1px solid rgba(213, 51, 132, 0.1);
+    border-radius: 12px;
+    padding: 20px;
     margin-bottom: 15px;
     background: #fff;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .music-post:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .post-author {
@@ -152,7 +159,8 @@
 
 .post-author strong {
     font-size: 14px;
-    color: #1a1a1a;
+    color: #d63384;
+    font-weight: bold;
 }
 
 .post-time {
@@ -193,8 +201,8 @@
 }
 
 .post-actions button:hover {
-    background: #f7f9fa;
-    color: #1db954;
+    background: rgba(213, 51, 132, 0.1);
+    color: #d63384;
 }
 
 /* Trending Songs */
@@ -212,7 +220,7 @@
 }
 
 .song-item:hover {
-    background: #f7f9fa;
+    background: rgba(213, 51, 132, 0.05);
     border-radius: 8px;
     padding: 8px;
     margin: 0 -8px;
@@ -233,8 +241,9 @@
 
 .song-item strong {
     font-size: 12px;
-    color: #1a1a1a;
+    color: #d63384;
     display: block;
+    font-weight: bold;
 }
 
 .song-item p {
@@ -257,17 +266,18 @@
     align-items: center;
     padding: 12px 8px;
     border-radius: 8px;
-    background: #f7f9fa;
+    background: #f8f9fa;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    border: 1px solid rgba(213, 51, 132, 0.1);
 }
 
 .playlist-item:hover {
-    background: #1db954;
+    background: linear-gradient(135deg, #d63384, #a855c7);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(29, 185, 84, 0.3);
+    box-shadow: 0 4px 12px rgba(213, 51, 132, 0.3);
 }
 
 .playlist-item img {
@@ -290,20 +300,26 @@
 }
 
 #music-stats strong {
-    color: #1db954;
+    color: #d63384;
+    font-weight: bold;
 }
 
 /* Now Playing */
 .now-playing {
-    background: #f7f9fa;
-    border-radius: 10px;
-    padding: 15px;
+    background: white;
+    border: 1px solid rgba(213, 51, 132, 0.1);
+    border-radius: 12px;
+    padding: 20px;
     margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .now-playing h4 {
-    margin-bottom: 10px;
-    color: #1a1a1a;
+    margin-bottom: 15px;
+    color: #d63384;
+    font-size: 16px;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 8px;
 }
 
 #nowPlayingInfo {
@@ -330,8 +346,9 @@
 
 .now-playing-info strong {
     font-size: 12px;
-    color: #1a1a1a;
+    color: #d63384;
     display: block;
+    font-weight: bold;
 }
 
 .now-playing-info span {
@@ -378,14 +395,16 @@
     .playlist-item {
         background: #2a2a2a;
         color: #fff;
+        border-color: #444;
     }
     
     .now-playing {
         background: #2a2a2a;
+        border-color: #444;
     }
     
     .now-playing h4 {
-        color: #fff;
+        color: #d63384;
     }
 }
 
@@ -395,7 +414,7 @@
     width: 20px;
     height: 20px;
     border: 2px solid #f3f3f3;
-    border-top: 2px solid #1db954;
+    border-top: 2px solid #d63384;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-right: 8px;
@@ -416,9 +435,9 @@
 }
 
 .spotify-message.success {
-    background: rgba(29, 185, 84, 0.1);
-    color: #1db954;
-    border: 1px solid rgba(29, 185, 84, 0.3);
+    background: rgba(213, 51, 132, 0.1);
+    color: #d63384;
+    border: 1px solid rgba(213, 51, 132, 0.3);
 }
 
 .spotify-message.error {
@@ -432,22 +451,23 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+    background: linear-gradient(135deg, #d63384, #a855c7);
     color: #fff;
     border-radius: 25px;
     padding: 10px 15px;
-    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.4);
+    box-shadow: 0 4px 20px rgba(213, 51, 132, 0.4);
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 1000;
     font-size: 12px;
     max-width: 200px;
     display: none;
+    font-family: Verdana, Arial, sans-serif;
 }
 
 .floating-music-widget:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(29, 185, 84, 0.5);
+    box-shadow: 0 6px 25px rgba(213, 51, 132, 0.5);
 }
 
 .floating-music-widget.show {
