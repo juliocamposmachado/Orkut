@@ -146,18 +146,22 @@
 /* Grid de amigos */
 .friends-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
     margin-bottom: 15px;
 }
 
 .friend-item {
     text-align: center;
-    padding: 6px 4px;
-    border-radius: 6px;
+    padding: 8px 4px;
+    border-radius: 8px;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 70px;
 }
 
 .friend-item:hover {
@@ -167,13 +171,15 @@
 }
 
 .friend-item img {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
+    width: 45px;
+    height: 45px;
+    border-radius: 6px;
     object-fit: cover;
-    margin-bottom: 3px;
+    margin: 0 auto 4px auto;
     border: 1px solid rgba(230, 216, 245, 0.5);
     transition: all 0.3s ease;
+    display: block;
+    max-width: 100%;
 }
 
 .friend-item:hover img {
