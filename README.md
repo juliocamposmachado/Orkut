@@ -1,10 +1,42 @@
-# 🌟 Orkut Retrô - Rede Social Nostálgica
+# 🌟 Orkut 2025 - Rede Social Nostálgica + Sistema de Consultas
 
-Uma rede social inspirada no clássico Orkut dos anos 2000, recriada com design retrô e funcionalidades modernas.
+Uma rede social inspirada no clássico Orkut dos anos 2000 com funcionalidades modernas + Sistema avançado de consultas de dados integrado com Telegram.
 
 ## 📋 Sobre o Projeto
 
-O **Orkut Retrô** é uma homenagem nostálgica à famosa rede social que marcou os anos 2000. O projeto recria a experiência clássica do Orkut com um design fiel ao original, mas adaptado para navegadores modernos e dispositivos atuais.
+O **Orkut 2025** combina nostalgia e modernidade, oferecendo:
+- **Rede Social Retrô**: Experiência clássica do Orkut original
+- **Sistema de Consultas**: Integração com bot Telegram @consultabrpro_bot
+- **IA Avançada**: Detecção de crushes e análise comportamental
+
+## 🚀 Novidades - Sistema de Consultas 2025
+
+### 🤖 Integração com Telegram Bot
+- **Bot**: [@consultabrpro_bot](https://web.telegram.org/k/#@consultabrpro_bot)
+- **Chat em Tempo Real**: Interface similar WhatsApp/Telegram
+- **8 Tipos de Consulta**: CPF, CNPJ, Telefone, Email, CEP, Nome, Título Eleitor
+- **Validação Avançada**: Algoritmos oficiais brasileiros
+
+### 📊 Funcionalidades de Consulta
+- 📄 **CPF**: Validação com dígitos verificadores
+- 🏢 **CNPJ**: Algoritmo oficial empresarial
+- 📞 **Telefone**: Validação DDD + formato brasileiro
+- 📧 **Email**: RFC 5322 compliant
+- 📮 **CEP**: Formato brasileiro + validação
+- 👤 **Nome**: Busca completa por pessoa
+- 🗳️ **Título Eleitor**: Algoritmo oficial TSE
+- 👩 **Nome da Mãe**: Busca por filiação
+
+### 🔒 Segurança e Privacidade
+- **Mascaramento**: Dados sensíveis são protegidos
+- **Blacklist**: CPFs/CNPJs inválidos bloqueados
+- **Frontend Only**: Nenhum dado enviado para servidores
+- **Histórico Local**: Armazenamento seguro no navegador
+
+### 🎯 Demonstrações Disponíveis
+- **[Sistema de Consultas](/consultation-demo.html)**: Demo completa das consultas
+- **[Personas IA](/demo.html)**: Sistema de IA avançado
+- **[Orkut Retrô](/)**: Rede social nostálgica
 
 ### ✨ Características Principais
 

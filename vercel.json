@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "orkut-2025-sistema-completo",
   "buildCommand": "echo 'No build needed for static site'",
   "outputDirectory": ".",
   "functions": {
@@ -11,6 +12,18 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    },
+    {
+      "source": "/consultas",
+      "destination": "/consultation-demo.html"
+    },
+    {
+      "source": "/consultation",
+      "destination": "/consultation-demo.html"
+    },
+    {
+      "source": "/personas",
+      "destination": "/demo.html"
     }
   ],
   "headers": [
@@ -30,6 +43,34 @@
           "value": "Content-Type, Authorization"
         }
       ]
+    },
+    {
+      "source": "**/*.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "**/*.css",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/css"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
