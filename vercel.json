@@ -1,72 +1,14 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build needed for static site'",
+  "buildCommand": "echo 'Static site - no build needed'",
   "outputDirectory": ".",
-  "functions": {
-    "api/login.js": {
-      "maxDuration": 30
-    },
-    "api/register.js": {
-      "maxDuration": 30
-    },
-    "api/posts.js": {
-      "maxDuration": 30
-    },
-    "api/profile.js": {
-      "maxDuration": 30
-    }
-  },
-  "ignore": [
-    "api/auth/**",
-    "api/backup.js",
-    "api/database*.js",
-    "api/friends.js",
-    "api/scraps.js",
-    "api/spotify/**",
-    "api/sync-friends.js",
-    "api/upload-photo.js",
-    "api/user/**"
-  ],
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
     {
       "source": "/profile/friends",
       "destination": "/profile/friends.html"
-    },
-    {
-      "source": "/consultas",
-      "destination": "/consultation-demo.html"
-    },
-    {
-      "source": "/consultation",
-      "destination": "/consultation-demo.html"
-    },
-    {
-      "source": "/personas",
-      "destination": "/demo.html"
     }
   ],
   "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
-    },
     {
       "source": "/(.*\\.js)$",
       "headers": [

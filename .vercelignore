@@ -1,23 +1,58 @@
-# Arquivos de backup da API
+# Arquivos de backup
 api-backup/
+backup*/
 
 # Arquivos de desenvolvimento
 node_modules/
 .git/
 .vscode/
+.idea/
+.DS_Store
 
 # Arquivos temporários
 *.tmp
 *.log
 *.cache
+.env*
 
-# Arquivos de certificados
+# Arquivos de certificados e chaves
 certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
 
-# Backups do GitHub
-backup github/
-
-# Scripts de desenvolvimento que não precisam ser deployados
+# Scripts de desenvolvimento desnecessários
 scripts/test_*.js
 scripts/populate*.js
 scripts/migrate*.js
+scripts/setup_*.js
+
+# Arquivos de configuração local
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Arquivos de documentação desnecessários
+*.md
+!README.md
+
+# Next.js (se houver)
+.next/
+out/
+
+# Outros arquivos que não precisam de deploy
+personas/
+config/
+server/
+api-backup/
+test-*.js
+test-*.html
+demo-*.html
+examples/
+docs/
+AI-SYSTEM-README.md
+IMPLEMENTATION_SUMMARY.md
+package-lock.json
