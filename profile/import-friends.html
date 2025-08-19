@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Amigos do Facebook - Orkut Retrô</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/feed.css">
+    <link rel="stylesheet" href="../css/friends-system.css">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <meta name="description" content="Importe seus amigos do Facebook para o Orkut Retrô">
+    <style>
+        .import-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #ddd;
+            z-index: 1;
+        }
+        
+        .step.active:not(:last-child)::after {
+            background: var(--primary-purple);
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .step.active .step-number {
+            background: var(--primary-purple);
+        }
+        
+        .step.completed .step-number {
+            background: #28a745;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .step.active .step-label {
+            color: var(--primary-purple);
+            font-weight: bold;
+        }
+        
+        .import-step {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .import-step.active {
+            display: block;
+        }
+        
+        .facebook-iframe {
+            width: 100%;
+            height: 500px;
+            border: 2px solid var(--primary-purple);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .import-results {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .friend-import-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+        
+        .friend-import-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .friend-import-item:last-child {
+            border-bottom: none;
+        }
+        
+        .import-checkbox {
+            margin-right: 12px;
+        }
+        
+        .import-friend-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        
+        .import-friend-info {
+            flex: 1;
+        }
+        
+        .import-friend-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .import-friend-details {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .import-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+        
+        .status-new {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-existing {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .status-imported {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .import-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .privacy-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+        
+        .privacy-notice h4 {
+            color: #856404;
+            margin: 0 0 8px 0;
+        }
+        
+        .privacy-notice p {
+            color: #856404;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-purple), var(--primary-pink));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .import-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-stat {
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-purple);
+            display: block;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .step-indicator {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .step:not(:last-child)::after {
+                display: none;
+            }
+            
+            .facebook-iframe {
+                height: 400px;
+            }
+            
+            .import-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1><a href="../home.html">orkut</a></h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="../home.html" class="nav-link">início</a>
+                <a href="../profile.html" class="nav-link">perfil</a>
+                <a href="./friends.html" class="nav-link active">amigos</a>
+                <a href="../messages.html" class="nav-link">mensagens</a>
+                <a href="../communities.html" class="nav-link">comunidades</a>
+            </nav>
+            
+            <div class="user-info">
+                <img id="headerUserPhoto" src="https://via.placeholder.com/32x32/a855c7/ffffff?text=U" alt="Foto do usuário" class="user-photo">
+                <span id="headerUserName">Usuário</span>
+                <a href="#" onclick="logout()" class="logout-link">sair</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="import-container">
+            <!-- Cabeçalho -->
+            <div class="feed-header">
+                <h2>📥 Importar Amigos do Facebook</h2>
+                <p>Traga seus amigos do Facebook para o Orkut Retrô em alguns passos simples</p>
+            </div>
+
+            <!-- Indicador de Passos -->
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Login Facebook</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Selecionar Amigos</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Importar</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Concluído</div>
+                </div>
+            </div>
+
+            <!-- Aviso de Privacidade -->
+            <div class="privacy-notice">
+                <h4>🔒 Sua Privacidade é Importante</h4>
+                <p>Não armazenamos suas credenciais do Facebook. O login é feito diretamente nos servidores do Facebook através de uma conexão segura. Apenas as informações públicas de seus amigos serão importadas.</p>
+            </div>
+
+            <!-- Passo 1: Login no Facebook -->
+            <div id="step1" class="import-step active">
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">🔑 Fazer Login no Facebook</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <p>Para importar seus amigos, você precisa fazer login no Facebook. O processo é seguro e suas credenciais não são armazenadas em nossos servidores.</p>
+                        
+                        <div class="feed-actions">
+                            <button class="feed-action-btn" id="loginFacebookBtn">🔗 Conectar com Facebook</button>
+                            <button class="feed-action-btn" id="simulateBtn" style="background: #28a745;">🧪 Modo Demonstração</button>
+                        </div>
+                        
+                        <!-- Facebook Login iFrame -->
+                        <div id="facebookIframeContainer" style="display: none; margin-top: 20px;">
+                            <p><strong>📱 Faça login no Facebook abaixo:</strong></p>
+                            <iframe 
+                                id="facebookIframe" 
+                                class="facebook-iframe"
+                                src=""
+                                frameborder="0"
+                                allow="encrypted-media">
+                            </iframe>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <button class="btn btn-primary" id="checkLoginBtn">✅ Verificar Login</button>
+                                <button class="btn btn-secondary" id="cancelLoginBtn">❌ Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 2: Selecionar Amigos -->
+            <div id="step2" class="import-step">
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">👥 Selecionar Amigos para Importar</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <p>Selecione os amigos que você deseja importar para o Orkut Retrô:</p>
+                        
+                        <div class="import-controls">
+                            <button class="btn btn-primary" id="selectAllBtn">☑️ Selecionar Todos</button>
+                            <button class="btn btn-secondary" id="selectNoneBtn">☐ Desmarcar Todos</button>
+                            <button class="btn btn-light" id="selectNewOnlyBtn">🆕 Apenas Novos</button>
+                            <input type="text" id="searchFriendsInput" placeholder="🔍 Buscar amigos..." style="padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 200px;">
+                        </div>
+                        
+                        <div id="friendsImportList" class="import-results">
+                            <!-- Lista de amigos será carregada aqui -->
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn btn-primary" id="proceedImportBtn">📥 Importar Selecionados (<span id="selectedCount">0</span>)</button>
+                            <button class="btn btn-secondary" id="backToStep1Btn">⬅️ Voltar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Importando -->
+            <div id="step3" class="import-step">
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">⏳ Importando Amigos...</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <p>Aguarde enquanto importamos seus amigos selecionados...</p>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="importProgress"></div>
+                        </div>
+                        
+                        <div id="importStatus" style="text-align: center; margin: 10px 0; font-weight: bold;">
+                            Preparando importação...
+                        </div>
+                        
+                        <div id="importLog" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; margin-top: 15px;">
+                            <!-- Log de importação -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 4: Concluído -->
+            <div id="step4" class="import-step">
+                <div class="feed-item">
+                    <div class="feed-header-info">
+                        <div class="feed-author-info">
+                            <span class="feed-author">🎉 Importação Concluída!</span>
+                        </div>
+                    </div>
+                    <div class="feed-content">
+                        <div class="import-summary">
+                            <h3 style="text-align: center; color: var(--primary-purple);">📊 Resumo da Importação</h3>
+                            <div class="summary-stats">
+                                <div class="summary-stat">
+                                    <span class="summary-number" id="totalProcessed">0</span>
+                                    <div class="summary-label">Total Processados</div>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="summary-number" id="newFriends">0</span>
+                                    <div class="summary-label">Novos Amigos</div>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="summary-number" id="existingFriends">0</span>
+                                    <div class="summary-label">Já Existiam</div>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="summary-number" id="invitesSent">0</span>
+                                    <div class="summary-label">Convites Enviados</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="window.location.href='./friends.html'">👥 Ver Meus Amigos</button>
+                            <button class="btn btn-secondary" id="importMoreBtn">📥 Importar Mais</button>
+                            <button class="btn btn-light" onclick="window.location.href='../home.html'">🏠 Voltar ao Início</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../public/js/api.js"></script>
+    <script>
+        class FacebookImporter {
+            constructor() {
+                this.currentStep = 1;
+                this.selectedFriends = [];
+                this.facebookFriends = [];
+                this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || { id: 'demo', name: 'Demo User' };
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateStepIndicator();
+            }
+
+            setupEventListeners() {
+                // Botões do Passo 1
+                document.getElementById('loginFacebookBtn').addEventListener('click', () => this.startFacebookLogin());
+                document.getElementById('simulateBtn').addEventListener('click', () => this.simulateLogin());
+                document.getElementById('checkLoginBtn').addEventListener('click', () => this.checkFacebookLogin());
+                document.getElementById('cancelLoginBtn').addEventListener('click', () => this.cancelLogin());
+
+                // Botões do Passo 2
+                document.getElementById('selectAllBtn').addEventListener('click', () => this.selectAll());
+                document.getElementById('selectNoneBtn').addEventListener('click', () => this.selectNone());
+                document.getElementById('selectNewOnlyBtn').addEventListener('click', () => this.selectNewOnly());
+                document.getElementById('proceedImportBtn').addEventListener('click', () => this.startImport());
+                document.getElementById('backToStep1Btn').addEventListener('click', () => this.goToStep(1));
+
+                // Busca de amigos
+                document.getElementById('searchFriendsInput').addEventListener('input', (e) => this.filterFriends(e.target.value));
+
+                // Botão do Passo 4
+                document.getElementById('importMoreBtn').addEventListener('click', () => this.resetImporter());
+            }
+
+            startFacebookLogin() {
+                document.getElementById('facebookIframeContainer').style.display = 'block';
+                
+                // Simulando o iframe do Facebook (em produção seria a URL real do Facebook)
+                const iframe = document.getElementById('facebookIframe');
+                // iframe.src = 'https://www.facebook.com/login.php?skip_api_login=1&api_key=YOUR_APP_ID&signed_next=1';
+                
+                // Para demonstração, vamos simular com uma página de login
+                iframe.src = 'data:text/html,<html><body style="font-family: Arial; padding: 20px; background: #4267B2; color: white; text-align: center;"><h2>🔒 Facebook Login</h2><p>Esta é uma simulação do login do Facebook.</p><div style="background: white; color: black; padding: 20px; margin: 20px 0; border-radius: 8px;"><input type="email" placeholder="Email" style="width: 80%; padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;"><br><input type="password" placeholder="Senha" style="width: 80%; padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;"><br><button style="background: #4267B2; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin: 10px;">Entrar</button></div><p><small>⚠️ Esta é apenas uma demonstração. Em produção seria o login real do Facebook.</small></p></body></html>';
+            }
+
+            simulateLogin() {
+                // Simular login com dados de exemplo
+                this.mockFacebookLogin();
+            }
+
+            mockFacebookLogin() {
+                // Simular dados do Facebook
+                this.facebookFriends = [
+                    {
+                        id: 'fb_1',
+                        name: 'Ana Silva',
+                        email: 'ana.silva@email.com',
+                        photo: 'https://via.placeholder.com/40x40/e91e63/ffffff?text=AS',
+                        mutualFriends: 15,
+                        isNew: true
+                    },
+                    {
+                        id: 'fb_2',
+                        name: 'Carlos Santos',
+                        email: 'carlos.santos@email.com',
+                        photo: 'https://via.placeholder.com/40x40/2196f3/ffffff?text=CS',
+                        mutualFriends: 8,
+                        isNew: true
+                    },
+                    {
+                        id: 'fb_3',
+                        name: 'Maria Oliveira',
+                        email: 'maria.oliveira@email.com',
+                        photo: 'https://via.placeholder.com/40x40/4caf50/ffffff?text=MO',
+                        mutualFriends: 22,
+                        isNew: false // Já existe no Orkut
+                    },
+                    {
+                        id: 'fb_4',
+                        name: 'João Pereira',
+                        email: 'joao.pereira@email.com',
+                        photo: 'https://via.placeholder.com/40x40/ff9800/ffffff?text=JP',
+                        mutualFriends: 5,
+                        isNew: true
+                    },
+                    {
+                        id: 'fb_5',
+                        name: 'Luciana Costa',
+                        email: 'luciana.costa@email.com',
+                        photo: 'https://via.placeholder.com/40x40/9c27b0/ffffff?text=LC',
+                        mutualFriends: 12,
+                        isNew: true
+                    },
+                    {
+                        id: 'fb_6',
+                        name: 'Roberto Lima',
+                        email: 'roberto.lima@email.com',
+                        photo: 'https://via.placeholder.com/40x40/f44336/ffffff?text=RL',
+                        mutualFriends: 3,
+                        isNew: true
+                    }
+                ];
+
+                setTimeout(() => {
+                    this.goToStep(2);
+                    this.renderFriendsList();
+                }, 1500);
+            }
+
+            checkFacebookLogin() {
+                // Simular verificação de login
+                this.showMessage('✅ Login realizado com sucesso!', 'success');
+                this.mockFacebookLogin();
+            }
+
+            cancelLogin() {
+                document.getElementById('facebookIframeContainer').style.display = 'none';
+                document.getElementById('facebookIframe').src = '';
+            }
+
+            renderFriendsList() {
+                const container = document.getElementById('friendsImportList');
+                if (!this.facebookFriends || this.facebookFriends.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Nenhum amigo encontrado.</div>';
+                    return;
+                }
+
+                const html = this.facebookFriends.map(friend => `
+                    <div class="friend-import-item" data-friend-id="${friend.id}">
+                        <input type="checkbox" class="import-checkbox" ${friend.isNew ? 'checked' : ''} 
+                               onchange="facebookImporter.toggleFriend('${friend.id}', this.checked)">
+                        <img src="${friend.photo}" alt="${friend.name}" class="import-friend-photo">
+                        <div class="import-friend-info">
+                            <div class="import-friend-name">${friend.name}</div>
+                            <div class="import-friend-details">
+                                ${friend.mutualFriends} amigos em comum • ${friend.email}
+                            </div>
+                        </div>
+                        <div class="import-status ${friend.isNew ? 'status-new' : 'status-existing'}">
+                            ${friend.isNew ? '🆕 Novo' : '👤 Já é amigo'}
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+                this.updateSelectedCount();
+            }
+
+            toggleFriend(friendId, selected) {
+                if (selected) {
+                    if (!this.selectedFriends.includes(friendId)) {
+                        this.selectedFriends.push(friendId);
+                    }
+                } else {
+                    this.selectedFriends = this.selectedFriends.filter(id => id !== friendId);
+                }
+                this.updateSelectedCount();
+            }
+
+            selectAll() {
+                this.selectedFriends = this.facebookFriends.map(f => f.id);
+                this.updateCheckboxes();
+                this.updateSelectedCount();
+            }
+
+            selectNone() {
+                this.selectedFriends = [];
+                this.updateCheckboxes();
+                this.updateSelectedCount();
+            }
+
+            selectNewOnly() {
+                this.selectedFriends = this.facebookFriends.filter(f => f.isNew).map(f => f.id);
+                this.updateCheckboxes();
+                this.updateSelectedCount();
+            }
+
+            updateCheckboxes() {
+                document.querySelectorAll('.import-checkbox').forEach(checkbox => {
+                    const friendId = checkbox.closest('.friend-import-item').dataset.friendId;
+                    checkbox.checked = this.selectedFriends.includes(friendId);
+                });
+            }
+
+            updateSelectedCount() {
+                document.getElementById('selectedCount').textContent = this.selectedFriends.length;
+            }
+
+            filterFriends(query) {
+                const items = document.querySelectorAll('.friend-import-item');
+                items.forEach(item => {
+                    const name = item.querySelector('.import-friend-name').textContent.toLowerCase();
+                    const email = item.querySelector('.import-friend-details').textContent.toLowerCase();
+                    const matches = name.includes(query.toLowerCase()) || email.includes(query.toLowerCase());
+                    item.style.display = matches ? 'flex' : 'none';
+                });
+            }
+
+            startImport() {
+                if (this.selectedFriends.length === 0) {
+                    alert('⚠️ Selecione pelo menos um amigo para importar!');
+                    return;
+                }
+
+                this.goToStep(3);
+                this.processImport();
+            }
+
+            async processImport() {
+                const totalSelected = this.selectedFriends.length;
+                const progressBar = document.getElementById('importProgress');
+                const statusDiv = document.getElementById('importStatus');
+                const logDiv = document.getElementById('importLog');
+                
+                let processed = 0;
+                let newFriends = 0;
+                let existingFriends = 0;
+                let invitesSent = 0;
+
+                this.addLog('🚀 Iniciando importação...');
+                this.addLog(`📋 Total de amigos selecionados: ${totalSelected}`);
+
+                for (const friendId of this.selectedFriends) {
+                    const friend = this.facebookFriends.find(f => f.id === friendId);
+                    if (!friend) continue;
+
+                    this.addLog(`👤 Processando: ${friend.name}`);
+                    statusDiv.textContent = `Importando ${friend.name}...`;
+
+                    // Simular processamento
+                    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
+
+                    try {
+                        // Simular verificação se já existe
+                        if (friend.isNew) {
+                            // Novo amigo - enviar convite
+                            this.addLog(`📧 Enviando convite para ${friend.name}`);
+                            await this.sendFriendInvite(friend);
+                            invitesSent++;
+                            newFriends++;
+                        } else {
+                            // Já existe
+                            this.addLog(`✅ ${friend.name} já é seu amigo no Orkut`);
+                            existingFriends++;
+                        }
+
+                        // Salvar no banco de dados
+                        await this.saveFriendToDatabase(friend);
+
+                    } catch (error) {
+                        this.addLog(`❌ Erro ao processar ${friend.name}: ${error.message}`);
+                    }
+
+                    processed++;
+                    const percentage = (processed / totalSelected) * 100;
+                    progressBar.style.width = percentage + '%';
+                }
+
+                // Finalizar importação
+                statusDiv.textContent = '✅ Importação concluída!';
+                this.addLog('🎉 Importação finalizada com sucesso!');
+                
+                // Atualizar estatísticas
+                document.getElementById('totalProcessed').textContent = processed;
+                document.getElementById('newFriends').textContent = newFriends;
+                document.getElementById('existingFriends').textContent = existingFriends;
+                document.getElementById('invitesSent').textContent = invitesSent;
+
+                setTimeout(() => {
+                    this.goToStep(4);
+                }, 2000);
+            }
+
+            async sendFriendInvite(friend) {
+                // Simular envio de convite
+                const data = {
+                    type: 'friend_invite_from_facebook',
+                    userId: this.currentUser.id,
+                    friend: {
+                        facebookId: friend.id,
+                        name: friend.name,
+                        email: friend.email,
+                        photo: friend.photo,
+                        mutualFriends: friend.mutualFriends
+                    },
+                    timestamp: Date.now()
+                };
+
+                // Em produção, faria uma chamada real para API
+                // await this.makeApiCall('POST', '/api/import-facebook-friend', data);
+                
+                return Promise.resolve(data);
+            }
+
+            async saveFriendToDatabase(friend) {
+                // Simular salvamento no banco
+                const existingFriends = JSON.parse(localStorage.getItem('orkut2025_facebook_imports')) || [];
+                existingFriends.push({
+                    ...friend,
+                    importedAt: Date.now(),
+                    importedBy: this.currentUser.id
+                });
+                localStorage.setItem('orkut2025_facebook_imports', JSON.stringify(existingFriends));
+
+                // Também adicionar à lista de amigos se for novo
+                if (friend.isNew) {
+                    const friends = JSON.parse(localStorage.getItem('orkut2025_friends')) || [];
+                    friends.push({
+                        id: friend.id,
+                        username: friend.email.split('@')[0],
+                        name: friend.name,
+                        email: friend.email,
+                        photo: friend.photo,
+                        status: 'offline',
+                        location: 'Importado do Facebook',
+                        since: Date.now(),
+                        mutualFriends: friend.mutualFriends,
+                        source: 'facebook_import'
+                    });
+                    localStorage.setItem('orkut2025_friends', JSON.stringify(friends));
+                }
+            }
+
+            addLog(message) {
+                const logDiv = document.getElementById('importLog');
+                const timestamp = new Date().toLocaleTimeString('pt-BR');
+                logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+
+            goToStep(step) {
+                // Esconder todas as etapas
+                document.querySelectorAll('.import-step').forEach(el => el.classList.remove('active'));
+                
+                // Mostrar etapa atual
+                document.getElementById(`step${step}`).classList.add('active');
+                
+                this.currentStep = step;
+                this.updateStepIndicator();
+            }
+
+            updateStepIndicator() {
+                document.querySelectorAll('.step').forEach((step, index) => {
+                    const stepNumber = index + 1;
+                    step.classList.remove('active', 'completed');
+                    
+                    if (stepNumber === this.currentStep) {
+                        step.classList.add('active');
+                    } else if (stepNumber < this.currentStep) {
+                        step.classList.add('completed');
+                    }
+                });
+            }
+
+            resetImporter() {
+                this.currentStep = 1;
+                this.selectedFriends = [];
+                this.facebookFriends = [];
+                document.getElementById('importLog').innerHTML = '';
+                document.getElementById('importProgress').style.width = '0%';
+                this.goToStep(1);
+                this.cancelLogin();
+            }
+
+            showMessage(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'saving-indicator';
+                notification.textContent = message;
+                notification.style.backgroundColor = type === 'success' ? '#28a745' : 
+                                                   type === 'error' ? '#dc3545' : '#17a2b8';
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 3000);
+            }
+        }
+
+        // Inicializar quando a página carregar
+        let facebookImporter;
+        document.addEventListener('DOMContentLoaded', function() {
+            facebookImporter = new FacebookImporter();
+        });
+    </script>
+</body>
+</html>

@@ -102,18 +102,59 @@
 
   function initFriends(){
     const searchInput = document.getElementById('friendSearchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const suggestionsBtn = document.getElementById('suggestionsBtn');
     const addBtn = document.getElementById('addFriendBtn');
     const friendsList = document.getElementById('friendsList');
     const requestsList = document.getElementById('friendRequestsList');
+    const sentRequestsList = document.getElementById('sentRequestsList');
+    const searchResults = document.getElementById('searchResults');
     const friendsCount = document.getElementById('friendsCount');
-    const pendingCount = document.getElementById('pendingCount');
+    const requestsCount = document.getElementById('requestsCount');
+    const sentCount = document.getElementById('sentCount');
+    const totalFriends = document.getElementById('totalFriends');
+    const totalRequests = document.getElementById('totalRequests');
+    const totalSent = document.getElementById('totalSent');
+    const onlineFriends = document.getElementById('onlineFriends');
+    const onlineFriendsList = document.getElementById('onlineFriendsList');
     
     const friends = load('orkut2025_friends', []);
     const requests = load('orkut2025_friend_requests', []);
+    const sentRequests = load('orkut2025_sent_requests', []);
+    
+    // Inicializar abas
+    initTabs();
+    
+    function initTabs(){
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.friends-tab-content');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.getAttribute('data-tab');
+          
+          // Remover classe active de todas as abas
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(c => c.classList.remove('active'));
+          
+          // Adicionar classe active na aba atual
+          btn.classList.add('active');
+          const targetTab = document.getElementById(tabId);
+          if(targetTab) targetTab.classList.add('active');
+        });
+      });
+    }
     
     function updateCounts(){
       if(friendsCount) friendsCount.textContent = friends.length;
-      if(pendingCount) pendingCount.textContent = requests.length;
+      if(requestsCount) requestsCount.textContent = requests.length;
+      if(sentCount) sentCount.textContent = sentRequests.length;
+      if(totalFriends) totalFriends.textContent = friends.length;
+      if(totalRequests) totalRequests.textContent = requests.length;
+      if(totalSent) totalSent.textContent = sentRequests.length;
+      
+      const onlineCount = friends.filter(f => Math.random() > 0.7).length;
+      if(onlineFriends) onlineFriends.textContent = onlineCount;
     }
     
     function renderFriends(){

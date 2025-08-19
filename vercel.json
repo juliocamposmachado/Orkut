@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "orkut-2025-sistema-completo",
   "buildCommand": "echo 'No build needed for static site'",
   "outputDirectory": ".",
   "functions": {
@@ -12,6 +11,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    },
+    {
+      "source": "/profile/friends",
+      "destination": "/profile/friends.html"
     },
     {
       "source": "/consultas",
@@ -45,7 +48,7 @@
       ]
     },
     {
-      "source": "**/*.js",
+      "source": "/(.*\\.js)$",
       "headers": [
         {
           "key": "Content-Type",
@@ -58,7 +61,7 @@
       ]
     },
     {
-      "source": "**/*.css",
+      "source": "/(.*\\.css)$",
       "headers": [
         {
           "key": "Content-Type",
