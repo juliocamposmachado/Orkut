@@ -368,9 +368,9 @@ function Deploy-Vercel {
             $envCommand = "vercel env add $envVar"
             try {
                 # Tentar adicionar variável (pode falhar se já existir)
-                Invoke-Expression "echo '$envValue' | $envCommand" 2>$null
+                Invoke-Expression "echo '$envValue' | $envCommand" | Out-Null
             } catch {
-                Write-Info "Variável $envVar já configurada no Vercel"
+                Write-Info "Variavel $envVar ja configurada no Vercel"
             }
         }
     }
