@@ -6,7 +6,7 @@
 class SystemLogger {
     constructor() {
         this.logs = [];
-        this.maxLogs = 50; // Máximo de logs para manter na memória
+        this.maxLogs = 100; // Máximo de logs para manter na memória
         this.isPaused = false;
         this.container = null;
         this.statsElements = {
@@ -150,7 +150,13 @@ class SystemLogger {
             if (this.isPaused) return;
 
             this.checkSystemHealth();
-        }, 10000); // A cada 10 segundos
+        }, 5000); // A cada 5 segundos
+        
+        // Monitorar performance em tempo real
+        setInterval(() => {
+            if (this.isPaused) return;
+            this.logPerformanceMetrics();
+        }, 30000); // A cada 30 segundos
 
         // Monitorar mudanças no localStorage
         this.monitorLocalStorage();
@@ -255,8 +261,8 @@ class SystemLogger {
         // Limpar container
         this.container.innerHTML = '';
 
-        // Mostrar apenas os últimos 15 logs para performance
-        const recentLogs = this.logs.slice(0, 15);
+        // Mostrar apenas os últimos 25 logs para performance
+        const recentLogs = this.logs.slice(0, 25);
 
         recentLogs.forEach(log => {
             const logElement = this.createLogElement(log);
@@ -339,6 +345,34 @@ class SystemLogger {
         URL.revokeObjectURL(url);
 
         this.log('Logs exportados pelo usuário', 'success');
+    }
+
+    logPerformanceMetrics() {
+        // Informações de performance
+        const now = performance.now();
+        const memInfo = performance.memory ? {
+            used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
+            total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024),
+            limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+        } : null;
+        
+        if (memInfo) {
+            this.log(`💾 Memória: ${memInfo.used}MB/${memInfo.total}MB (Limite: ${memInfo.limit}MB)`, 'debug');
+        }
+        
+        // Status da conexão
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (connection) {
+            this.log(`🌐 Conexão: ${connection.effectiveType} - ${connection.downlink}Mbps`, 'debug');
+        }
+        
+        // Storage usage
+        const storageSize = this.getStorageSize();
+        this.log(`💽 LocalStorage: ${this.formatBytes(storageSize)}`, 'debug');
+        
+        // Tempo de execução
+        const uptime = Math.round((Date.now() - (window.appStartTime || Date.now())) / 1000);
+        this.log(`⏱️ Tempo ativo: ${uptime}s`, 'debug');
     }
 
     // Métodos utilitários
