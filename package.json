@@ -17,11 +17,12 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
+    "express": "^5.1.0",
     "googleapis": "^118.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "orkut-retro": "file:",
-    "pg": "^8.11.3",
+    "pg": "^8.16.3",
     "sharp": "^0.32.6",
     "sqlite3": "^5.1.6",
     "uuid": "^9.0.1"
@@ -31,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/usuario/orkut-retro.git"
+    "url": "git+https://github.com/usuario/orkut-retro.git"
   },
   "keywords": [
     "orkut",
@@ -44,5 +45,13 @@
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/usuario/orkut-retro/issues"
+  },
+  "homepage": "https://github.com/usuario/orkut-retro#readme",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
   }
 }

@@ -1,3 +1,21 @@
+Orkut2025
+
+Projeto: Site estático com scripts centrais que usam localStorage e sincronizam com um backend Node.js para gravar no PostgreSQL (Supabase).
+
+Como rodar
+- Requisitos: Node.js 18+
+- Instalar deps: npm install
+- Configurar variável de ambiente DATABASE_URL
+- Iniciar: npm run dev (ou npm start)
+
+Segurança
+- Não coloque credenciais diretamente no código.
+- Use variáveis de ambiente. Veja .env.example.
+
+Estrutura
+- public/: arquivos estáticos (HTML, CSS, JS)
+- server/: backend Express + rotas
+
 # 🌟 Orkut 2025 - Rede Social Nostálgica + Sistema de Consultas
 
 Uma rede social inspirada no clássico Orkut dos anos 2000 com funcionalidades modernas + Sistema avançado de consultas de dados integrado com Telegram.
