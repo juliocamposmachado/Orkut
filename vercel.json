@@ -1,11 +1,57 @@
 {
   "version": 2,
+  "name": "orkut-retro",
   "buildCommand": "echo 'Static site - no build needed'",
   "outputDirectory": ".",
+  "public": true,
+  "github": {
+    "silent": true
+  },
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/profile/friends",
       "destination": "/profile/friends.html"
+    },
+    {
+      "source": "/termos",
+      "destination": "/termos.html"
+    },
+    {
+      "source": "/privacidade",
+      "destination": "/privacidade.html"
+    },
+    {
+      "source": "/sobre",
+      "destination": "/sobre.html"
+    },
+    {
+      "source": "/contato",
+      "destination": "/contato.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/home.html",
+      "permanent": false
+    },
+    {
+      "source": "/login",
+      "destination": "/index.html",
+      "permanent": false
     }
   ],
   "headers": [
@@ -14,7 +60,7 @@
       "headers": [
         {
           "key": "Content-Type",
-          "value": "application/javascript"
+          "value": "application/javascript; charset=utf-8"
         },
         {
           "key": "Cache-Control",
@@ -27,11 +73,54 @@
       "headers": [
         {
           "key": "Content-Type",
-          "value": "text/css"
+          "value": "text/css; charset=utf-8"
         },
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.html)$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.json)$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/admin(.*)$",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     }
