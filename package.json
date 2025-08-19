@@ -2,23 +2,46 @@
   "name": "orkut-retro",
   "version": "1.0.0",
   "description": "Orkut Retrô - A rede social nostálgica dos anos 2000",
-  "main": "index.html",
+  "private": true,
   "scripts": {
-    "build": "echo 'Static site - no build needed'",
-    "start": "echo 'Static site deployed'"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "@prisma/client": "^5.7.1",
+    "next": "14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.0.4",
+    "prisma": "^5.7.1",
+    "typescript": "^5.3.3"
   },
   "keywords": [
     "orkut",
     "social-network",
     "nostalgia",
     "2000s",
-    "retro"
+    "retro",
+    "nextjs",
+    "supabase"
   ],
   "author": "Orkut Retrô Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/usuario/orkut-retro.git"
+    "url": "git+https://github.com/juliocamposmachado/Orkut.git"
   },
-  "homepage": "https://github.com/usuario/orkut-retro#readme"
+  "homepage": "https://github.com/juliocamposmachado/Orkut#readme"
 }

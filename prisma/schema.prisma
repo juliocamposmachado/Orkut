@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Orkut Retrô - Schema Completo
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password_hash String
+  username     String   @unique
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+
+  // Relacionamentos
+  profile              Profile?
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  scraps_sent          Scrap[] @relation("ScrapsFrom")
+  scraps_received      Scrap[] @relation("ScrapsTo")
+  messages_sent        Message[] @relation("MessagesFrom")
+  messages_received    Message[] @relation("MessagesTo")
+  uploads              Upload[]
+  communities_created  Community[]
+  community_memberships CommunityMember[]
+  friendships_requested Friendship[] @relation("FriendshipsRequester")
+  friendships_received  Friendship[] @relation("FriendshipsAddressee")
+
+  @@map("users")
+}
+
+model Profile {
+  id                  String   @id @default(uuid())
+  user_id             String   @unique
+  photo_url           String?
+  status              String?  @default("Novo no Orkut Retrô! 🎉")
+  age                 Int?
+  location            String?
+  relationship_status String?
+  birthday            DateTime? @db.Date
+  bio                 String?
+  profile_views       Int      @default(0)
+  join_date          DateTime @default(now())
+  last_active        DateTime @default(now())
+
+  // Relacionamentos
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Post {
+  id              String   @id @default(uuid())
+  user_id         String
+  content         String
+  post_type       String   @default("status") // status, photo, community_post
+  community_id    String?
+  likes_count     Int      @default(0)
+  comments_count  Int      @default(0)
+  created_at      DateTime @default(now())
+
+  // Relacionamentos
+  user      User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  community Community? @relation(fields: [community_id], references: [id])
+  comments  Comment[]
+  likes     Like[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  user_id    String
+  post_id    String
+  content    String
+  created_at DateTime @default(now())
+
+  // Relacionamentos
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Like {
+  id         String   @id @default(uuid())
+  user_id    String
+  post_id    String
+  created_at DateTime @default(now())
+
+  // Relacionamentos
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, post_id])
+  @@map("likes")
+}
+
+model Scrap {
+  id           String   @id @default(uuid())
+  from_user_id String
+  to_user_id   String
+  content      String
+  created_at   DateTime @default(now())
+  is_public    Boolean  @default(true)
+
+  // Relacionamentos
+  from_user User @relation("ScrapsFrom", fields: [from_user_id], references: [id], onDelete: Cascade)
+  to_user   User @relation("ScrapsTo", fields: [to_user_id], references: [id], onDelete: Cascade)
+
+  @@map("scraps")
+}
+
+model Message {
+  id           String   @id @default(uuid())
+  from_user_id String
+  to_user_id   String
+  subject      String
+  content      String
+  is_read      Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  // Relacionamentos
+  from_user User @relation("MessagesFrom", fields: [from_user_id], references: [id], onDelete: Cascade)
+  to_user   User @relation("MessagesTo", fields: [to_user_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Community {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  category      String?
+  creator_id    String
+  image_url     String?
+  members_count Int      @default(0)
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  creator User              @relation(fields: [creator_id], references: [id])
+  members CommunityMember[]
+  posts   Post[]
+
+  @@map("communities")
+}
+
+model CommunityMember {
+  id           String   @id @default(uuid())
+  community_id String
+  user_id      String
+  joined_at    DateTime @default(now())
+  role         String   @default("member") // member, admin, moderator
+
+  // Relacionamentos
+  community Community @relation(fields: [community_id], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([community_id, user_id])
+  @@map("community_members")
+}
+
+model Friendship {
+  id           String   @id @default(uuid())
+  requester_id String
+  addressee_id String
+  status       String   @default("pending") // pending, accepted, blocked
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+
+  // Relacionamentos
+  requester User @relation("FriendshipsRequester", fields: [requester_id], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipsAddressee", fields: [addressee_id], references: [id], onDelete: Cascade)
+
+  @@unique([requester_id, addressee_id])
+  @@map("friendships")
+}
+
+model Upload {
+  id                String   @id @default(uuid())
+  user_id           String
+  original_filename String
+  stored_filename   String
+  file_path         String
+  file_type         String
+  file_size         Int
+  upload_date       DateTime @default(now())
+
+  // Relacionamentos
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("uploads")
+}
+
+model Instrument {
+  id   BigInt @id @default(autoincrement())
+  name String
+
+  @@map("instruments")
+}
+
+model TestLog {
+  id         String   @id @default(uuid())
+  created_at DateTime @default(now())
+  test_type  String
+  status     String
+  details    Json?
+
+  @@map("test_logs")
+}
+
+// Tabela temporária para testes - manteremos por compatibilidade
+model Todo {
+  id         Int      @id @default(autoincrement())
+  title      String
+  created_at DateTime @default(now())
+
+  @@map("todos")
+}
