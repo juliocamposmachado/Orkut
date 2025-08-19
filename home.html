@@ -119,10 +119,22 @@
 
             <!-- Right Sidebar -->
             <aside class="right-sidebar">
-                <div class="trending-communities">
-                    <h4>Comunidades em alta</h4>
-                    <div id="trendingCommunitiesList">
-                        <p>Carregando...</p>
+                <div class="system-logs-panel">
+                    <h4>🤖 Sistema - Logs em Tempo Real</h4>
+                    <div class="logs-controls">
+                        <button class="btn-small" onclick="clearSystemLogs()">🗑️ Limpar</button>
+                        <button class="btn-small" onclick="toggleLogsPause()">⏸️ Pausar</button>
+                        <button class="btn-small" onclick="exportLogs()">📤 Exportar</button>
+                    </div>
+                    <div id="systemLogsContainer" class="logs-container">
+                        <div class="log-entry info">
+                            <span class="log-time">Iniciando...</span>
+                            <span class="log-message">Sistema de logs carregado</span>
+                        </div>
+                    </div>
+                    <div class="logs-stats">
+                        <span id="logsCount">1 log</span> • 
+                        <span id="logsStatus">Ativo</span>
                     </div>
                 </div>
 
@@ -158,6 +170,9 @@
     <script src="js/app.js"></script>
     <script src="js/main.js"></script>
     <script src="js/ai-database-manager.js"></script>
+    <script src="js/smart-sync.js"></script>
+    <script src="js/ai-status-panel.js"></script>
+    <script src="js/system-logs.js"></script>
     <script src="js/supabase-integration.js"></script>
     <script src="js/feed-interactions.js"></script>
     <script src="js/profile-photos.js"></script>
