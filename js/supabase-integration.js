@@ -531,4 +531,325 @@ function getCurrentPage() {
     return page.replace('.html', '') || 'index';
 }
 
-console.log('🔗 Integração Supabase carregada');
+// ===== FUNCIONALIDADES DE INTERAÇÃO =====
+
+// Sistema de Posts e Feed
+async function createPost(content, type = 'status', mediaUrl = null) {
+    if (!supabaseClient) {
+        console.warn('Supabase não disponível, salvando localmente');
+        return savePostLocally(content, type, mediaUrl);
+    }
+    
+    try {
+        const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+        if (!user.id) {
+            throw new Error('Usuário não logado');
+        }
+        
+        const postData = {
+            user_id: user.id,
+            content: content,
+            type: type,
+            media_url: mediaUrl,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('posts')
+            .insert(postData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('Erro ao criar post:', error);
+            return savePostLocally(content, type, mediaUrl);
+        }
+        
+        console.log('✅ Post criado no Supabase:', data);
+        return { success: true, data: data };
+        
+    } catch (error) {
+        console.error('Erro ao criar post:', error);
+        return savePostLocally(content, type, mediaUrl);
+    }
+}
+
+// Fallback local para posts
+function savePostLocally(content, type, mediaUrl) {
+    const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+    const posts = JSON.parse(localStorage.getItem('orkutPosts') || '[]');
+    
+    const newPost = {
+        id: Date.now().toString(),
+        user_id: user.id || 'local_user',
+        content: content,
+        type: type,
+        media_url: mediaUrl,
+        created_at: new Date().toISOString(),
+        author_name: user.name || 'Usuário',
+        author_photo: user.photo || getRandomProfileImage()
+    };
+    
+    posts.unshift(newPost);
+    localStorage.setItem('orkutPosts', JSON.stringify(posts));
+    
+    return { success: true, data: newPost };
+}
+
+// Sistema de upload de fotos de perfil
+async function updateProfilePhoto(photoFile = null, useLocalImage = null) {
+    try {
+        let photoUrl = null;
+        
+        if (useLocalImage) {
+            // Usar imagem da pasta local
+            photoUrl = `images/${useLocalImage}`;
+        } else if (photoFile) {
+            // Upload de arquivo (implementar se necessário)
+            photoUrl = await uploadPhotoFile(photoFile);
+        } else {
+            // Usar imagem padrão
+            photoUrl = getRandomProfileImage();
+        }
+        
+        // Atualizar no Supabase
+        if (supabaseClient) {
+            await updateProfile({ photo_url: photoUrl });
+        }
+        
+        // Atualizar localmente
+        const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+        user.photo = photoUrl;
+        localStorage.setItem('orkutUser', JSON.stringify(user));
+        
+        // Atualizar na página
+        updatePageUserInfo(user);
+        
+        return { success: true, photoUrl: photoUrl };
+        
+    } catch (error) {
+        console.error('Erro ao atualizar foto:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Função para obter imagem aleatória da pasta
+function getRandomProfileImage() {
+    const availableImages = [
+        'images/orkutblack.png',
+        'images/orkut.png',
+        'images/julio.webp',
+        'images/juliette.jpg',
+        'images/Abujamra.jpg'
+    ];
+    
+    return availableImages[Math.floor(Math.random() * availableImages.length)];
+}
+
+// Função para usuários de teste usarem orkutblack.png
+function getTestUserImage(userName = '') {
+    // Se for usuário de teste, usar orkutblack
+    const testUsers = ['teste', 'test', 'demo', 'admin', 'user'];
+    const isTestUser = testUsers.some(test => userName.toLowerCase().includes(test));
+    
+    return isTestUser ? 'images/orkutblack.png' : getRandomProfileImage();
+}
+
+// Sistema de Scraps (recados)
+async function sendScrap(targetUserId, message) {
+    if (!supabaseClient) {
+        return saveScrapLocally(targetUserId, message);
+    }
+    
+    try {
+        const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+        
+        const scrapData = {
+            from_user_id: user.id,
+            to_user_id: targetUserId,
+            message: message,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('scraps')
+            .insert(scrapData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('Erro ao enviar scrap:', error);
+            return saveScrapLocally(targetUserId, message);
+        }
+        
+        return { success: true, data: data };
+        
+    } catch (error) {
+        console.error('Erro ao enviar scrap:', error);
+        return saveScrapLocally(targetUserId, message);
+    }
+}
+
+// Fallback local para scraps
+function saveScrapLocally(targetUserId, message) {
+    const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+    const scraps = JSON.parse(localStorage.getItem('orkutScraps') || '[]');
+    
+    const newScrap = {
+        id: Date.now().toString(),
+        from_user_id: user.id,
+        to_user_id: targetUserId,
+        message: message,
+        created_at: new Date().toISOString(),
+        author_name: user.name,
+        author_photo: user.photo
+    };
+    
+    scraps.unshift(newScrap);
+    localStorage.setItem('orkutScraps', JSON.stringify(scraps));
+    
+    return { success: true, data: newScrap };
+}
+
+// Sistema de Amizades
+async function sendFriendRequest(targetUserId) {
+    if (!supabaseClient) {
+        return saveFriendRequestLocally(targetUserId);
+    }
+    
+    try {
+        const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+        
+        const requestData = {
+            from_user_id: user.id,
+            to_user_id: targetUserId,
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabaseClient
+            .from('friend_requests')
+            .insert(requestData)
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('Erro ao enviar solicitação:', error);
+            return saveFriendRequestLocally(targetUserId);
+        }
+        
+        return { success: true, data: data };
+        
+    } catch (error) {
+        console.error('Erro ao enviar solicitação:', error);
+        return saveFriendRequestLocally(targetUserId);
+    }
+}
+
+// Fallback local para solicitações de amizade
+function saveFriendRequestLocally(targetUserId) {
+    const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+    const requests = JSON.parse(localStorage.getItem('orkutFriendRequests') || '[]');
+    
+    const newRequest = {
+        id: Date.now().toString(),
+        from_user_id: user.id,
+        to_user_id: targetUserId,
+        status: 'pending',
+        created_at: new Date().toISOString()
+    };
+    
+    requests.push(newRequest);
+    localStorage.setItem('orkutFriendRequests', JSON.stringify(requests));
+    
+    return { success: true, data: newRequest };
+}
+
+// Carregar feed com posts do Supabase + locais
+async function loadCompleteFeed(limit = 20, offset = 0) {
+    let supabasePosts = [];
+    let localPosts = [];
+    
+    // Tentar carregar do Supabase
+    if (supabaseClient) {
+        try {
+            supabasePosts = await getSupabaseFeed(limit, offset) || [];
+        } catch (error) {
+            console.warn('Erro ao carregar feed do Supabase:', error);
+        }
+    }
+    
+    // Carregar posts locais
+    localPosts = JSON.parse(localStorage.getItem('orkutPosts') || '[]');
+    
+    // Combinar e ordenar por data
+    const allPosts = [...supabasePosts, ...localPosts]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, limit);
+    
+    return allPosts;
+}
+
+// Inicializar usuários de teste com imagens corretas
+function initializeTestUsers() {
+    const testUsers = [
+        {
+            name: 'Usuário Teste',
+            email: 'teste@orkut.com',
+            photo: 'images/orkutblack.png'
+        },
+        {
+            name: 'Demo User',
+            email: 'demo@orkut.com', 
+            photo: 'images/orkutblack.png'
+        }
+    ];
+    
+    // Aplicar imagens corretas se for usuário de teste
+    const currentUser = JSON.parse(localStorage.getItem('orkutUser') || '{}');
+    if (currentUser.email) {
+        const isTestUser = testUsers.some(test => 
+            currentUser.email.includes('test') || 
+            currentUser.email.includes('demo') ||
+            currentUser.name.toLowerCase().includes('test')
+        );
+        
+        if (isTestUser && !currentUser.photo.includes('orkutblack')) {
+            currentUser.photo = 'images/orkutblack.png';
+            localStorage.setItem('orkutUser', JSON.stringify(currentUser));
+            updatePageUserInfo(currentUser);
+        }
+    }
+}
+
+// Atualizar dados de mock com imagens corretas
+function updateMockDataImages() {
+    // Atualizar dados do main.js se existir
+    if (window.mockData) {
+        window.mockData.currentUser.photo = 'images/orkutblack.png';
+        
+        // Atualizar fotos dos amigos
+        if (window.mockData.friends) {
+            window.mockData.friends.forEach(friend => {
+                friend.photo = getRandomProfileImage();
+            });
+        }
+        
+        // Atualizar fotos do feed
+        if (window.mockData.feedPosts) {
+            window.mockData.feedPosts.forEach(post => {
+                post.authorPhoto = getRandomProfileImage();
+            });
+        }
+    }
+}
+
+// Event listeners para inicialização
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        initializeTestUsers();
+        updateMockDataImages();
+    }, 1000);
+});
+
+console.log('🔗 Integração Supabase carregada com funcionalidades completas');
