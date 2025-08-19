@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut Consultas 2025 - Sistema de Consulta de Dados</title>
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="styles/consultation-styles.css">
+    
+    <!-- CSS para feedback de validação -->
+    <style>
+        .field-error {
+            border-color: #f44336 !important;
+            background-color: rgba(244, 67, 54, 0.05) !important;
+        }
+
+        .field-success {
+            border-color: #4caf50 !important;
+            background-color: rgba(76, 175, 80, 0.05) !important;
+        }
+
+        .field-feedback {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-feedback.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .field-feedback.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        /* Loading e estados especiais */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #4285F4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos para demonstração */
+        .demo-controls {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-controls h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Status do sistema */
+        .system-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .system-status h4 {
+            margin: 0 0 0.5rem 0;
+            color: #4285F4;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-value.online {
+            color: #4caf50;
+        }
+
+        .status-value.offline {
+            color: #f44336;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .system-status {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                margin: 1rem;
+            }
+
+            .demo-controls {
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Controles de Demonstração -->
+        <div class="demo-controls">
+            <h3>🚀 Controles de Demonstração</h3>
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="demoFunctions.fillCPF()">📄 Testar CPF</button>
+                <button class="demo-btn" onclick="demoFunctions.fillCNPJ()">🏢 Testar CNPJ</button>
+                <button class="demo-btn" onclick="demoFunctions.fillPhone()">📞 Testar Telefone</button>
+                <button class="demo-btn" onclick="demoFunctions.fillEmail()">📧 Testar Email</button>
+                <button class="demo-btn" onclick="demoFunctions.simulateError()">❌ Simular Erro</button>
+                <button class="demo-btn" onclick="demoFunctions.clearAll()">🗑️ Limpar Tudo</button>
+                <button class="demo-btn" onclick="demoFunctions.showStats()">📊 Ver Stats</button>
+                <button class="demo-btn" onclick="demoFunctions.exportData()">📥 Exportar</button>
+            </div>
+        </div>
+
+        <!-- Container principal onde a interface será carregada -->
+        <div id="main-content"></div>
+
+        <!-- Status do Sistema -->
+        <div class="system-status" id="system-status">
+            <h4>📊 Status do Sistema</h4>
+            <div class="status-item">
+                <span>Interface:</span>
+                <span class="status-value online" id="interface-status">Online</span>
+            </div>
+            <div class="status-item">
+                <span>Chat:</span>
+                <span class="status-value online" id="chat-status">Online</span>
+            </div>
+            <div class="status-item">
+                <span>Validação:</span>
+                <span class="status-value online" id="validation-status">Online</span>
+            </div>
+            <div class="status-item">
+                <span>Bot Telegram:</span>
+                <span class="status-value online" id="bot-status">Simulado</span>
+            </div>
+            <div class="status-item">
+                <span>Consultas:</span>
+                <span class="status-value" id="consultation-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <h3>Carregando Sistema...</h3>
+            <p>Inicializando componentes do Orkut Consultas 2025</p>
+        </div>
+    </div>
+
+    <!-- Scripts do Sistema -->
+    <script type="module">
+        // Importa todos os módulos necessários
+        import TelegramBotAPI from './scripts/telegram-bot-api.js';
+        import DataConsultationChat from './scripts/data-consultation-chat.js';
+        import DataConsultationInterface from './scripts/data-consultation-interface.js';
+        import DataValidation from './scripts/data-validation.js';
+
+        // Funções de demonstração globais
+        window.demoFunctions = {
+            // Preenche formulário com CPF de teste
+            fillCPF() {
+                const input = document.querySelector('.query-input');
+                if (input) {
+                    input.value = '12345678901';
+                    input.dispatchEvent(new Event('input'));
+                }
+            },
+
+            // Preenche formulário com CNPJ de teste
+            fillCNPJ() {
+                const input = document.querySelector('.query-input');
+                if (input) {
+                    input.value = '12345678000123';
+                    input.dispatchEvent(new Event('input'));
+                }
+            },
+
+            // Preenche formulário com telefone de teste
+            fillPhone() {
+                const input = document.querySelector('.query-input');
+                if (input) {
+                    input.value = '11987654321';
+                    input.dispatchEvent(new Event('input'));
+                }
+            },
+
+            // Preenche formulário com email de teste
+            fillEmail() {
+                const input = document.querySelector('.query-input');
+                if (input) {
+                    input.value = 'usuario@exemplo.com';
+                    input.dispatchEvent(new Event('input'));
+                }
+            },
+
+            // Simula erro de validação
+            simulateError() {
+                const input = document.querySelector('.query-input');
+                if (input) {
+                    input.value = 'dados_invalidos';
+                    input.dispatchEvent(new Event('input'));
+                }
+            },
+
+            // Limpa todos os dados
+            clearAll() {
+                if (window.dataConsultationChat) {
+                    window.dataConsultationChat.clearChat();
+                }
+                if (window.consultationInterface) {
+                    window.consultationInterface.clearAllData();
+                }
+                this.updateSystemStatus();
+            },
+
+            // Mostra estatísticas
+            showStats() {
+                const stats = window.dataValidation?.getValidationStats() || {};
+                const consultationStats = window.consultationInterface?.getSystemStatus() || {};
+                
+                alert(`📊 Estatísticas do Sistema:
+
+🔍 Validações: ${stats.total || 0}
+✅ Sucessos: ${stats.successful || 0}
+❌ Falhas: ${stats.failed || 0}
+📈 Taxa de Sucesso: ${stats.successRate || 0}%
+
+💬 Consultas: ${consultationStats.totalConsultations || 0}
+🎯 Interface: ${consultationStats.isInitialized ? 'Ativa' : 'Inativa'}
+🤖 Chat: ${consultationStats.chatSystem?.isActive ? 'Ativo' : 'Inativo'}`);
+            },
+
+            // Exporta dados
+            exportData() {
+                if (window.consultationInterface) {
+                    window.consultationInterface.exportHistory();
+                } else {
+                    alert('Sistema ainda não está totalmente carregado');
+                }
+            },
+
+            // Atualiza status do sistema
+            updateSystemStatus() {
+                const interfaceStatus = document.getElementById('interface-status');
+                const chatStatus = document.getElementById('chat-status');
+                const validationStatus = document.getElementById('validation-status');
+                const consultationCount = document.getElementById('consultation-count');
+
+                if (interfaceStatus) {
+                    interfaceStatus.textContent = window.consultationInterface?.isInitialized ? 'Online' : 'Carregando';
+                    interfaceStatus.className = window.consultationInterface?.isInitialized ? 'status-value online' : 'status-value offline';
+                }
+
+                if (chatStatus) {
+                    const isActive = window.dataConsultationChat?.getSystemStatus()?.isActive;
+                    chatStatus.textContent = isActive ? 'Online' : 'Carregando';
+                    chatStatus.className = isActive ? 'status-value online' : 'status-value offline';
+                }
+
+                if (validationStatus) {
+                    validationStatus.textContent = window.dataValidation ? 'Online' : 'Carregando';
+                    validationStatus.className = window.dataValidation ? 'status-value online' : 'status-value offline';
+                }
+
+                if (consultationCount) {
+                    const count = window.consultationInterface?.getConsultationHistory()?.length || 0;
+                    consultationCount.textContent = count;
+                }
+            }
+        };
+
+        // Função de inicialização
+        async function initializeSystem() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                console.log('🚀 Inicializando Orkut Consultas 2025...');
+                
+                // Aguarda um pouco para mostrar o loading
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Verifica se todos os sistemas estão carregados
+                const systemsReady = window.telegramBotAPI && 
+                                   window.dataConsultationChat && 
+                                   window.consultationInterface && 
+                                   window.dataValidation;
+
+                if (systemsReady) {
+                    console.log('✅ Todos os sistemas carregados com sucesso!');
+                    
+                    // Atualiza status inicial
+                    window.demoFunctions.updateSystemStatus();
+                    
+                    // Atualiza status a cada 5 segundos
+                    setInterval(() => {
+                        window.demoFunctions.updateSystemStatus();
+                    }, 5000);
+                    
+                } else {
+                    console.warn('⚠️ Alguns sistemas podem não ter carregado corretamente');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao inicializar sistema:', error);
+                alert('Erro ao carregar o sistema. Verifique o console para mais detalhes.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Configura eventos globais
+        window.addEventListener('load', initializeSystem);
+        
+        // Escuta mudanças no sistema para atualizar status
+        document.addEventListener('DOMContentLoaded', () => {
+            // Observer para mudanças no DOM
+            const observer = new MutationObserver(() => {
+                window.demoFunctions.updateSystemStatus();
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'id']
+            });
+        });
+
+        // Tratamento de erros globais
+        window.addEventListener('error', (event) => {
+            console.error('Erro global capturado:', event.error);
+            
+            // Mostra notificação de erro se disponível
+            if (window.consultationInterface && window.consultationInterface.showNotification) {
+                window.consultationInterface.showNotification(
+                    `Erro: ${event.error.message}`, 
+                    'error'
+                );
+            }
+        });
+
+        // Atalhos de teclado para demonstração
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey) {
+                switch (e.key) {
+                    case 'D':
+                        e.preventDefault();
+                        window.demoFunctions.showStats();
+                        break;
+                    case 'C':
+                        e.preventDefault();
+                        window.demoFunctions.clearAll();
+                        break;
+                    case 'E':
+                        e.preventDefault();
+                        window.demoFunctions.exportData();
+                        break;
+                }
+            }
+        });
+
+        // Log de boas-vindas
+        console.log(`
+🎯 Orkut Consultas 2025 - Sistema de Consulta de Dados
+═══════════════════════════════════════════════════════
+
+🚀 Sistema carregado com sucesso!
+🤖 Bot integrado: @consultabrpro_bot
+📱 Interface moderna e responsiva
+🛡️ Validação avançada de dados
+💬 Chat em tempo real
+
+Atalhos disponíveis:
+• Ctrl+Shift+D: Mostrar estatísticas
+• Ctrl+Shift+C: Limpar dados
+• Ctrl+Shift+E: Exportar histórico
+• Ctrl+1: Consulta CPF
+• Ctrl+2: Consulta CNPJ
+• Ctrl+H: Histórico
+
+Para mais informações, visite: https://github.com/orkut2025
+        `);
+        
+    </script>
+
+    <!-- Scripts individuais (fallback caso modules não funcionem) -->
+    <script src="scripts/telegram-bot-api.js"></script>
+    <script src="scripts/data-validation.js"></script>
+    <script src="scripts/data-consultation-chat.js"></script>
+    <script src="scripts/data-consultation-interface.js"></script>
+</body>
+</html>

@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Orkut 2025 - Demo das Personas IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        #main-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn, .btn-primary, .btn-secondary {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn, .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-btn:hover, .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .crush-alert {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .page-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .crush-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: crushAlert 0.5s ease-out;
+        }
+
+        @keyframes crushAlert {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .crush-alert {
+            text-align: center;
+        }
+
+        .crush-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .crush-content h4 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .crush-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .ai-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .upload-progress {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .responsive {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .responsive > * {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            #main-content {
+                padding: 20px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Animações especiais */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bounce {
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0,-30px,0); }
+            70% { transform: translate3d(0,-15px,0); }
+            90% { transform: translate3d(0,-4px,0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Orkut 2025</h1>
+            <p>Demo do Sistema de Personas IA</p>
+        </div>
+
+        <div id="main-content" class="fade-in">
+            <!-- O conteúdo será renderizado dinamicamente aqui pelas personas -->
+            <div class="page-section">
+                <h2>🚀 Sistema de Personas IA em Ação!</h2>
+                <p>Este é um demo do sistema completo do Orkut 2025 com IAs especializadas para detecção de crushes, gerenciamento de dados e navegação inteligente.</p>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h3>💕 Crush AI Persona</h3>
+                        <p>IA especializada que analisa comportamentos, visitações de perfil e interações para detectar possíveis crushes secretos.</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>Analisa frequência de visitas</li>
+                            <li>Monitora curtidas e comentários</li>
+                            <li>Detecta padrões de horário</li>
+                            <li>Identifica observadores silenciosos</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔄 Data Manager Persona</h3>
+                        <p>IA que gerencia sincronização inteligente entre localStorage e backend, garantindo que nenhum dado seja perdido.</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>Sincronização automática</li>
+                            <li>Gerenciamento de conflitos</li>
+                            <li>Backup e restauração</li>
+                            <li>Análise de comportamento</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🎨 Navigation UI Persona</h3>
+                        <p>IA que gerencia a interface do usuário e navegação entre páginas de forma fluida e intuitiva.</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>Navegação dinâmica</li>
+                            <li>Renderização de componentes</li>
+                            <li>Gerenciamento de estado</li>
+                            <li>Interface responsiva</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="scraps-count">0</div>
+                        <div>Scraps</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="photos-count">0</div>
+                        <div>Fotos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="friends-count">0</div>
+                        <div>Amigos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="crushes-count">0</div>
+                        <div>Crushes Detectados</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-section">
+                <h2>🎮 Teste as Funcionalidades</h2>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" data-navigate="profile">👤 Meu Perfil</button>
+                    <button class="nav-btn" data-navigate="scraps">💌 Scraps</button>
+                    <button class="nav-btn" data-navigate="photos">📸 Fotos</button>
+                    <button class="nav-btn" data-navigate="friends">👥 Amigos</button>
+                    <button class="nav-btn crush-alert" data-navigate="crush-alerts">💕 Alertas de Crush</button>
+                    <button class="nav-btn" onclick="demoActions.simulateCrushDetection()">🤖 Simular Crush</button>
+                    <button class="nav-btn" onclick="demoActions.generateDemoData()">📊 Gerar Dados Demo</button>
+                </div>
+            </div>
+
+            <div class="page-section">
+                <h2>⚡ Ações Rápidas</h2>
+                
+                <div class="responsive">
+                    <div class="card">
+                        <h3>💌 Enviar Scrap</h3>
+                        <form class="action-form" data-action-type="send-scrap">
+                            <div class="form-group">
+                                <label for="scrap-to">Para (ID do usuário):</label>
+                                <input type="text" id="scrap-to" name="toUserId" placeholder="user123" value="demo_user_1">
+                            </div>
+                            <div class="form-group">
+                                <textarea name="message" placeholder="Escreva sua mensagem..." rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="isPrivate"> Scrap privado
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">📤 Enviar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>📸 Upload de Foto</h3>
+                        <form class="action-form" data-action-type="upload-photo">
+                            <div class="form-group">
+                                <label for="photo-file">Selecionar Foto:</label>
+                                <input type="file" id="photo-file" name="photo" accept="image/*" data-action-type="photo" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="caption" placeholder="Legenda da foto...">
+                            </div>
+                            <div class="form-group">
+                                <select name="album">
+                                    <option value="default">Álbum Padrão</option>
+                                    <option value="profile">Fotos do Perfil</option>
+                                    <option value="memories">Memórias</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">📤 Enviar Foto</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-status" id="ai-status">
+            🤖 Carregando Personas IA...
+        </div>
+    </div>
+
+    <!-- Scripts das Personas -->
+    <script type="module" src="scripts/localStorage-manager.js"></script>
+    <script type="module" src="personas/navigation-ui-persona.js"></script>
+    <script type="module" src="personas/data-manager-persona.js"></script>
+    <script type="module" src="personas/crush-ai-persona.js"></script>
+    <script type="module" src="scripts/action-handlers.js"></script>
+
+    <script>
+        // Demo Actions para testar funcionalidades
+        class DemoActions {
+            constructor() {
+                this.setupDemo();
+            }
+
+            setupDemo() {
+                console.log('🚀 Inicializando Demo do Orkut 2025...');
+                
+                // Aguarda carregamento das personas
+                setTimeout(() => {
+                    this.initializeDemoUser();
+                    this.updateStats();
+                    this.startStatsUpdater();
+                }, 2000);
+            }
+
+            initializeDemoUser() {
+                if (typeof localStorageManager === 'undefined') {
+                    console.warn('LocalStorageManager não carregado ainda');
+                    return;
+                }
+
+                let profile = localStorageManager.getUserProfile();
+                if (!profile.name) {
+                    localStorageManager.updateUserProfile({
+                        id: 'current_user_demo',
+                        name: 'Usuário Demo',
+                        bio: 'Testando o sistema de Personas IA do Orkut 2025! 🚀💕',
+                        location: 'São Paulo, Brasil',
+                        interests: ['Tecnologia', 'IA', 'Redes Sociais', 'Inovação']
+                    });
+                    console.log('👤 Usuário demo inicializado');
+                }
+            }
+
+            generateDemoData() {
+                console.log('🎲 Gerando dados demo...');
+                
+                if (typeof localStorageManager === 'undefined') {
+                    this.showNotification('❌ Sistema ainda carregando, tente novamente em alguns segundos', 'error');
+                    return;
+                }
+                
+                // Adiciona scraps variados
+                const scrapMessages = [
+                    'Olá! Como você está? 😊',
+                    'Adorei suas fotos! 📸❤️',
+                    'Que legal seu perfil! 🌟',
+                    'Vamos conversar mais? 💬',
+                    'Sua bio é muito interessante! 🤔',
+                    'Legal te ver aqui no Orkut! 🎉'
+                ];
+
+                for (let i = 1; i <= 6; i++) {
+                    localStorageManager.addScrap(
+                        `demo_user_${i}`,
+                        'current_user_demo',
+                        scrapMessages[i - 1],
+                        Math.random() > 0.8
+                    );
+                }
+
+                // Simula visitas de perfil com padrões diferentes
+                for (let i = 1; i <= 15; i++) {
+                    const visitCount = Math.floor(Math.random() * 8) + 1;
+                    for (let j = 0; j < visitCount; j++) {
+                        localStorageManager.recordProfileVisit(
+                            `demo_user_${i}`,
+                            'current_user_demo'
+                        );
+                    }
+                    
+                    // Alguns usuários visitam muito (possíveis crushes)
+                    if (i <= 3) {
+                        for (let k = 0; k < Math.floor(Math.random() * 10) + 5; k++) {
+                            localStorageManager.recordProfileVisit(
+                                `demo_user_${i}`,
+                                'current_user_demo'
+                            );
+                        }
+                    }
+                }
+
+                // Adiciona fotos demo com diferentes popularidades
+                const demoPhotos = [
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzY2N2VlYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii0uNWVtIj5Gb3RvIERlbW88L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMS4yZW0iPk9ya3V0IDIwMjU8L3RleHQ+PC9zdmc+',
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZmOWE5ZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNydXNoIElBPC90ZXh0Pjwvc3ZnPg==',
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzc2NGJhMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFJIFBlcnNvbmFzPC90ZXh0Pjwvc3ZnPg=='
+                ];
+
+                const captions = ['Testando o sistema! 🚀', 'IA detectando crushes 💕', 'Orkut 2025 em ação! ⚡'];
+
+                demoPhotos.forEach((photo, index) => {
+                    const photoObj = localStorageManager.addPhoto(
+                        'current_user_demo',
+                        photo,
+                        captions[index] || `Foto demo ${index + 1}`,
+                        index === 0 ? 'profile' : 'default'
+                    );
+
+                    // Simula curtidas (alguns usuários curtem mais)
+                    const likeCount = index === 0 ? 8 : Math.floor(Math.random() * 6) + 1;
+                    for (let i = 1; i <= likeCount; i++) {
+                        localStorageManager.likePhoto(photoObj.id, `demo_user_${i}`);
+                    }
+                });
+
+                this.updateStats();
+                this.showNotification('✅ Dados demo gerados! O sistema está pronto para detectar crushes.', 'success');
+                
+                // Força análise automática após gerar dados
+                setTimeout(() => {
+                    if (window.dataManager) {
+                        window.dataManager.performPeriodicAnalysis?.();
+                    }
+                }, 3000);
+            }
+
+            simulateCrushDetection() {
+                console.log('💕 Simulando detecção de crush avançada...');
+                
+                if (typeof localStorageManager === 'undefined') {
+                    this.showNotification('❌ Sistema ainda carregando, tente novamente', 'error');
+                    return;
+                }
+                
+                // Simula comportamento intenso de crush para demo_user_1
+                const crushUserId = 'demo_user_1';
+                
+                // Múltiplas visitas em horários diferentes
+                const visitTimes = [];
+                for (let i = 0; i < 12; i++) {
+                    localStorageManager.recordProfileVisit(crushUserId, 'current_user_demo');
+                    visitTimes.push(new Date().toISOString());
+                }
+                
+                // Adiciona scraps com emojis (indicador de interesse)
+                const crushMessages = [
+                    'Oi! Tudo bem? 😊',
+                    'Adorei sua foto nova! 😍💕',
+                    'Você está sempre online aqui né? 😅',
+                    'Que legal esse sistema de IA! 🤖✨'
+                ];
+                
+                crushMessages.forEach(msg => {
+                    localStorageManager.addScrap(
+                        crushUserId,
+                        'current_user_demo',
+                        msg,
+                        false
+                    );
+                });
+
+                // Curte todas as fotos
+                const photos = localStorageManager.getPhotosByUser('current_user_demo');
+                photos.forEach(photo => {
+                    if (!photo.likes.includes(crushUserId)) {
+                        localStorageManager.likePhoto(photo.id, crushUserId);
+                    }
+                });
+
+                // Força análise comportamental
+                if (window.crushAI) {
+                    const behaviorData = {
+                        userId: crushUserId,
+                        visitFrequency: 4.2,
+                        totalInteractions: 16,
+                        interactionTypes: {
+                            'scrap': 4,
+                            'like': photos.length,
+                            'visit': 12
+                        },
+                        communicationStyle: {
+                            totalMessages: 4,
+                            averageLength: 35,
+                            emojiUsage: 2.5
+                        },
+                        photoActivity: {
+                            totalLikes: photos.length
+                        }
+                    };
+                    
+                    console.log('🔍 Enviando dados para análise da Crush AI:', behaviorData);
+                    window.crushAI.processBehaviorData(behaviorData);
+                } else {
+                    console.warn('Crush AI não disponível ainda');
+                }
+                
+                this.updateStats();
+                
+                // Mostra alerta de crush após análise
+                setTimeout(() => {
+                    this.showAdvancedCrushAlert();
+                }, 3000);
+            }
+
+            showAdvancedCrushAlert() {
+                const alerts = [
+                    {
+                        message: '💕 CRUSH DETECTADO! demo_user_1 visitou seu perfil 12 vezes hoje (92% de chance de interesse)',
+                        patterns: ['Visitador Frequente', 'Curtidor de Fotos', 'Comunicador Ativo']
+                    },
+                    {
+                        message: '👀 demo_user_1 parece estar muito interessado! Ele curtiu todas suas fotos (89% match)',
+                        patterns: ['Observador Atento', 'Interação Consistente']
+                    }
+                ];
+
+                const alert = alerts[Math.floor(Math.random() * alerts.length)];
+
+                const notification = document.createElement('div');
+                notification.className = 'crush-notification';
+                notification.innerHTML = `
+                    <div class="crush-alert high">
+                        <div class="crush-icon">💕</div>
+                        <div class="crush-content">
+                            <h4>Crush AI Detectou Interesse!</h4>
+                            <p>${alert.message}</p>
+                            <div style="margin: 15px 0; font-size: 14px; opacity: 0.9;">
+                                <strong>Padrões identificados:</strong><br>
+                                ${alert.patterns.join(' • ')}
+                            </div>
+                            <div class="crush-actions">
+                                <button class="btn-primary" onclick="this.viewCrushProfile('demo_user_1'); this.closest('.crush-notification').remove();">
+                                    👤 Ver Perfil
+                                </button>
+                                <button class="btn-secondary" onclick="this.closest('.crush-notification').remove();">
+                                    ❌ Dispensar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Remove após 15 segundos
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 15000);
+
+                // Som de alerta simulado
+                console.log('🔊 *Notificação de crush detectado* 💕');
+                
+                // Atualiza contador de crushes
+                setTimeout(() => this.updateStats(), 1000);
+            }
+
+            updateStats() {
+                if (typeof localStorageManager === 'undefined') return;
+
+                try {
+                    const stats = localStorageManager.getStatistics();
+                    
+                    document.getElementById('scraps-count').textContent = stats.scraps || 0;
+                    document.getElementById('photos-count').textContent = stats.photos || 0;
+                    
+                    const profile = localStorageManager.getUserProfile();
+                    document.getElementById('friends-count').textContent = profile.friends?.length || 0;
+                    
+                    // Conta crushes detectados (score > 0.7)
+                    const crushData = localStorageManager.getCrushData();
+                    const detectedCrushes = crushData.filter(c => c.crushScore && c.crushScore > 0.7).length;
+                    document.getElementById('crushes-count').textContent = detectedCrushes;
+                } catch (error) {
+                    console.warn('Erro ao atualizar stats:', error);
+                }
+            }
+
+            startStatsUpdater() {
+                setInterval(() => {
+                    this.updateStats();
+                }, 3000);
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 4000);
+            }
+
+            viewCrushProfile(userId) {
+                if (window.navigationUI) {
+                    window.navigationUI.navigateTo('profile', { userId });
+                } else {
+                    this.showNotification(`👤 Visualizando perfil de ${userId}`, 'info');
+                }
+            }
+        }
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Iniciando Demo do Orkut 2025...');
+            window.demoActions = new DemoActions();
+            
+            // Mensagem de boas-vindas
+            setTimeout(() => {
+                if (window.demoActions) {
+                    window.demoActions.showNotification('🌟 Demo carregado! Teste o sistema de detecção de crushes.', 'success');
+                }
+            }, 3000);
+        });
+
+        // Monitor de status das IAs
+        function updateAIStatus() {
+            const status = document.getElementById('ai-status');
+            if (!status) return;
+            
+            let activeAIs = [];
+            let totalAIs = 0;
+            
+            // Verifica cada persona
+            if (typeof localStorageManager !== 'undefined') {
+                activeAIs.push('LocalStorage');
+                totalAIs++;
+            }
+            if (window.navigationUI) {
+                activeAIs.push('Navigation');
+                totalAIs++;
+            }
+            if (window.dataManager) {
+                activeAIs.push('DataManager');
+                totalAIs++;
+            }
+            if (window.crushAI) {
+                activeAIs.push('CrushAI');
+                totalAIs++;
+            }
+            if (window.actionHandlers) {
+                activeAIs.push('Actions');
+                totalAIs++;
+            }
+            
+            if (activeAIs.length === 0) {
+                status.textContent = '🤖 Carregando Personas IA...';
+                status.style.background = '#dc3545';
+            } else if (activeAIs.length < 5) {
+                status.textContent = `🤖 ${activeAIs.length}/5 IAs: ${activeAIs.join(', ')}`;
+                status.style.background = '#ffc107';
+            } else {
+                status.textContent = `🤖 Todas as ${totalAIs} Personas IA ativas!`;
+                status.style.background = '#28a745';
+            }
+        }
+
+        // Monitora carregamento das IAs
+        const aiStatusInterval = setInterval(updateAIStatus, 1000);
+        
+        // Para de monitorar após 30 segundos
+        setTimeout(() => {
+            clearInterval(aiStatusInterval);
+        }, 30000);
+    </script>
+</body>
+</html>

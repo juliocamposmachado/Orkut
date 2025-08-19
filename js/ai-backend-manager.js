@@ -112,7 +112,38 @@ const AI_PERSONAS = {
         active: true
     },
     
-    // Persona 5: Assistente Social (OPCIONAL - só quando ociosa)
+    // Persona 5: Gerenciador de Interações Sociais (ATIVO - Alta Prioridade)
+    SOCIAL_MANAGER: {
+        name: "ORKY-SOCIAL-MANAGER-AI",
+        role: "Social Interactions Controller",
+        specialization: "Gerenciamento TOTAL de todas as interações sociais em tempo real",
+        responsibilities: [
+            "🔄 Capturar TODAS as interações do usuário instantaneamente",
+            "💬 Gerenciar scraps: envio, recebimento, notificações",
+            "📝 Processar depoimentos e aprovações automaticamente", 
+            "📸 Controlar upload, visualização e comentários de fotos",
+            "👤 Gerenciar visualizações de perfil e estatísticas",
+            "❤️ Processar curtidas, comentários e reações",
+            "🎯 Renderizar páginas dinamicamente conforme interações",
+            "📊 Atualizar contadores e estatísticas em tempo real",
+            "🔔 Criar notificações inteligentes de interações",
+            "🤝 Gerenciar amizades, pedidos e relacionamentos"
+        ],
+        priority: 2, // Alta prioridade - logo após ORKY-DB-AI
+        active: true,
+        interactionTypes: {
+            scraps: true,
+            depoimentos: true,
+            fotos: true,
+            perfil: true,
+            curtidas: true,
+            comentarios: true,
+            amizades: true,
+            visualizacoes: true
+        }
+    },
+    
+    // Persona 6: Assistente Social (OPCIONAL - só quando ociosa)
     SOCIAL_ASSISTANT: {
         name: "Orky-Social-AI",
         role: "Social Interaction Assistant",
@@ -125,7 +156,7 @@ const AI_PERSONAS = {
             "Criar notificações inteligentes",
             "Entretenimento nostálgico"
         ],
-        priority: 5,
+        priority: 6,
         active: false // Só ativa quando todas as outras estão ociosas
     }
 };
