@@ -345,13 +345,20 @@ function handlePhotoUpload(event) {
 function updateAllUserPhotoInstances(newPhotoUrl) {
     const user = JSON.parse(localStorage.getItem('orkutUser') || '{}');
     
+    // Atualizar usuário no localStorage com nova foto
+    user.photo = newPhotoUrl;
+    localStorage.setItem('orkutUser', JSON.stringify(user));
+    localStorage.setItem('orkut_user', JSON.stringify(user)); // Compatibilidade
+    
     // Selecionar todos os elementos que mostram a foto do usuário
     const photoSelectors = [
         '#profilePhoto',
         '#headerUserPhoto', 
         '#sidebarUserPhoto',
         '.user-photo',
-        '.profile-photo'
+        '.profile-photo',
+        '.profile-header img',
+        '.profile-photo-container img'
     ];
     
     photoSelectors.forEach(selector => {
@@ -359,6 +366,7 @@ function updateAllUserPhotoInstances(newPhotoUrl) {
         elements.forEach(element => {
             if (element.tagName === 'IMG') {
                 element.src = newPhotoUrl;
+                element.style.objectFit = 'cover';
             }
         });
     });
@@ -368,6 +376,15 @@ function updateAllUserPhotoInstances(newPhotoUrl) {
     userPosts.forEach(avatar => {
         avatar.src = newPhotoUrl;
     });
+    
+    // Disparar evento para notificar outros sistemas
+    window.dispatchEvent(new CustomEvent('profile_photo_updated', {
+        detail: {
+            userId: user.id,
+            photoUrl: newPhotoUrl,
+            user: user
+        }
+    }));
 }
 
 // Mostrar loading de atualização de foto

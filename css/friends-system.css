@@ -29,10 +29,10 @@
 }
 
 .result-photo {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-right: 12px;
     object-fit: cover;
     border: 2px solid #ddd;
     transition: border-color 0.3s ease;
@@ -235,7 +235,7 @@
 .friend-item, .friend-request-item, .sent-request-item {
     display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 10px 12px;
     border-bottom: 1px solid #eee;
     transition: all 0.3s ease;
     background: white;
@@ -251,10 +251,10 @@
 }
 
 .friend-photo, .request-photo, .sent-photo {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-right: 12px;
     object-fit: cover;
     border: 2px solid #ddd;
     transition: all 0.3s ease;
@@ -274,8 +274,8 @@
 .friend-name, .request-name, .sent-name {
     font-weight: bold;
     color: #333;
-    margin-bottom: 6px;
-    font-size: 14px;
+    margin-bottom: 4px;
+    font-size: 13px;
 }
 
 .friend-status {
