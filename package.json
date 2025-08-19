@@ -4,13 +4,9 @@
   "description": "Orkut Retrô - A rede social nostálgica dos anos 2000",
   "main": "index.html",
   "scripts": {
-    "dev": "npx http-server -p 3000 -c-1",
-    "dev:vercel": "vercel dev",
-    "build": "echo 'No build step required for static site'",
-    "start": "npx http-server -p 3000 -c-1",
-    "deploy": "vercel --prod",
-    "populate": "node scripts/populate-database.js",
-    "populate:clear": "node scripts/populate-database.js --clear"
+    "dev": "node server/index.js",
+    "start": "node server/index.js",
+    "test:all": "node scripts/test_all.js http://localhost:%PORT%"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",

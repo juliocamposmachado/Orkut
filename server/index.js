@@ -12,6 +12,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Rotas API
 app.use('/api', require('./routes/sync'));
+app.use('/api/orky', require('./routes/orky'));
 
 const port = process.env.PORT || 3000;
 app.listen(port, ()=>{
