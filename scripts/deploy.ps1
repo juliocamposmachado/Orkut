@@ -237,7 +237,7 @@ function Clear-BuildArtifacts {
 
 function Invoke-Tests {
     if ($SkipTests) {
-        Write-Warning "Testes ignorados (--SkipTests)"
+        Write-Warning "Testes ignorados (-SkipTests)"
         return $true
     }
     
@@ -297,7 +297,7 @@ function Test-Environment {
 
 function Invoke-Build {
     if ($SkipBuild) {
-        Write-Warning "Build ignorado (--SkipBuild)"
+        Write-Warning "Build ignorado (-SkipBuild)"
         return $true
     }
     
