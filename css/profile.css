@@ -146,29 +146,39 @@
 /* Grid de amigos */
 .friends-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
     margin-bottom: 15px;
 }
 
 .friend-item {
     text-align: center;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
+    padding: 6px 4px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
 }
 
 .friend-item:hover {
-    background: var(--light-purple);
+    background: rgba(230, 216, 245, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(168, 85, 199, 0.15);
 }
 
 .friend-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
     object-fit: cover;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    border: 1px solid rgba(230, 216, 245, 0.5);
+    transition: all 0.3s ease;
+}
+
+.friend-item:hover img {
+    border-color: var(--primary-purple);
+    box-shadow: 0 2px 8px rgba(168, 85, 199, 0.2);
 }
 
 .friend-item span {
